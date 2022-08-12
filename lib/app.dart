@@ -8,6 +8,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:polkawallet_sdk/polkawallet_sdk.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/pages/home/home.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/wallet.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/wallet2.dart';
 import 'dart:developer' as developer;
 
@@ -60,6 +61,8 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
         ),
         home: new RootView(),
         routes: {
+          WalletView.route: (_) =>
+              WalletView(this.sdk, this.keyring),
           WalletView2.route: (_) =>
               WalletView2(this.sdk, this.keyring, this._sdkReady),
         },
@@ -115,7 +118,7 @@ PreferredSizeWidget getAppBarView(BuildContext context) {
       TextButton.icon(
         // <-- TextButton
         onPressed: () {
-          Navigator.of(context).pushNamed(WalletView2.route);
+          Navigator.of(context).pushNamed(WalletView.route);
         },
         icon: Image.asset('assets/images/Coin_PNT.png', width: 34.w),
         label: Text('0.0', style: TextStyle(color: Colors.white, fontSize: 16)),

@@ -1,0 +1,115 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.bluetooth.demo.DeviceFragment" >
+
+    <item
+        android:id="@+id/fun_hardware_ver"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_hardware_ver"/>
+
+    <item
+        android:id="@+id/fun_software_ver"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_software_ver"/>
+
+    <item
+        android:id="@+id/fun_firmware_ver"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_firmware_ver"/>
+
+
+    <item
+        android:id="@+id/fun_old_ota_mode"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_old_ota_mode"/>
+
+    <item
+        android:id="@+id/fun_new_ota_mode"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_new_ota_mode"/>
+
+    <item
+        android:id="@+id/fun_dev_reset"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_dev_reset"/>
+
+    <item
+        android:id="@+id/fun_dev_revert"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_dev_revert"/>
+
+    <item
+        android:id="@+id/fun_set_adv_name"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_set_adv_name"/>
+
+
+    <!--跳绳部分-->
+    <item
+        android:id="@+id/fun_sync_dev_time"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_sync_dev_time"/>
+
+    <item
+        android:id="@+id/fun_set_jump_mode"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_set_jump_mode"/>
+
+    <item
+        android:id="@+id/fun_stop_jump"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_stop_jump"/>
+<!--
+    <item
+        android:id="@+id/fun_font_trans"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_font_trans"/>-->
+
+    <item
+        android:id="@+id/fun_font_trans"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_font_trans"/>
+
+    <item
+        android:id="@+id/fun_image_trans"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_image_trans"/>
+
+    <item
+        android:id="@+id/fun_image_bonddev"
+        android:orderInCategory="100"
+        tools:ignore="AppCompatResource"
+        android:showAsAction="never"
+        android:title="@string/str_fun_image_bonddev"/>
+
+
+
+</menu>

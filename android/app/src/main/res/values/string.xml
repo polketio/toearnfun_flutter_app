@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NftBleDemo</string>
+    <string name="notifyTitle">提示</string>
+    <string name="gpsNotifyMsg">当前手机扫描蓝牙需要打开定位功能。</string>
+    <string name="setting">前往设置</string>
+    <string name="cancel">取消</string>
+
+    <string name="start_scan">开始扫描</string>
+    <string name="stop_scan">停止扫描</string>
+    <string name="expand_search_settings">展开搜索设置</string>
+    <string name="retrieve_search_settings">收起搜索设置</string>
+    <string name="connect_fail">连接失败</string>
+    <string name="connect_suc">连接成功</string>
+    <string name="active_disconnected">断开了</string>
+    <string name="disconnected">连接断开</string>
+    <string name="please_open_blue">请先打开蓝牙</string>
+    <string name="name">设备广播名：</string>
+    <string name="mac">MAC:</string>
+    <string name="scan_setting">在下面你可以配置需要扫描的设备的条件，可以为空</string>
+    <string name="setting_name">输入蓝牙设备广播名，多个之间以英文逗号隔开</string>
+    <string name="setting_mac">输入蓝牙设备mac地址</string>
+    <string name="setting_uuid">输入蓝牙设备UUID，多个之间以英文逗号隔开</string>
+    <string name="setting_rssi">输入蓝牙强度</string>
+    <string name="connect">连接</string>
+    <string name="connected">已连接</string>
+    <string name="disconnect">断开连接</string>
+    <string name="api">接口</string>
+    <string name="show_device">展示设备</string>
+
+    <string name="count_down">倒计时</string>
+    <string name="count_back">倒计数</string>
+    <string name="free_jump">自由跳</string>
+
+    <!--功能列表-->
+    <string name="str_fun_hardware_ver">硬件版本</string>
+    <string name="str_fun_software_ver">软件版本</string>
+    <string name="str_fun_firmware_ver">固件版本</string>
+    <string name="str_fun_show_permission_setting">展示App权限设置</string>
+    <string name="str_fun_sync_dev_time">同步设备时间</string>
+    <string name="str_fun_set_jump_mode">设置跳绳模式</string>
+    <string name="str_fun_set_start_secs">设置开始跳绳倒计秒数</string>
+    <string name="str_fun_set_jump_param">设置跳绳参数</string>
+    <string name="str_fun_stop_jump">停止跳绳</string>
+    <string name="str_fun_font_trans">创建ECC公钥</string>
+    <string name="str_fun_image_trans">图库传输</string>
+    <string name="str_fun_image_bonddev">绑定设备</string>
+
+    <string name="str_fun_old_ota_mode">旧版OTA</string>
+    <string name="str_fun_new_ota_mode">新版OTA</string>
+    <string name="str_fun_dev_reset">设备复位</string>
+    <string name="str_fun_dev_revert">设备恢复出厂</string>
+    <!-- <string name="str_fun_set_adv_name">设置广播名</string>-->
+    <string name="str_fun_set_adv_name">获取设备公钥</string>
+    <!-- Dialog Or Message status -->
+
+
+    <!-- Device Setting Dialog Title -->
+    <string name="title_app_permission">设置App权限</string>
+    <string name="title_error_parameter">参数错误</string>
+
+    <!-- Dialog Label -->
+    <string name="label_please_enter">please enter</string>
+</resources>

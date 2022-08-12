@@ -20,7 +20,7 @@ class WalletView2 extends StatefulWidget {
   final Keyring keyring;
   final bool sdkReady;
 
-  static const String route = '/wallet';
+  static const String route = '/wallet2';
 
   @override
   State<WalletView2> createState() => _WalletView2State();
