@@ -232,9 +232,9 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
             public void onScanning(BleDevice bleDevice) {
                 mBleDevice =bleDevice;
                 Toast.makeText(mActivity, bleDevice.getMac()+"   "+bleDevice.getName(), Toast.LENGTH_LONG).show();
-                if (bleDevice.getRssi()> (Integer.parseInt("-100"))) {
-                    mResult.success(bleDevice.getMac()+","+bleDevice.getName());
-                }
+//                if (bleDevice.getRssi()> (Integer.parseInt("-100"))) {
+//                    mResult.success(bleDevice.getMac()+","+bleDevice.getName());
+//                }
             }
 
             @Override

@@ -3,10 +3,18 @@ import 'package:flukit/flukit.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:polkawallet_sdk/api/types/networkParams.dart';
+import 'package:polkawallet_sdk/storage/keyring.dart';
+import 'package:toearnfun_flutter_app/plugin.dart';
+import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
+import 'package:toearnfun_flutter_app/service/app_service.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({Key? key}) : super(key: key);
+  HomeView(this.plugin, this.keyring);
+
+  final PluginPolket plugin;
+  final Keyring keyring;
 
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -14,6 +22,24 @@ class HomeView extends StatefulWidget {
 
 // HomeView
 class _HomeViewState extends State<HomeView> {
+  bool _refreshing = false;
+
+  Future<void> _updateBalances() async {
+    if (!widget.plugin.connected) {
+      // TODO: service is disconnected
+      return;
+    }
+    ;
+
+    setState(() {
+      _refreshing = true;
+    });
+    await widget.plugin.updateBalances(widget.keyring.current);
+    setState(() {
+      _refreshing = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -75,7 +101,14 @@ class _VFECardState extends State<VFECard> {
                         // crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text('Status'),
-                          Text('disconnected'),
+                          TextButton(
+                              onPressed: () async {
+                                // bluetooth_device.checkBluetoothIsOpen();
+                                bluetooth_device.scanDevice();
+                                String s = await bluetooth_device.getText();
+                                print('android to ' + s);
+                              },
+                              child: Text('disconnected')),
                         ],
                       )),
                   Expanded(

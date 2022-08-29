@@ -39,6 +39,7 @@ dependencies:
   flustars: ^2.0.1
   flukit: ^3.0.1
   biometric_storage: ^4.1.1
+  rive: ^0.9.0
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +65,8 @@ flutter:
   assets:
     - assets/images/
     - assets/images/2.0x/
+
+    - js_service/dist/main.js
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

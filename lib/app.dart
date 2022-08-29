@@ -1,19 +1,16 @@
-import 'package:bruno/bruno.dart';
 import 'package:flustars/flustars.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:polkawallet_sdk/polkawallet_sdk.dart';
+import 'package:polkawallet_sdk/api/types/networkParams.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
-import 'package:toearnfun_flutter_app/pages/home/home.dart';
-import 'package:toearnfun_flutter_app/pages/wallet/wallet.dart';
-import 'package:toearnfun_flutter_app/pages/wallet/wallet2.dart';
-import 'dart:developer' as developer;
+import 'package:toearnfun_flutter_app/pages/root.dart';
+import 'package:toearnfun_flutter_app/pages/start/start.dart';
+import 'package:toearnfun_flutter_app/service/app_service.dart';
+import 'package:toearnfun_flutter_app/plugin.dart';
 
 import 'package:toearnfun_flutter_app/store/app_store.dart';
-import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
 const get_storage_container = 'configuration';
 const log_tag = 'ToEarnFun';
@@ -26,31 +23,65 @@ class ToEarnFunApp extends StatefulWidget {
 }
 
 class _ToEarnFunAppState extends State<ToEarnFunApp> {
-  final WalletSDK sdk = WalletSDK();
-  final Keyring keyring = Keyring();
+  PluginPolket _network = PluginPolket();
+  Keyring? _keyring;
+  AppStore? _store;
+  AppService? _service;
 
-  bool _sdkReady = false;
+  Future<int> _initApp() async {
+    if (_keyring == null) {
+      LogUtil.init(tag: log_tag, isDebug: true);
+      _keyring = Keyring();
+      await _keyring!.init([_network.basic.ss58 ?? 0]);
+      final storage = GetStorage(get_storage_container);
+      final store = AppStore(storage);
+      await store.init();
+      final service = AppService(_network, _keyring!, store);
+      service.init();
 
-  Future<void> _initApi() async {
-    LogUtil.init(tag: log_tag, isDebug: true);
-    await keyring.init([0, 2, 42]);
-    await sdk.init(keyring);
-    final storage = GetStorage(get_storage_container);
-    final store = AppStore(storage);
-    await store.init();
-    setState(() {
-      _sdkReady = true;
-    });
+      setState(() {
+        _store = store;
+        _service = service;
+      });
+      LogUtil.d('_initApp.setState');
+      // service connecting
+      await _service!.plugin.beforeStart(_keyring!);
+      await _service!.plugin.start(_keyring!);
+      await _service!.plugin.updateNetworkState();
+    }
+
+    return 1;
   }
 
   @override
   void initState() {
     super.initState();
-    _initApi();
+    // _initApp();
+  }
+
+  Map<String, Widget Function(BuildContext)> _getRoutes() {
+    final pluginPages = _service != null
+        ? _service!.plugin.getRoutes(_keyring!)
+        : {
+            RootView.route: (_) =>
+                Container(color: Theme.of(context).hoverColor)
+          };
+    return {
+      /// pages of plugin
+      ...pluginPages,
+
+      StartView.route: (_) {
+        _initApp();
+        return StartView();
+      },
+    };
   }
 
   @override
   Widget build(BuildContext context) {
+    LogUtil.d('app.build');
+    final routes = _getRoutes();
+
     return ScreenUtilInit(
       designSize: Size(390, 844),
       builder: (_, __) => MaterialApp(
@@ -59,93 +90,16 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
         theme: new ThemeData(
           primaryColor: Colors.white,
         ),
-        home: new RootView(),
-        routes: {
-          WalletView.route: (_) =>
-              WalletView(this.sdk, this.keyring),
-          WalletView2.route: (_) =>
-              WalletView2(this.sdk, this.keyring, this._sdkReady),
+        initialRoute: StartView.route,
+        onGenerateRoute: (settings) {
+          if (routes[settings.name] != null) {
+            return CupertinoPageRoute(
+                builder: routes[settings.name]!, settings: settings);
+          } else {
+            return null;
+          }
         },
       ),
     );
   }
-}
-
-class RootView extends StatefulWidget {
-  const RootView({Key? key}) : super(key: key);
-
-  @override
-  State<RootView> createState() => _RootViewState();
-}
-
-class _RootViewState extends State<RootView> {
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      backgroundColor: HexColor('#956DFD'),
-      appBar: getAppBarView(context),
-      bottomNavigationBar: getBottomTabBarView(),
-      body: HomeView(),
-    );
-  }
-}
-
-PreferredSizeWidget getAppBarView(BuildContext context) {
-  return AppBar(
-    leadingWidth: 100.w,
-    leading: IconButton(
-      icon: Image.asset(
-        'assets/images/home_icon_tl.png',
-        width: 34.w,
-      ),
-      onPressed: null,
-      alignment: Alignment.centerLeft,
-    ),
-    toolbarOpacity: 1,
-    bottomOpacity: 0,
-    elevation: 0,
-    // showDefaultBottom: false,
-    backgroundColor: HexColor('#956DFD'),
-    title: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-      TextButton.icon(
-        // <-- TextButton
-        onPressed: () {
-          Navigator.of(context).pushNamed(WalletView2.route);
-        },
-        icon: Image.asset('assets/images/Coin_FUN.png', width: 34.w),
-        label: Text('0.0', style: TextStyle(color: Colors.white, fontSize: 16)),
-      ),
-      TextButton.icon(
-        // <-- TextButton
-        onPressed: () {
-          Navigator.of(context).pushNamed(WalletView.route);
-        },
-        icon: Image.asset('assets/images/Coin_PNT.png', width: 34.w),
-        label: Text('0.0', style: TextStyle(color: Colors.white, fontSize: 16)),
-      ),
-    ]),
-  );
-}
-
-Widget getBottomTabBarView() {
-  return BottomAppBar(
-      // elevation: 3.0,
-      color: Colors.white,
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            IconButton(
-              icon: Image.asset('assets/images/icon_AtTabBar_home-off.png'),
-              onPressed: null,
-            ),
-            IconButton(
-              icon:
-                  Image.asset('assets/images/icon_AtTabBar_storehouse-off.png'),
-              onPressed: null,
-            ),
-            IconButton(
-              icon: Image.asset('assets/images/icon_AtTabBar_market-off.png'),
-              onPressed: null,
-            ),
-          ]));
 }

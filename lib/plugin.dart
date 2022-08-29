@@ -1,0 +1,117 @@
+import 'package:flustars/flustars.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:polkawallet_sdk/api/types/networkParams.dart';
+import 'package:polkawallet_sdk/plugin/homeNavItem.dart';
+import 'package:polkawallet_sdk/plugin/index.dart';
+import 'package:polkawallet_sdk/storage/keyring.dart';
+import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
+import 'package:toearnfun_flutter_app/pages/root.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/wallet.dart';
+import 'package:toearnfun_flutter_app/service/api/polket_api.dart';
+import 'package:toearnfun_flutter_app/store/plugin_store.dart';
+
+class PluginPolket extends PolkawalletPlugin {
+  // store cache
+  late PluginStore _store;
+
+  //polket api
+  late PolketApi _api;
+
+  // check node is connected?
+  bool _connected = false;
+
+  bool get connected => _connected;
+
+  @override
+  final basic = PluginBasicData(
+    name: 'Polket',
+    ss58: 42,
+    primaryColor: Colors.grey,
+    icon: Image.asset('assets/images/Coin_PNT.png'),
+    iconDisabled: Image.asset('assets/images/Coin_PNT.png'),
+    jsCodeVersion: 1,
+  );
+
+  @override
+  List<NetworkParams> get nodeList {
+    return [
+      {
+        'name': 'Polket Testnet',
+        'ss58': 42,
+        'endpoint': 'wss://testnet.playonchain.fun',
+      },
+    ].map((e) => NetworkParams.fromJson(e)).toList();
+  }
+
+  @override
+  Map<String, Widget> get tokenIcons => {
+        'KSM': Image.asset('assets/images/icon-KSM.png'),
+        'PNT': Image.asset('assets/images/icon-PNT.png'),
+        'FUN': Image.asset('assets/images/icon-FUN.png'),
+      };
+
+  @override
+  List<HomeNavItem> getNavItems(BuildContext context, Keyring keyring) => [];
+
+  // @override
+  // Future<String>? loadJSCode() =>
+  //     rootBundle.loadString('js_service/dist/main.js');
+
+  @override
+  Future<String>? loadJSCode() =>
+      null;
+
+  @override
+  Map<String, WidgetBuilder> getRoutes(Keyring keyring) {
+    LogUtil.d('plugin.getRoutes');
+    return {
+      RootView.route: (_) => RootView(this, keyring),
+      WalletView.route: (_) => WalletView(this, keyring),
+    };
+  }
+
+  void _loadCacheData(KeyPairData acc) {
+    balances.setTokens([]);
+    balances.setExtraTokens([]);
+
+    _store.assets.loadCache(acc.pubKey);
+  }
+
+  Future<void> _subscribeTokenBalances(String address) async {
+    _api.assets.subscribeTokenBalances(address, (data) {
+      balances.setTokens(data);
+      _store.assets.setTokenBalanceMap(data);
+    });
+  }
+
+  @override
+  Future<void> onWillStart(Keyring keyring) async {
+    _api = PolketApi(this);
+
+    _store = PluginStore();
+    await _store.init();
+    _loadCacheData(keyring.current);
+    LogUtil.d('plugin.onWillStart');
+  }
+
+  @override
+  Future<void> onStarted(Keyring keyring) async {
+    _connected = true;
+
+    if (keyring.current.address != null) {
+      _subscribeTokenBalances(keyring.current.address!);
+    }
+    LogUtil.d('plugin.onStarted');
+  }
+
+  @override
+  Future<void> onAccountChanged(KeyPairData acc) async {
+    _loadCacheData(acc);
+
+    if (_connected && acc.address != null) {
+      _api.assets.unsubscribeTokenBalances(acc.address!);
+      _subscribeTokenBalances(acc.address!);
+    }
+  }
+}

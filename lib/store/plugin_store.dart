@@ -1,0 +1,15 @@
+import 'package:get_storage/get_storage.dart';
+import 'package:toearnfun_flutter_app/store/assets.dart';
+
+class PluginStore {
+  static const polket_plugin_cache_key = 'plugin_polket';
+
+  final GetStorage _storage = GetStorage(polket_plugin_cache_key);
+
+  late AssetsStore assets;
+
+  Future<void> init() async {
+    await GetStorage.init(polket_plugin_cache_key);
+    assets = AssetsStore(_storage);
+  }
+}

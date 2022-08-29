@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:polkawallet_sdk/api/apiKeyring.dart';
 import 'package:polkawallet_sdk/api/types/addressIconData.dart';
+import 'package:polkawallet_sdk/api/types/balanceData.dart';
 import 'package:polkawallet_sdk/api/types/networkParams.dart';
 import 'package:polkawallet_sdk/api/types/txInfoData.dart';
 import 'package:polkawallet_sdk/polkawallet_sdk.dart';
@@ -14,11 +15,10 @@ import 'dart:developer' as developer;
 import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
 
 class WalletView2 extends StatefulWidget {
-  WalletView2(this.sdk, this.keyring, this.sdkReady);
+  WalletView2(this.sdk, this.keyring);
 
   final WalletSDK sdk;
   final Keyring keyring;
-  final bool sdkReady;
 
   static const String route = '/wallet2';
 
@@ -48,7 +48,7 @@ class _WalletView2State extends State<WalletView2> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('js-api loaded: ${widget.sdkReady}'),
+                // Text('js-api loaded: ${widget.sdkReady}'),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -204,8 +204,10 @@ sdk.api.keyring.accountList'''),
   }
 
   Future<void> _queryBalance() async {
-    final res = await widget.sdk.api.account.queryBalance(_testAcc!.address!);
+    // widget.sdk.api.
+    final res = await widget.sdk.api.account.queryBalance(_testAcc!.address);
     LogUtil.d('balance: ${res!.freeBalance}');
+
   }
 
   Future<void> _sendTx() async {
@@ -241,4 +243,5 @@ sdk.api.keyring.accountList'''),
       LogUtil.d('sendTx failed: ${err.toString()}');
     }
   }
+
 }
