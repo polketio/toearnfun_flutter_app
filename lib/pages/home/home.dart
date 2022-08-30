@@ -104,9 +104,9 @@ class _VFECardState extends State<VFECard> {
                           TextButton(
                               onPressed: () async {
                                 // bluetooth_device.checkBluetoothIsOpen();
-                                bluetooth_device.scanDevice();
+                                String ss=await bluetooth_device.scanDevice();
                                 String s = await bluetooth_device.getText();
-                                print('android to ' + s);
+                                print('android to ' + ss);
                               },
                               child: Text('disconnected')),
                         ],

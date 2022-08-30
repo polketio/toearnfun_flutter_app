@@ -21,6 +21,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.Ls.skipBle.SkipBleUUIDs;
+import com.Ls.skipBle.protocol.HexUtil;
 import com.example.toearnfun_flutter_app.bluetooth.BleManager;
 import com.example.toearnfun_flutter_app.callback.BleGattCallback;
 import com.example.toearnfun_flutter_app.callback.BleMtuChangedCallback;
@@ -46,6 +47,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
     Activity mActivity;
     private static final String TAG = MainActivity.class.getSimpleName();
     MethodChannel.Result mResult=null;
+    String param="";
     BleDevice mBleDevice=null;
     private static final int REQUEST_CODE_OPEN_GPS = 1;
     private static final int REQUEST_CODE_PERMISSION_LOCATION = 2;
@@ -74,12 +76,13 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
                     String str = getText();
 
                     //将结果返回给flutter
-                    result.success(str);
+                    mResult.success(str);
 
                     //这里也有error的方法，可以看情况使用
                     //result.error("code", "message", "detail");
                 } else if(method.equals("scanDevice")){
                     checkPermissions();
+                //    mResult.success(param);
                 } else if(method.equals("connect"))
                 {
                     connect(mBleDevice);
@@ -219,7 +222,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
             public void onScanStarted(boolean success) {
               //  mDeviceAdapter.clearScanDevice();
               //  mDeviceAdapter.notifyDataSetChanged();
-              //  img_loading.startAnimation(operatingAnim);
+              //  img_loading.startAnimation(operat ingAnim);
               //  img_loading.setVisibility(View.VISIBLE);
               //  btn_scan.setText(getString(R.string.stop_scan));
             }
@@ -231,10 +234,11 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
             @Override
             public void onScanning(BleDevice bleDevice) {
                 mBleDevice =bleDevice;
-                Toast.makeText(mActivity, bleDevice.getMac()+"   "+bleDevice.getName(), Toast.LENGTH_LONG).show();
-//                if (bleDevice.getRssi()> (Integer.parseInt("-100"))) {
-//                    mResult.success(bleDevice.getMac()+","+bleDevice.getName());
-//                }
+                if (bleDevice.getRssi()> (Integer.parseInt("-100"))) {
+                    param="{\"name\":"+bleDevice.getName()+",\"mac\":"+bleDevice.getMac()+",\"Rssi\":"+bleDevice.getRssi()+"}";
+                    Toast.makeText(mActivity, bleDevice.getMac()+"   "+bleDevice.getName(), Toast.LENGTH_LONG).show();
+                    mResult.success(param);
+                }
             }
 
             @Override

@@ -17,7 +17,8 @@ class bluetooth_device{
   }
 
   static Future<String>  scanDevice() async{
-    return await _channel.invokeMethod("scanDevice");
+    var param = "hello";
+    return await _channel.invokeMethod("scanDevice",param);
   }
   static Future<String>  connect() async{
     return await _channel.invokeMethod("connect");
