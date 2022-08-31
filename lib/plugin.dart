@@ -15,8 +15,12 @@ class PluginPolket extends PolkawalletPlugin {
   // store cache
   late PluginStore _store;
 
+  PluginStore get store => _store;
+
   //polket api
   late PolketApi _api;
+
+  PolketApi get api => _api;
 
   // check node is connected?
   bool _connected = false;
@@ -54,13 +58,12 @@ class PluginPolket extends PolkawalletPlugin {
   @override
   List<HomeNavItem> getNavItems(BuildContext context, Keyring keyring) => [];
 
-  // @override
-  // Future<String>? loadJSCode() =>
-  //     rootBundle.loadString('js_service/dist/main.js');
-
   @override
   Future<String>? loadJSCode() =>
-      null;
+      rootBundle.loadString('js_service/dist/main.js');
+
+  // @override
+  // Future<String>? loadJSCode() => null;
 
   @override
   Map<String, WidgetBuilder> getRoutes(Keyring keyring) {
@@ -87,7 +90,7 @@ class PluginPolket extends PolkawalletPlugin {
 
   @override
   Future<void> onWillStart(Keyring keyring) async {
-    _api = PolketApi(this);
+    _api = PolketApi(this, keyring);
 
     _store = PluginStore();
     await _store.init();

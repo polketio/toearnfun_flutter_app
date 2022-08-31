@@ -1,13 +1,10 @@
 import 'package:bruno/bruno.dart';
 import 'package:flukit/flukit.dart';
-import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:polkawallet_sdk/api/types/networkParams.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
-import 'package:toearnfun_flutter_app/service/app_service.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
 class HomeView extends StatefulWidget {
@@ -104,9 +101,11 @@ class _VFECardState extends State<VFECard> {
                           TextButton(
                               onPressed: () async {
                                 // bluetooth_device.checkBluetoothIsOpen();
-                                String ss=await bluetooth_device.scanDevice();
-                                String s = await bluetooth_device.getText();
-                                print('android to ' + ss);
+                                // String ss = await bluetooth_device.scanDevice();
+                                // print('android to ' + ss);
+                                String isconnect =
+                                    await bluetooth_device.connect();
+                                print('isconnect ' + isconnect);
                               },
                               child: Text('disconnected')),
                         ],
