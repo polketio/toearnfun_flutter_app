@@ -20,7 +20,11 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.Ls.skipBle.ReceiveDataCallback;
 import com.Ls.skipBle.SkipBleUUIDs;
+import com.Ls.skipBle.SkipDisplayData;
+import com.Ls.skipBle.SkipParamDef;
+import com.Ls.skipBle.SkipResultData;
 import com.Ls.skipBle.protocol.HexUtil;
 import com.example.toearnfun_flutter_app.bluetooth.BleManager;
 import com.example.toearnfun_flutter_app.callback.BleGattCallback;
@@ -28,6 +32,8 @@ import com.example.toearnfun_flutter_app.callback.BleMtuChangedCallback;
 import com.example.toearnfun_flutter_app.callback.BleScanCallback;
 import com.example.toearnfun_flutter_app.comm.ObserverManager;
 import com.example.toearnfun_flutter_app.data.BleDevice;
+import com.example.toearnfun_flutter_app.device.skip.SkipApiActivity;
+import com.example.toearnfun_flutter_app.device.skip.SkipSettingProfiles;
 import com.example.toearnfun_flutter_app.exception.BleException;
 import com.example.toearnfun_flutter_app.scan.BleScanRuleConfig;
 
@@ -49,6 +55,14 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
     MethodChannel.Result mResult=null;
     String param="";
     BleDevice mBleDevice=null;
+    SkipApiActivity skipApi = new SkipApiActivity();
+    SkipSettingProfiles api = new SkipSettingProfiles();
+    private static int tmp_used_sec = 0;
+    private static int tmp_skip_cnt = 0;
+    private static int tmp_trip_cnt = 0;
+    private static int tmp_batt_per = 0;
+
+
     private static final int REQUEST_CODE_OPEN_GPS = 1;
     private static final int REQUEST_CODE_PERMISSION_LOCATION = 2;
     BluetoothFlutterPlugin(Activity activity)
@@ -85,8 +99,49 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
                 //    mResult.success(param);
                 } else if(method.equals("connect"))
                 {
-                    connect(mBleDevice);
-                }else {
+                    if (!BleManager.getInstance().isConnected(mBleDevice)) {
+                        BleManager.getInstance().cancelScan();
+                        connect(mBleDevice);
+                    }
+                    
+                }else if(method.equals("registerCustomDataRxCallback"))
+                {
+                    registerCustomDataRxCallback();
+                }else if(method.equals("setSkipMode"))
+                {
+                    mSettingCallback.setTag("设置跳绳模式");
+                    api.setSkipMode(mBleDevice, mSettingCallback);
+                }
+                else if(method.equals("devRevert"))
+                {
+                    mSettingCallback.setTag("设备恢复出厂");
+                    api.devRevert(mBleDevice, mSettingCallback);
+                }
+                else if(method.equals("writeSkipGetPublicKey"))
+                {
+                    mSettingCallback.setTag("获取设备公钥");
+                    skipApi.writeSkipGetPublicKey(mBleDevice, mSettingCallback);
+                }
+                else if(method.equals("devReset"))
+                {
+                    mSettingCallback.setTag("设备复位");
+                    api.devReset(mBleDevice, mSettingCallback);
+                }
+                else if(method.equals("stopSkip"))
+                {
+                    mSettingCallback.setTag("停止跳绳");
+                    api.stopSkip(mBleDevice, mSettingCallback);
+                }
+                else if(method.equals("writeSkipGenerateECCKey"))
+                {
+                    mSettingCallback.setTag("创建设备ECC公钥");
+                    skipApi.writeSkipGenerateECCKey(mBleDevice, mSettingCallback);
+                }
+                else if(method.equals("writeSkipBondDev"))
+                {
+                    mSettingCallback.setTag("绑定设备");
+                    skipApi.writeSkipBondDev(mBleDevice, mSettingCallback);
+                } else {
                     //Flutter传过来id方法名没有找到，就调此方法
                     result.notImplemented();
                 }
@@ -203,7 +258,6 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
 
      //   boolean isAutoConnect = sw_auto.isChecked();
    //     boolean isFuzzy = sw_fuzzy.isChecked();
-
         boolean isAutoConnect =false;
         boolean isFuzzy = true;
                 BleScanRuleConfig scanRuleConfig = new BleScanRuleConfig.Builder()
@@ -314,5 +368,168 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
             }
         });
     }
+
+    private void registerCustomDataRxCallback()
+    {
+         skipApi.init(mBleDevice);
+        //BleManager.getInstance().registerCustomDataRxCallback(mBleDevice, customRxDataCallback);
+    }
+
+    private ReceiveDataCallback customRxDataCallback = new ReceiveDataCallback()
+    {
+        @Override
+        public void onReceiveDisplayData(SkipDisplayData display) {
+            if(tmp_used_sec != display.getSkipSecSum() || tmp_skip_cnt != display.getSkipCntSum() || tmp_trip_cnt != display.getTripCnt() || tmp_batt_per != display.getBatteryPercent()) {
+                tmp_used_sec = display.getSkipSecSum();
+                tmp_skip_cnt = display.getSkipCntSum();
+                tmp_trip_cnt = display.getTripCnt();
+                tmp_batt_per = display.getBatteryPercent();
+                String modeStr = "";
+                String ParamStr = "";
+                switch(display.getMode())
+                {
+                    case SkipParamDef.MODE_COUNT_DOWN: {
+                        modeStr = "倒计时";
+                        ParamStr = "秒";
+                    }break;
+
+                    case SkipParamDef.MODE_COUNT_BACK: {
+                        modeStr = "倒计数";
+                        ParamStr = "次";
+                    }break;
+
+                    case SkipParamDef.MODE_FREE_JUMP: {
+                        modeStr = "自由跳";
+                    }break;
+
+                    default:
+                        break;
+                }
+                final String s = "模式: " + modeStr + ", 设置: " + display.getSetting() + ParamStr + ", 时间: " + Integer.toString(display.getSkipSecSum()) + ", 次数: " + Integer.toString(display.getSkipCntSum()) +
+                        ", 绊绳: " + Integer.toString(display.getTripCnt()) + ", 电量:" + Integer.toString(display.getBatteryPercent()) + ", 有效时长:" + Integer.toString(display.getSkipValidSec());
+                Toast.makeText(mActivity, s, Toast.LENGTH_LONG).show();
+                Log.i(TAG, s);
+            }
+        }
+
+        @Override
+        public void onReceiveSkipRealTimeResultData(SkipResultData result, int pkt_idx) {
+            String str = "[接收][成功] 跳绳实时结果: " + "(" + pkt_idx + ")";
+            str += "UTC: " + Integer.toString(result.getUtc());
+            switch(result.getMode())
+            {
+                case SkipParamDef.MODE_COUNT_DOWN: {
+                    str += " 倒计时: " + Integer.toString(result.getSetting()) + "秒";
+                }break;
+
+                case SkipParamDef.MODE_COUNT_BACK: {
+                    str += " 倒计数: " + Integer.toString(result.getSetting()) + "次";
+                }break;
+
+                case SkipParamDef.MODE_FREE_JUMP: {
+                    str += " 自由跳";
+                }break;
+
+                default:
+                    break;
+            }
+            str += " 总时长: " + Integer.toString(result.getSkipSecSum()) + "秒";
+            str += " 总次数: " + Integer.toString(result.getSkipCntSum()) + "次";
+            str += " 有效时长: " + Integer.toString(result.getSkipValidSec()) + "秒";
+            str += " 平均频次: " + Integer.toString(result.getFreqAvg()) + "次";
+            str += " 最快频次: " + Integer.toString(result.getFreqMax()) + "次";
+            str += " 最大连跳: " + Integer.toString(result.getConsecutiveSkipMaxNum()) + "次";
+            str += " 绊绳次数: " + Integer.toString(result.getSkipTripNum()) + "次";
+            /*str += " 跳绳组: ";
+            for(int i=0;i<result.getSkipGroupNum();i++) {
+                str += Integer.toString(result.getSkipGroupEleSkipSecs(i)) + "," + Integer.toString(result.getSkipGroupEleSkipCnt(i)) + " ";
+            }*/
+            final String s = str;
+            Log.i(TAG, s);
+            Toast.makeText(mActivity, s, Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onReceiveSkipHistoryResultData(SkipResultData result, int pkt_idx) {
+            String str = "[接收][成功] 跳绳历史结果: " + "(" + pkt_idx + ")";
+            str += "UTC: " + Integer.toString(result.getUtc());
+            switch(result.getMode())
+            {
+                case SkipParamDef.MODE_COUNT_DOWN: {
+                    str += " 倒计时: " + Integer.toString(result.getSetting()) + "秒";
+                }break;
+
+                case SkipParamDef.MODE_COUNT_BACK: {
+                    str += " 倒计数: " + Integer.toString(result.getSetting()) + "次";
+                }break;
+
+                case SkipParamDef.MODE_FREE_JUMP: {
+                    str += " 自由跳";
+                }break;
+
+                default:
+                    break;
+            }
+            str += " 总时长: " + Integer.toString(result.getSkipSecSum()) + "秒";
+            str += " 总次数: " + Integer.toString(result.getSkipCntSum()) + "次";
+            str += " 有效时长: " + Integer.toString(result.getSkipValidSec()) + "秒";
+            str += " 平均频次: " + Integer.toString(result.getFreqAvg()) + "次";
+            str += " 最快频次: " + Integer.toString(result.getFreqMax()) + "次";
+            str += " 最大连跳: " + Integer.toString(result.getConsecutiveSkipMaxNum()) + "次";
+            str += " 绊绳次数: " + Integer.toString(result.getSkipTripNum()) + "次";
+            /*str += " 跳绳组: ";
+            for(int i=0;i<result.getSkipGroupNum();i++) {
+                str += Integer.toString(result.getSkipGroupEleSkipSecs(i)) + "," + Integer.toString(result.getSkipGroupEleSkipCnt(i)) + " ";
+            }*/
+            final String s = str;
+            Log.i(TAG, s);
+
+
+        }
+
+        @Override
+        public void onReceiveEnteredOtaMode(String mac) {
+            super.onReceiveEnteredOtaMode(mac);
+            final String s = "[接收][成功] 进入OTA模式, mac:" + mac;
+            Log.i(TAG, s);
+        }
+
+        @Override
+        public void onReceiveEnteredFactoryMode() {
+            super.onReceiveEnteredFactoryMode();
+            final String s = "[接收][成功] 进入工厂模式" ;
+            Log.i(TAG, s);
+        }
+
+        @Override
+        public void onReceiveRevertDevice() {
+            super.onReceiveRevertDevice();
+            final String s = "[接收][成功] 恢复出厂" ;
+            Log.i(TAG, s);
+        }
+
+    };
+
+    private BleManager.LcWriteBleCallback mSettingCallback = new BleManager.LcWriteBleCallback() {
+        @Override
+        public void onWriteSuccess(int current, int total, byte[] justWrite) {
+            super.onWriteSuccess(current, total, justWrite);
+            String ss= com.Ls.skipBle.protocol.HexUtil.encodeHexStr(justWrite);
+            if ( current == total ) {
+                final String s = "[写入][成功]" + getTag();
+                Log.i(TAG, s);
+
+            }
+        }
+
+        @Override
+        public void onWriteFailure(BleException exception) {
+            super.onWriteFailure(exception);
+            final String s = "[写入][失败]" + getTag() + ": " + exception.toString();
+            Log.i(TAG, s);
+
+        }
+    };
+
 
 }
