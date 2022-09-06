@@ -18,7 +18,7 @@ class PolketApiAssets {
     final tokens = res
         .map((e) => TokenBalanceData(
               id: e['id'].toString(),
-              name: e['symbol'],
+              name: e['name'],
               fullName: e['name'],
               symbol: e['symbol'],
               decimals: int.parse(e['decimals']),

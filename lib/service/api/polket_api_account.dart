@@ -5,15 +5,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:polkawallet_sdk/api/apiKeyring.dart';
 import 'package:polkawallet_sdk/api/types/recoveryInfo.dart';
+import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
 import 'package:polkawallet_ui/components/passwordInputDialog.dart';
 import 'package:toearnfun_flutter_app/common/consts.dart';
-import 'package:toearnfun_flutter_app/service/app_service.dart';
+import 'package:toearnfun_flutter_app/plugin.dart';
 
-class ApiAccount {
-  ApiAccount(this.apiRoot);
+class PolketApiAccount {
+  PolketApiAccount(this.plugin, this.keyring);
 
-  final AppService apiRoot;
+  final PluginPolket plugin;
+  final Keyring keyring;
 
   final _biometricEnabledKey = 'biometric_enabled_';
   final _biometricPasswordKey = 'biometric_password_';
@@ -24,7 +26,7 @@ class ApiAccount {
     String derivePath = '',
     bool isFromCreatePage = false,
   }) async {
-    final acc = apiRoot.store.account.newAccount;
+    final acc = plugin.store.account.newAccount;
     if (isFromCreatePage &&
         (acc.name == null ||
             acc.name.isEmpty ||
@@ -32,8 +34,8 @@ class ApiAccount {
             acc.password.isEmpty)) {
       throw Exception('create account failed');
     }
-    final res = await apiRoot.plugin.sdk.api.keyring.importAccount(
-      apiRoot.keyring,
+    final res = await plugin.sdk.api.keyring.importAccount(
+      keyring,
       keyType: keyType,
       cryptoType: cryptoType,
       derivePath: derivePath,
@@ -51,7 +53,7 @@ class ApiAccount {
     String derivePath = '',
     bool isFromCreatePage = false,
   }) async {
-    final acc = apiRoot.store.account.newAccount;
+    final acc = plugin.store.account.newAccount;
     if (isFromCreatePage &&
         (acc.name == null ||
             acc.name.isEmpty ||
@@ -59,8 +61,8 @@ class ApiAccount {
             acc.password.isEmpty)) {
       throw Exception('save account failed');
     }
-    final res = await apiRoot.plugin.sdk.api.keyring.addAccount(
-      apiRoot.keyring,
+    final res = await plugin.sdk.api.keyring.addAccount(
+      keyring,
       keyType: keyType,
       acc: json,
       password: acc.password,
@@ -69,7 +71,7 @@ class ApiAccount {
   }
 
   void setBiometricEnabled(String pubKey) {
-    apiRoot.store.storage.write(
+    plugin.store.storage.write(
         '$_biometricEnabledKey$pubKey', DateTime.now().millisecondsSinceEpoch);
   }
 
@@ -80,12 +82,12 @@ class ApiAccount {
 
   // Actively turn off the function and will not be automatically unlocked again
   void closeBiometricDisabled(String pubKey) {
-    apiRoot.store.storage.write('$_biometricEnabledKey$pubKey', 0);
+    plugin.store.storage.write('$_biometricEnabledKey$pubKey', 0);
   }
 
   bool isCloseBiometricDisabled(String pubKey) {
     final timestamp =
-        apiRoot.store.storage.read('$_biometricEnabledKey$pubKey');
+        plugin.store.storage.read('$_biometricEnabledKey$pubKey');
     if (timestamp == null || timestamp == 0) {
       return true;
     }
@@ -94,7 +96,7 @@ class ApiAccount {
 
   bool getBiometricEnabled(String pubKey) {
     final timestamp =
-        apiRoot.store.storage.read('$_biometricEnabledKey$pubKey');
+        plugin.store.storage.read('$_biometricEnabledKey$pubKey');
     // we cache user's password with biometric for 7 days.
     if (timestamp != null &&
         timestamp + SECONDS_OF_DAY * 7000 >
@@ -173,7 +175,7 @@ class ApiAccount {
       context: context,
       builder: (_) {
         return PasswordInputDialog(
-          apiRoot.plugin.sdk.api,
+          plugin.sdk.api,
           title: Text('Unlock Account with Password'),
           account: acc,
           userPass: bioPass == "can't" ? null : bioPass,
@@ -188,18 +190,18 @@ class ApiAccount {
 
   Future<void> queryAddressIcons(List addresses) async {
     addresses.retainWhere(
-        (e) => !apiRoot.store.account.addressIconsMap.containsKey(e));
+        (e) => !plugin.store.account.addressIconsMap.containsKey(e));
     if (addresses.length == 0) return;
 
     final icons =
-        await apiRoot.plugin.sdk.api.account.getAddressIcons(addresses);
-    apiRoot.store.account.setAddressIconsMap(icons!);
+        await plugin.sdk.api.account.getAddressIcons(addresses);
+    plugin.store.account.setAddressIconsMap(icons!);
   }
 
   Future<RecoveryInfo> queryRecoverable(String address) async {
 //    address = "J4sW13h2HNerfxTzPGpLT66B3HVvuU32S6upxwSeFJQnAzg";
-    final res = await apiRoot.plugin.sdk.api.recovery.queryRecoverable(address);
-    apiRoot.store.account.setAccountRecoveryInfo(res!);
+    final res = await plugin.sdk.api.recovery.queryRecoverable(address);
+    plugin.store.account.setAccountRecoveryInfo(res!);
 
     if (res != null && res!.friends!.length > 0) {
       queryAddressIcons(res!.friends!);

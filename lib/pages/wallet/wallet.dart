@@ -15,7 +15,6 @@ import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/common/consts.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
-import 'package:toearnfun_flutter_app/service/app_service.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
 class WalletView extends StatefulWidget {
@@ -32,8 +31,6 @@ class WalletView extends StatefulWidget {
 
 class _WalletViewState extends State<WalletView> {
   KeyPairData? currentAccount;
-
-  double _initHeight = 180;
 
   @override
   void initState() {
@@ -58,7 +55,7 @@ class _WalletViewState extends State<WalletView> {
       elevation: 0,
       backgroundColor: HexColor('#956DFD'),
       leading: MyBackButton(),
-      // backgroundColor: Colors.green,
+      centerTitle: true,
       title: Text('Wallet', style: TextStyle(color: Colors.white)),
       actions: <Widget>[
         IconButton(
@@ -75,44 +72,80 @@ class _WalletViewState extends State<WalletView> {
       return Scaffold(
           appBar: getAppBarView(),
           body: SafeArea(
-              child: CustomScrollView(
+              child: PullRefreshScope(
+                  child: CustomScrollView(
             physics: const BouncingScrollPhysics(
                 parent: AlwaysScrollableScrollPhysics()),
             slivers: [
-              SliverFlexibleHeader(
-                visibleExtent: _initHeight,
-                builder: (context, availableHeight, direction) {
-                  return mainAssetView(context);
-                },
+              SliverPullRefreshIndicator(
+                refreshTriggerPullDistance: 100.h,
+                refreshIndicatorExtent: 60.h,
+                onRefresh: loadCurrencies,
               ),
-              SliverToBoxAdapter(
-                child: ListTile(
-                    onTap: null,
-                    title: const Text('Assets'),
-                    trailing: TextButton.icon(
-                      onPressed: null,
-                      icon: const Icon(Icons.history),
-                      label: const Text('History',
-                          style: TextStyle(color: Colors.black, fontSize: 16)),
-                    )),
+              SliverPersistentHeader(
+                delegate: SliverHeaderDelegate(
+                  maxHeight: 180.h,
+                  minHeight: 134.h,
+                  child: mainAssetView(context),
+                ),
               ),
+              SliverPersistentHeader(
+                pinned: true,
+                floating: true,
+                delegate: SliverHeaderDelegate(
+                    maxHeight: 60.h,
+                    minHeight: 60.h,
+                    child: Stack(fit: StackFit.expand, children: [
+                      Container(
+                          decoration: new BoxDecoration(
+                        color: HexColor('#956DFD'),
+                      )),
+                      Container(
+                          decoration: new BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          child: ListTile(
+                              onTap: null,
+                              title: const Text('Assets'),
+                              trailing: TextButton.icon(
+                                onPressed: null,
+                                icon: const Icon(Icons.history),
+                                label: const Text('History',
+                                    style: TextStyle(
+                                        color: Colors.black, fontSize: 16)),
+                              ))),
+                    ])),
+              ),
+              // SliverToBoxAdapter(
+              //   child: ListTile(
+              //       onTap: null,
+              //       title: const Text('Assets'),
+              //       trailing: TextButton.icon(
+              //         onPressed: null,
+              //         icon: const Icon(Icons.history),
+              //         label: const Text('History',
+              //             style: TextStyle(color: Colors.black, fontSize: 16)),
+              //       )),
+              // ),
               assetsListView(),
             ],
-          )));
+          ))));
     });
   }
 
   // show user main asset view
   Widget mainAssetView(BuildContext context) {
     final symbol = (widget.plugin.networkState.tokenSymbol ?? [''])[0];
-    final decimals =
-        (widget.plugin.networkState.tokenDecimals ?? [12])[0];
+    final decimals = (widget.plugin.networkState.tokenDecimals ?? [12])[0];
     BalanceData? balancesInfo = widget.plugin.balances.native;
     return Container(
         decoration: new BoxDecoration(
           color: HexColor('#956DFD'),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -133,13 +166,15 @@ class _WalletViewState extends State<WalletView> {
                       color: HexColor('#956dfd'),
                       fontWeight: FontWeight.bold),
                 )),
-            Text(
-              '${Fmt.balance(balancesInfo?.freeBalance, decimals)} $symbol',
-              style: TextStyle(
-                  fontSize: 28,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold),
-            ),
+            SizedBox(
+                height: 34.h,
+                child: Text(
+                  '${Fmt.balance(balancesInfo?.freeBalance, decimals)} $symbol',
+                  style: TextStyle(
+                      fontSize: 28,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
+                )),
             Card(
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -165,14 +200,12 @@ class _WalletViewState extends State<WalletView> {
 
   // show currencies info
   Widget assetsListView() {
-
     List<TokenBalanceData> currencies = [];
 
     final nativeName = widget.plugin.networkState.name ?? "";
-    final nativeSymbol =
-    (widget.plugin.networkState.tokenSymbol ?? [''])[0];
+    final nativeSymbol = (widget.plugin.networkState.tokenSymbol ?? [''])[0];
     final nativeDecimals =
-    (widget.plugin.networkState.tokenDecimals ?? [12])[0];
+        (widget.plugin.networkState.tokenDecimals ?? [12])[0];
     final native = widget.plugin.balances.native;
 
     //add native
@@ -223,7 +256,7 @@ class _WalletViewState extends State<WalletView> {
         title: "Create Wallet", indexedActionClickCallback: (index) {
       Navigator.of(context).pop();
       if (index == 0) {
-        // _generateAccount();
+        _generateAccount();
       }
       if (index == 2) {
         _exit();
@@ -236,65 +269,41 @@ class _WalletViewState extends State<WalletView> {
     Navigator.of(context).pop();
   }
 
-  // Future<void> _generateAccount({String key = ''}) async {
-  //   // LogUtil.d('_generateAccount');
-  //
-  //   final addressInfo = await widget.service.plugin.sdk.api.keyring
-  //       .generateMnemonic(widget.service.plugin.basic.ss58 ?? DEFAULT_SS58,
-  //           key: key);
-  //   LogUtil.d('mnemonic: ${addressInfo.mnemonic}');
-  //   if (key.isEmpty && addressInfo.mnemonic != null) {
-  //     widget.service.store.account.setNewAccountKey(addressInfo.mnemonic!);
-  //     widget.service.store.account.setNewAccount('tester', '1234qwer');
-  //
-  //     try {
-  //       final json = await widget.service.account.importAccount(
-  //         isFromCreatePage: true,
-  //       );
-  //       await widget.service.account.addAccount(
-  //         json: json,
-  //         isFromCreatePage: true,
-  //       );
-  //
-  //       widget.service.store.account.setAccountCreated();
-  //
-  //       setState(() {
-  //         //update ui
-  //         this.currentAccount = widget.service.keyring.current;
-  //         LogUtil.d('current: ${widget.service.keyring.current.address}');
-  //       });
-  //     } catch (err) {
-  //       LogUtil.e(err.toString());
-  //     }
-  //   }
-  // }
+  Future<void> _generateAccount({String key = ''}) async {
+    // LogUtil.d('_generateAccount');
+
+    final addressInfo = await widget.plugin.sdk.api.keyring
+        .generateMnemonic(widget.plugin.basic.ss58 ?? DEFAULT_SS58, key: key);
+    LogUtil.d('mnemonic: ${addressInfo.mnemonic}');
+    if (key.isEmpty && addressInfo.mnemonic != null) {
+      widget.plugin.store.account.setNewAccountKey(addressInfo.mnemonic!);
+      widget.plugin.store.account.setNewAccount('tester', '1234qwer');
+
+      try {
+        final json = await widget.plugin.api.account.importAccount(
+          isFromCreatePage: true,
+        );
+        await widget.plugin.api.account.addAccount(
+          json: json,
+          isFromCreatePage: true,
+        );
+
+        widget.plugin.store.account.setAccountCreated();
+
+        setState(() {
+          //update ui
+          this.currentAccount = widget.keyring.current;
+          LogUtil.d('current: ${widget.keyring.current.address}');
+        });
+      } catch (err) {
+        LogUtil.e(err.toString());
+      }
+    }
+  }
 
   // load cureencies info, show [icon, symbol, name, amount]
   Future<void> loadCurrencies() async {
-    // List<TokenBalanceData> currencies = [];
-
-    // final data = await widget.plugin.sdk.api.account.queryBalance(widget.keyring.current.address);
-
-    // await widget.service.plugin.updateBalances(widget.service.keyring.current);
-
-    // final nativeName = widget.service.plugin.networkState.name ?? "";
-    // final nativeSymbol =
-    //     (widget.service.plugin.networkState.tokenSymbol ?? [''])[0];
-    // final nativeDecimals =
-    //     (widget.service.plugin.networkState.tokenDecimals ?? [12])[0];
-    // final native = widget.service.plugin.balances.native;
-    // LogUtil.d('native info: $native');
-
-    // widget.plugin.balances.setBalance(data!);
-    // widget.assets.getAllAssets();
-
-    //TODO: add assets
-
-
-    // final metadata = await widget.service.assets.queryMetaData(1);
-    // LogUtil.d('metadata: ${metadata!.name}');
-
-    // widget.service.store.assets.setTokenBalanceMap(currencies);
-    // widget.service.plugin.balances.setTokens(currencies);
+    final tokens = await widget.plugin.api.assets.getAllAssets();
+    widget.plugin.balances.setTokens(tokens);
   }
 }
