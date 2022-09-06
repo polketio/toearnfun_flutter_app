@@ -1,8 +1,10 @@
 import 'package:bruno/bruno.dart';
+import 'package:ele_progress/ele_progress.dart';
 import 'package:flukit/flukit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
+import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
@@ -77,7 +79,7 @@ class _VFECardState extends State<VFECard> {
               padding: EdgeInsets.only(left: 16, right: 16, top: 36, bottom: 0),
               child: Image.asset("assets/images/img-Bound.png")),
           Padding(
-              padding: EdgeInsets.only(top: 8.h),
+              padding: EdgeInsets.only(top: 16.h, left: 24.w, right: 24.w),
               child: Row(
                 //row: [ID, status, power]
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -86,10 +88,17 @@ class _VFECardState extends State<VFECard> {
                   Expanded(
                       flex: 1,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         // mainAxisSize: MainAxisSize.max,
                         children: [
-                          Text('ID'),
-                          Text('#0001'),
+                          const Text('VFE ID',
+                              style: TextStyle(
+                                  color: Colors.greenAccent, fontSize: 12)),
+                          SizedBox(
+                              height: 24.h,
+                              child: const Text('#0001',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16))),
                         ],
                       )),
                   Expanded(
@@ -97,34 +106,46 @@ class _VFECardState extends State<VFECard> {
                       child: Column(
                         // crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text('Status'),
-                          TextButton(
-                              onPressed: () async {
-                                // bluetooth_device.checkBluetoothIsOpen();
-                                // String ss = await bluetooth_device.scanDevice();
-                                // print('android to ' + ss);
-                                String isconnect =
-                                    await bluetooth_device.connect();
-                                print('isconnect ' + isconnect);
-                              },
-                              child: Text('disconnected')),
+                          const Text('STATUS',
+                              style: TextStyle(
+                                  color: Colors.greenAccent, fontSize: 12)),
+                          SizedBox(
+                              height: 24.h,
+                              child: GestureDetector(
+                                  child: const Text('Disconnected',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 16)),
+                                  onTap: () async {
+                                    // bluetooth_device.checkBluetoothIsOpen();
+                                    // String ss = await bluetooth_device.scanDevice();
+                                    // print('android to ' + ss);
+                                    String isconnect =
+                                        await bluetooth_device.connect();
+                                    print('isconnect ' + isconnect);
+                                  })),
                         ],
                       )),
                   Expanded(
                       flex: 1,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('Battery'),
-                          BrnProgressChart(
-                            key: UniqueKey(),
-                            width: 60.w,
-                            height: 8.h,
-                            value: 0.6,
-                            brnProgressIndicatorBuilder:
-                                (BuildContext context, double value) {
-                              return Text('');
-                            },
-                          ),
+                          SizedBox(
+                              width: 80.w,
+                              child: const Text('BATTERY',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.greenAccent,
+                                      fontSize: 12))),
+                          SizedBox(
+                              width: 80.w,
+                              height: 24.h,
+                              child: EProgress(
+                                  progress: 80,
+                                  colors: [HexColor('#b7e9e0')],
+                                  backgroundColor: Colors.grey,
+                                  textStyle: const TextStyle(
+                                      color: Colors.white, fontSize: 12))),
                         ],
                       ))
                 ],
@@ -194,25 +215,32 @@ class _MyTrainingViewState extends State<MyTrainingView>
   }
 
   Widget trainingTitleView(BuildContext context) {
-    return Padding(
-        //[title, arrow]
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 8.w, 0.h),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Text(
-              'My Training',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            IconButton(
-              onPressed: null,
-              alignment: Alignment.centerRight,
-              icon: Image.asset('assets/images/icon-LeftArrow.png'),
-              // iconSize: 24.w,
-            )
-          ],
-        ));
+    return GestureDetector(
+        child: Padding(
+            //[title, arrow]
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 8.w, 0.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Text(
+                  'My Training',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pushNamed(JumpRopeTrainingReportsView.route);
+                  },
+                  alignment: Alignment.centerRight,
+                  icon: Image.asset('assets/images/icon-LeftArrow.png'),
+                  // iconSize: 24.w,
+                )
+              ],
+            )),
+        onTap: () {
+          Navigator.of(context).pushNamed(JumpRopeTrainingReportsView.route);
+        });
   }
 
   // daily training data

@@ -18,3 +18,27 @@ class MyBackButton extends StatelessWidget {
         icon: Image.asset('assets/images/icon-L-Arrow.png'));
   }
 }
+
+class IconText extends StatelessWidget {
+  IconText(this.icon, this.text, {TextStyle? this.style});
+
+  String text;
+  String icon;
+  TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: null,
+      style: ButtonStyle(
+        alignment: Alignment.centerLeft,
+        splashFactory: NoSplash.splashFactory,
+        //disable click effect
+        overlayColor: MaterialStateProperty.all(
+            Colors.transparent), //disable click effect
+      ),
+      icon: Image.asset(icon),
+      label: Text(text, style: style),
+    );
+  }
+}

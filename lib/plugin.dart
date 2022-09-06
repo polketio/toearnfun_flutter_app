@@ -7,6 +7,9 @@ import 'package:polkawallet_sdk/plugin/index.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
 import 'package:toearnfun_flutter_app/pages/root.dart';
+import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/create/step_one.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/create/welcome.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/wallet.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api.dart';
 import 'package:toearnfun_flutter_app/store/plugin_store.dart';
@@ -71,6 +74,9 @@ class PluginPolket extends PolkawalletPlugin {
     return {
       RootView.route: (_) => RootView(this, keyring),
       WalletView.route: (_) => WalletView(this, keyring),
+      JumpRopeTrainingReportsView.route: (_) => JumpRopeTrainingReportsView(this, keyring),
+      NewWalletWelcomeView.route: (_) => NewWalletWelcomeView(this, keyring),
+      NewWalletStepOne.route: (_) => NewWalletStepOne(this, keyring),
     };
   }
 

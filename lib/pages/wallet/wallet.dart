@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:polkawallet_sdk/api/types/addressIconData.dart';
 import 'package:polkawallet_sdk/api/types/balanceData.dart';
 import 'package:polkawallet_sdk/plugin/store/balances.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
@@ -14,6 +13,7 @@ import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
 import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/common/consts.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/create/welcome.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
@@ -59,7 +59,9 @@ class _WalletViewState extends State<WalletView> {
       title: Text('Wallet', style: TextStyle(color: Colors.white)),
       actions: <Widget>[
         IconButton(
-            onPressed: null,
+            onPressed: () {
+              Navigator.of(context).pushNamed(NewWalletWelcomeView.route);
+            },
             icon: Image.asset('assets/images/icon-more.png'),
             iconSize: 36.w),
       ],
@@ -70,6 +72,7 @@ class _WalletViewState extends State<WalletView> {
   Widget build(BuildContext context) {
     return Observer(builder: (_) {
       return Scaffold(
+          backgroundColor: Colors.white,
           appBar: getAppBarView(),
           body: SafeArea(
               child: PullRefreshScope(
@@ -99,7 +102,8 @@ class _WalletViewState extends State<WalletView> {
                       Container(
                           decoration: new BoxDecoration(
                         color: HexColor('#956DFD'),
-                      )),
+                      )
+                ),
                       Container(
                           decoration: new BoxDecoration(
                             color: Colors.white,
@@ -118,17 +122,6 @@ class _WalletViewState extends State<WalletView> {
                               ))),
                     ])),
               ),
-              // SliverToBoxAdapter(
-              //   child: ListTile(
-              //       onTap: null,
-              //       title: const Text('Assets'),
-              //       trailing: TextButton.icon(
-              //         onPressed: null,
-              //         icon: const Icon(Icons.history),
-              //         label: const Text('History',
-              //             style: TextStyle(color: Colors.black, fontSize: 16)),
-              //       )),
-              // ),
               assetsListView(),
             ],
           ))));
@@ -225,7 +218,7 @@ class _WalletViewState extends State<WalletView> {
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final d = currencies[index];
-          return new Card(
+          return Card(
               elevation: 0,
               margin: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
               color: HexColor('#e9e0ff'),
