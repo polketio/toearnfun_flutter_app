@@ -15,12 +15,48 @@ class bluetooth_device{
   static Future<String> checkBluetoothIsOpen() async{
     return await _channel.invokeMethod("checkBluetoothIsOpen");
   }
-
   static Future<String>  scanDevice() async{
     var param = "hello";
     return await _channel.invokeMethod("scanDevice",param);
   }
   static Future<String>  connect() async{
     return await _channel.invokeMethod("connect");
+  }
+  static Future<String>  registerCustomDataRxCallback() async{
+    return await _channel.invokeMethod("registerCustomDataRxCallback");
+  }
+  //设置跳绳模式
+  static Future<String>  setSkipMode() async{
+    return await _channel.invokeMethod("setSkipMode");
+  }
+  //设备恢复出厂
+  static Future<String>  devRevert() async{
+    return await _channel.invokeMethod("devRevert");
+  }
+  //获取设备公钥
+  static Future<String>  writeSkipGetPublicKey() async{
+    return await _channel.invokeMethod("writeSkipGetPublicKey");
+  }
+
+  //设备复位
+  static Future<String>  devReset() async{
+    return await _channel.invokeMethod("devReset");
+  }
+//同步设备时间
+  static Future<String>  syncDeviceTime() async{
+    return await _channel.invokeMethod("syncDeviceTime");
+  }
+//停止跳绳
+  static Future<String>  stopSkip() async{
+    return await _channel.invokeMethod("stopSkip");
+  }
+
+  //创建设备ECC公钥
+  static Future<String>  writeSkipGenerateECCKey() async{
+    return await _channel.invokeMethod("writeSkipGenerateECCKey");
+  }
+  //绑定设备
+  static Future<String>  writeSkipBondDev() async{
+    return await _channel.invokeMethod("writeSkipBondDev");
   }
 }

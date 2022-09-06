@@ -123,6 +123,33 @@ class _VFECardState extends State<VFECard> {
                                         await bluetooth_device.connect();
                                     print('isconnect ' + isconnect);
                                   })),
+                          // Text('Status'),
+                          // TextButton(
+                          //     onPressed: () async {
+                          //       // bluetooth_device.checkBluetoothIsOpen();
+                          //       // String ss = await bluetooth_device.scanDevice();
+                          //       // print('android to ' + ss);
+                          //       String isconnect =
+                          //           await bluetooth_device.connect();
+                          //       print('isconnect ' + isconnect);
+                          //     },
+                          //     child: Text('扫描')),
+                          // TextButton(
+                          //     onPressed: () async {
+                          //      await bluetooth_device.connect();
+                          //
+                          //     },
+                          //     child: Text('连接')),
+                          // TextButton(
+                          //     onPressed: () async {
+                          //      await bluetooth_device.registerCustomDataRxCallback();
+                          //     },
+                          //     child: Text('注册')),
+                          // TextButton(
+                          //     onPressed: () async {
+                          //        bluetooth_device.writeSkipGenerateECCKey();
+                          //     },
+                          //     child: Text('获取设备ecc')),
                         ],
                       )),
                   Expanded(

@@ -1177,10 +1177,12 @@ public class BleManager {
 
                     @Override
                     public void onCharacteristicChanged(byte[] data) {
-                        if(DeviceType.SKIP_DEVICE == DeviceApiActivity.getDeviceType()) {
+                        SkipApiActivity api = new SkipApiActivity();
+                        api.onListenBleIndication(data, receiveDataCallback);
+                       /* if(DeviceType.SKIP_DEVICE == DeviceApiActivity.getDeviceType()) {
                             SkipApiActivity api = new SkipApiActivity();
                             api.onListenBleIndication(data, receiveDataCallback);
-                        }
+                        }*/
                     }
                 });
     }

@@ -180,94 +180,12 @@ public class SkipApiActivity {
 
     };
 
-    private BleManager.LcWriteBleCallback mSettingCallback = new BleManager.LcWriteBleCallback() {
-        @Override
-        public void onWriteSuccess(int current, int total, byte[] justWrite) {
-            super.onWriteSuccess(current, total, justWrite);
-            String ss= com.Ls.skipBle.protocol.HexUtil.encodeHexStr(justWrite);
-            if ( current == total ) {
-                final String s = "[写入][成功]" + getTag();
-                Log.i(TAG, s);
-                DeviceApiActivity a = new DeviceApiActivity();
-                a.outputLog(s);
-            }
-        }
-
-        @Override
-        public void onWriteFailure(BleException exception) {
-            super.onWriteFailure(exception);
-            final String s = "[写入][失败]" + getTag() + ": " + exception.toString();
-            Log.i(TAG, s);
-            DeviceApiActivity a = new DeviceApiActivity();
-            a.outputLog(s);
-        }
-    };
 
 
-    public void init()
+    public void init(BleDevice mBleDevice)
     {
-        BleManager.getInstance().registerCustomDataRxCallback(DeviceApiActivity.getBleDevice(), customRxDataCallback);
-        fileTransSendPackInit();
-    }
-
-
-    /**
-     * 处理设备功能
-     * @param index
-     */
-    public void handleDeviceFunction(BleDevice bleDev, int index)
-    {
-        SkipSettingProfiles api = new SkipSettingProfiles();
-        switch (index)
-        {
-            case R.id.fun_dev_revert:{
-                mSettingCallback.setTag("设备恢复出厂");
-                api.devRevert(bleDev, mSettingCallback);
-            }break;
-
-            case R.id.fun_set_adv_name:{
-                //mSettingCallback.setTag("设置广播名");
-                //api.setDevAdvName(bleDev, mSettingCallback);
-                mSettingCallback.setTag("获取设备公钥");
-                SkipApiActivity wr = new SkipApiActivity();
-                wr.writeSkipGetPublicKey(bleDev, mSettingCallback);
-                //wr.writeSkipBondDev(bleDev, mSettingCallback);
-            }break;
-
-            case R.id.fun_dev_reset:{
-                mSettingCallback.setTag("设备复位");
-                api.devReset(bleDev, mSettingCallback);
-            }break;
-
-            case R.id.fun_sync_dev_time:{
-                mSettingCallback.setTag("同步设备时间");
-                api.syncDeviceTime(bleDev, mSettingCallback);
-            } break;
-
-            case R.id.fun_set_jump_mode:{
-                mSettingCallback.setTag("设置跳绳模式");
-                api.setSkipMode(bleDev, mSettingCallback);
-            } break;
-
-            case R.id.fun_stop_jump:{
-                mSettingCallback.setTag("停止跳绳");
-                api.stopSkip(bleDev, mSettingCallback);
-            } break;
-
-            case R.id.fun_font_trans:{
-                mSettingCallback.setTag("创建设备ECC公钥");
-                //BleManager.getInstance().registerFileDataRxCallback(DeviceApiActivity.getBleDevice(), fileRxDataCallback);
-                //api.setFontHeadInfo(bleDev, mSettingCallback);
-                SkipApiActivity wr = new SkipApiActivity();
-                wr.writeSkipGenerateECCKey(bleDev, mSettingCallback);
-            } break;
-            case R.id.fun_image_bonddev:{
-               // byte[] s=com.Ls.skipBle.protocol.HexUtil.hexStringToBytes("422d0010f16ae8539c53eb57a912890244a9eb5a");
-                mSettingCallback.setTag("绑定设备");
-                SkipApiActivity wr = new SkipApiActivity();
-                wr.writeSkipBondDev(bleDev, mSettingCallback);
-            } break;
-        }
+        BleManager.getInstance().registerCustomDataRxCallback(mBleDevice, customRxDataCallback);
+       // fileTransSendPackInit();
     }
 
     public void onListenBleFileNotification(byte[] data, final ReceiveFileDataCallback receiveFileDataCallback)
@@ -531,12 +449,12 @@ public class SkipApiActivity {
 
 
     // ********************  File Trans Part *******************************/
-    private void fileTransSendPackInit() {
+    /*private void fileTransSendPackInit() {
         FileTransSendPack tx = new FileTransSendPack();
         tx.setSendPackHandle(sendFileDataCb);
     }
-
-    private SendFileDataCallback sendFileDataCb = new SendFileDataCallback()
+*/
+  /*  private SendFileDataCallback sendFileDataCb = new SendFileDataCallback()
     {
         public void txCtrlPoint(byte[] payload) {
             Log.i("FileTransDfu", "txCtrlPoint");
@@ -584,7 +502,7 @@ public class SkipApiActivity {
             a.outputLog(s);
             Log.i("FileTransDfu", "txDone");
         }
-    };
+    };*/
 
 
     public ReceiveFileDataCallback fileRxDataCallback = new ReceiveFileDataCallback()

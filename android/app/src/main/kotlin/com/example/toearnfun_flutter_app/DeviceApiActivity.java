@@ -84,7 +84,7 @@ public class DeviceApiActivity extends AppCompatActivity implements Observer {
         initData();
         initView();
         if(DeviceType.SKIP_DEVICE == getDeviceType()) {
-            skipApi.init();
+            skipApi.init(bleDevice);
         }
         ObserverManager.getInstance().addObserver(this);
 
@@ -143,10 +143,10 @@ public class DeviceApiActivity extends AppCompatActivity implements Observer {
             Toast.makeText(DeviceApiActivity.this, "undefined.....", Toast.LENGTH_LONG).show();
             return false;
         }
-        handleDeviceFunction(item.getItemId());
+       /* handleDeviceFunction(item.getItemId());
         if(DeviceType.SKIP_DEVICE == getDeviceType()) {
             skipApi.handleDeviceFunction(bleDevice, item.getItemId());
-        }
+        }*/
         return super.onOptionsItemSelected(item);
     }
 
@@ -458,16 +458,16 @@ public class DeviceApiActivity extends AppCompatActivity implements Observer {
 
 
     private static void addText(String content) {
-        logcat_textView.append(content);
+      /*  logcat_textView.append(content);
         logcat_textView.append("\n");
-        logcat_scrollView.fullScroll(View.FOCUS_DOWN);
+        logcat_scrollView.fullScroll(View.FOCUS_DOWN);*/
     }
 
     private void cleanText(TextView textView) {
-        textView.setText("");
+       // textView.setText("");
     }
 
     public static void outputLog(final String str) {
-        addText(str);
+      //  addText(str);
     }
 }
