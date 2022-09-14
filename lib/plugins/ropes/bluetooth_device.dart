@@ -4,6 +4,7 @@ class bluetooth_device{
   //注意，这里的名称需要和Android原生中定义的一样
   static const MethodChannel _channel = MethodChannel("BluetoothFlutterPlugin");
 
+
   static Future<String> getText() async{
     //传字符串给Android
     var param = "hello";
@@ -24,6 +25,11 @@ class bluetooth_device{
   }
   static Future<String>  registerCustomDataRxCallback() async{
     return await _channel.invokeMethod("registerCustomDataRxCallback");
+  }
+  //检查蓝牙是否连接
+  static Future<bool>  checkStateOn() async{
+    var param = false;
+    return await _channel.invokeMethod("checkStateOn",param);
   }
   //设置跳绳模式
   static Future<String>  setSkipMode() async{

@@ -1,7 +1,11 @@
 package com.example.toearnfun_flutter_app.device.skip;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
+import android.widget.Toast;
 
+import io.flutter.plugin.common.EventChannel;
+import io.flutter.plugin.common.MethodChannel;
 import com.Ls.fileTrans.FileTransManager;
 import com.Ls.fileTrans.FileTransParamDef;
 import com.Ls.fileTrans.FileTransReceivePack;
@@ -23,6 +27,8 @@ import com.example.toearnfun_flutter_app.data.BleDevice;
 import com.example.toearnfun_flutter_app.exception.BleException;
 import com.example.toearnfun_flutter_app.utils.HexUtil;
 
+import io.flutter.plugin.common.MethodChannel;
+
 
 public class SkipApiActivity {
     public static final String KEY_DATA = "key_data";
@@ -38,7 +44,18 @@ public class SkipApiActivity {
     private static int tmp_skip_cnt = 0;
     private static int tmp_trip_cnt = 0;
     private static int tmp_batt_per = 0;
+    private static MethodChannel.Result mResult=null;
+    private static EventChannel.EventSink mEventChannel;
+    public void setMethodChannelResult(MethodChannel.Result result)
+    {
+        this.mResult=result;
+    }
 
+    public void setEventChannelEventSink(EventChannel.EventSink eventChannel)
+    {
+        this.mEventChannel=eventChannel;
+    }
+     
 
     private ReceiveDataCallback customRxDataCallback = new ReceiveDataCallback()
     {
@@ -70,17 +87,21 @@ public class SkipApiActivity {
                     default:
                         break;
                 }
-                final String s = "模式: " + modeStr + ", 设置: " + display.getSetting() + ParamStr + ", 时间: " + Integer.toString(display.getSkipSecSum()) + ", 次数: " + Integer.toString(display.getSkipCntSum()) +
+              /*  final String s = "模式: " + modeStr + ", 设置: " + display.getSetting() + ParamStr + ", 时间: " + Integer.toString(display.getSkipSecSum()) + ", 次数: " + Integer.toString(display.getSkipCntSum()) +
                         ", 绊绳: " + Integer.toString(display.getTripCnt()) + ", 电量:" + Integer.toString(display.getBatteryPercent()) + ", 有效时长:" + Integer.toString(display.getSkipValidSec());
+               */
+                final String s = "mode: " + modeStr + ", setting: " + display.getSetting() + ParamStr + ", SkipSecSum: " + Integer.toString(display.getSkipSecSum()) + ", SkipCntSum: " + Integer.toString(display.getSkipCntSum()) +
+                        ", TripCnt: " + Integer.toString(display.getTripCnt()) + ", BatteryPercent:" + Integer.toString(display.getBatteryPercent()) + ", SkipValidSec:" + Integer.toString(display.getSkipValidSec());
 
-                DeviceApiActivity a = new DeviceApiActivity();
-                a.outputLog(s);
+                if(mEventChannel!=null)
+                   mEventChannel.success(s);
             }
         }
 
         @Override
         public void onReceiveSkipRealTimeResultData(SkipResultData result, int pkt_idx) {
-            String str = "[接收][成功] 跳绳实时结果: " + "(" + pkt_idx + ")";
+          //  String str = "[接收][成功] 跳绳实时结果: " + "(" + pkt_idx + ")";
+            String str = "SkipRealTimeResult: " + "(" + pkt_idx + ")";
             str += "UTC: " + Integer.toString(result.getUtc());
             switch(result.getMode())
             {
@@ -99,6 +120,7 @@ public class SkipApiActivity {
                 default:
                     break;
             }
+          /*
             str += " 总时长: " + Integer.toString(result.getSkipSecSum()) + "秒";
             str += " 总次数: " + Integer.toString(result.getSkipCntSum()) + "次";
             str += " 有效时长: " + Integer.toString(result.getSkipValidSec()) + "秒";
@@ -106,18 +128,28 @@ public class SkipApiActivity {
             str += " 最快频次: " + Integer.toString(result.getFreqMax()) + "次";
             str += " 最大连跳: " + Integer.toString(result.getConsecutiveSkipMaxNum()) + "次";
             str += " 绊绳次数: " + Integer.toString(result.getSkipTripNum()) + "次";
+            */
+
+            str += " SkipSecSum: " + Integer.toString(result.getSkipSecSum());
+            str += " SkipCntSum: " + Integer.toString(result.getSkipCntSum());
+            str += " SkipValidSec: " + Integer.toString(result.getSkipValidSec()) ;
+            str += " FreqAvg: " + Integer.toString(result.getFreqAvg());
+            str += " FreqMax: " + Integer.toString(result.getFreqMax()) ;
+            str += " ConsecutiveSkipMaxNum: " + Integer.toString(result.getConsecutiveSkipMaxNum()) ;
+            str += " SkipTripNum: " + Integer.toString(result.getSkipTripNum()) ;
+
             /*str += " 跳绳组: ";
             for(int i=0;i<result.getSkipGroupNum();i++) {
                 str += Integer.toString(result.getSkipGroupEleSkipSecs(i)) + "," + Integer.toString(result.getSkipGroupEleSkipCnt(i)) + " ";
             }*/
-            final String s = str;
-            DeviceApiActivity a = new DeviceApiActivity();
-            a.outputLog(s);
+            if(mEventChannel!=null)
+                mEventChannel.success(str);
         }
 
         @Override
         public void onReceiveSkipHistoryResultData(SkipResultData result, int pkt_idx) {
-            String str = "[接收][成功] 跳绳历史结果: " + "(" + pkt_idx + ")";
+           // String str = "[接收][成功] 跳绳历史结果: " + "(" + pkt_idx + ")";
+            String str = "SkipResultData: " + "(" + pkt_idx + ")";
             str += "UTC: " + Integer.toString(result.getUtc());
             switch(result.getMode())
             {
@@ -136,46 +168,51 @@ public class SkipApiActivity {
                 default:
                     break;
             }
-            str += " 总时长: " + Integer.toString(result.getSkipSecSum()) + "秒";
+
+            str += " SkipSecSum: " + Integer.toString(result.getSkipSecSum());
+            str += " SkipCntSum: " + Integer.toString(result.getSkipCntSum());
+            str += " SkipValidSec: " + Integer.toString(result.getSkipValidSec()) ;
+            str += " FreqAvg: " + Integer.toString(result.getFreqAvg());
+            str += " FreqMax: " + Integer.toString(result.getFreqMax()) ;
+            str += " ConsecutiveSkipMaxNum: " + Integer.toString(result.getConsecutiveSkipMaxNum()) ;
+            str += " SkipTripNum: " + Integer.toString(result.getSkipTripNum()) ;
+
+           /* str += " 总时长: " + Integer.toString(result.getSkipSecSum()) + "秒";
             str += " 总次数: " + Integer.toString(result.getSkipCntSum()) + "次";
             str += " 有效时长: " + Integer.toString(result.getSkipValidSec()) + "秒";
             str += " 平均频次: " + Integer.toString(result.getFreqAvg()) + "次";
             str += " 最快频次: " + Integer.toString(result.getFreqMax()) + "次";
             str += " 最大连跳: " + Integer.toString(result.getConsecutiveSkipMaxNum()) + "次";
-            str += " 绊绳次数: " + Integer.toString(result.getSkipTripNum()) + "次";
+            str += " 绊绳次数: " + Integer.toString(result.getSkipTripNum()) + "次";*/
+
             /*str += " 跳绳组: ";
             for(int i=0;i<result.getSkipGroupNum();i++) {
                 str += Integer.toString(result.getSkipGroupEleSkipSecs(i)) + "," + Integer.toString(result.getSkipGroupEleSkipCnt(i)) + " ";
             }*/
-            final String s = str;
-            DeviceApiActivity a = new DeviceApiActivity();
-            a.outputLog(s);
-
-
+            if(mEventChannel!=null)
+                mEventChannel.success(str);
+            
         }
 
         @Override
         public void onReceiveEnteredOtaMode(String mac) {
             super.onReceiveEnteredOtaMode(mac);
             final String s = "[接收][成功] 进入OTA模式, mac:" + mac;
-            DeviceApiActivity a = new DeviceApiActivity();
-            a.outputLog(s);
+          //  mResult.success(s);
         }
 
         @Override
         public void onReceiveEnteredFactoryMode() {
             super.onReceiveEnteredFactoryMode();
             final String s = "[接收][成功] 进入工厂模式" ;
-            DeviceApiActivity a = new DeviceApiActivity();
-            a.outputLog(s);
+        //    mResult.success(s);
         }
 
         @Override
         public void onReceiveRevertDevice() {
             super.onReceiveRevertDevice();
             final String s = "[接收][成功] 恢复出厂" ;
-            DeviceApiActivity a = new DeviceApiActivity();
-            a.outputLog(s);
+          //  mResult.success(s);
         }
 
     };
@@ -237,7 +274,28 @@ public class SkipApiActivity {
             public void onReceiveRevertDevice() {
                 receiveDataCallback.onReceiveRevertDevice();
             }
+            
+            @SuppressLint("LongLogTag")
+            @Override
+            public void onReceivewriteSkipGenerateECCKey(String cmd,String data) {
+                receiveDataCallback.onReceivewriteSkipGenerateECCKey(cmd,data);
+                if(mResult!=null)
+                {
+                    mResult.success(data);
+                }
+                Log.i("onReceivewriteSkipGenerateECCKey", data);
+            }
 
+            @SuppressLint("LongLogTag")
+            @Override
+            public void onReceivewriteSkipGetPublicKey(String cmd,String data) {
+                receiveDataCallback.onReceivewriteSkipGetPublicKey(cmd,data);
+                if(mResult!=null)
+                {
+                    mResult.success(data);
+                }
+                Log.i("onReceivewriteSkipGetPublicKey", data);
+            }
         });
     }
 

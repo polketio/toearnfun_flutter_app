@@ -16,4 +16,6 @@ public abstract class ReceiveDataCallback {
 
     public void onReceiveRevertDevice() {}
 
+    public void onReceivewriteSkipGenerateECCKey(String cmd,String data ) {}
+    public void onReceivewriteSkipGetPublicKey(String cmd,String data) {}
 }

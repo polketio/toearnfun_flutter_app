@@ -165,12 +165,14 @@ public class RxPackage {
                 String hex=HexUtil.encodeHexStr(retPackage.getPayload());
                 Log.i(TAG, "CMD_GEN_ECC_KEY: " + retPackage.getCmd() + " " + HexUtil.encodeHexStr(retPackage.getPayload()));
           //  String hex=HexUtil.HexUtil.encodeHexStr(retPackage.getPayload());
-
+                receiveDataCallback.onReceivewriteSkipGenerateECCKey(retPackage.getCmd()+"",HexUtil.encodeHexStr(retPackage.getPayload()));
             } break;
 
 
             case SkipProtocolDef.CMD_GET_DEV_PUB_KEY: {
                 Log.i(TAG, "CMD_GET_DEV_PUB_KEY: " + retPackage.getCmd() + " " + HexUtil.encodeHexStr(retPackage.getPayload()));
+                receiveDataCallback.onReceivewriteSkipGetPublicKey(retPackage.getCmd()+"",HexUtil.encodeHexStr(retPackage.getPayload()));
+
             } break;
 
 

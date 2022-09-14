@@ -2,6 +2,7 @@ import 'package:bruno/bruno.dart';
 import 'package:ele_progress/ele_progress.dart';
 import 'package:flukit/flukit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
@@ -14,14 +15,33 @@ class HomeView extends StatefulWidget {
 
   final PluginPolket plugin;
   final Keyring keyring;
-
-  @override
+    @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 // HomeView
 class _HomeViewState extends State<HomeView> {
   bool _refreshing = false;
+  static final EventChannel _eventChannel = EventChannel("BluetoothFlutterPluginEvent"); //原生平台主动调用flutter端事件通道
+
+  @override
+  void initState() {
+    super.initState();
+    _eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onErroe);
+  }
+
+
+  /**
+   * 监听原生传递回来的值（通过eventChannel）
+   */
+  void  _onEvent(dynamic object) {
+    print(object.toString() + "-------------从原生主动传递过来的值");
+
+  }
+
+  void _onErroe(Object object) {
+    print(object.toString() + "-------------从原生主动传递过来的值");
+  }
 
   Future<void> _updateBalances() async {
     if (!widget.plugin.connected) {
@@ -112,44 +132,44 @@ class _VFECardState extends State<VFECard> {
                           SizedBox(
                               height: 24.h,
                               child: GestureDetector(
-                                  child: const Text('Disconnected',
+                                  child: const Text('测试是否连接',
                                       style: TextStyle(
                                           color: Colors.white, fontSize: 16)),
                                   onTap: () async {
-                                    // bluetooth_device.checkBluetoothIsOpen();
-                                    // String ss = await bluetooth_device.scanDevice();
-                                    // print('android to ' + ss);
-                                    String isconnect =
-                                        await bluetooth_device.connect();
-                                    print('isconnect ' + isconnect);
+                                    bool isconnect =
+                                        await bluetooth_device.checkStateOn();
+                                    print('isconnect ' + isconnect.toString());
                                   })),
-                          // Text('Status'),
-                          // TextButton(
-                          //     onPressed: () async {
-                          //       // bluetooth_device.checkBluetoothIsOpen();
-                          //       // String ss = await bluetooth_device.scanDevice();
-                          //       // print('android to ' + ss);
-                          //       String isconnect =
-                          //           await bluetooth_device.connect();
-                          //       print('isconnect ' + isconnect);
-                          //     },
-                          //     child: Text('扫描')),
-                          // TextButton(
-                          //     onPressed: () async {
-                          //      await bluetooth_device.connect();
-                          //
-                          //     },
-                          //     child: Text('连接')),
-                          // TextButton(
-                          //     onPressed: () async {
-                          //      await bluetooth_device.registerCustomDataRxCallback();
-                          //     },
-                          //     child: Text('注册')),
-                          // TextButton(
-                          //     onPressed: () async {
-                          //        bluetooth_device.writeSkipGenerateECCKey();
-                          //     },
-                          //     child: Text('获取设备ecc')),
+                            TextButton(
+                            onPressed: () async {
+                            String ss = await bluetooth_device.writeSkipGenerateECCKey();
+                            print('公钥:' + ss);
+                            },
+                            child: Text('创建公钥')),
+                           TextButton(
+                               onPressed: () async {
+                                  String ss = await bluetooth_device.scanDevice();
+                                  print('android to ' + ss);
+                               },
+                               child: Text('扫描')),
+                           TextButton(
+                               onPressed: () async {
+                                await bluetooth_device.connect();
+
+                               },
+                               child: Text('连接')),
+                           TextButton(
+                               onPressed: () async {
+                                 String ss =await bluetooth_device.registerCustomDataRxCallback();
+                                 print('跳绳结果：' + ss);
+                               },
+                               child: Text('注册')),
+                           TextButton(
+                              onPressed: () async {
+                                String ss = await bluetooth_device.writeSkipGetPublicKey();
+                                print('设备ecc公钥：' + ss);
+                              },
+                               child: Text('获取设备ecc')),
                         ],
                       )),
                   Expanded(
