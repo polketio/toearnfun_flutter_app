@@ -45,10 +45,11 @@ import java.util.UUID;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
-public class BluetoothFlutterPlugin  implements FlutterPlugin {
+public class BluetoothFlutterPlugin  implements FlutterPlugin{
     Context applicationContext;
     Activity mActivity;
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -65,6 +66,10 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
 
     private static final int REQUEST_CODE_OPEN_GPS = 1;
     private static final int REQUEST_CODE_PERMISSION_LOCATION = 2;
+
+    private EventChannel.EventSink eventChannel;
+    private static final String EVENT_CHANNEL = "BluetoothFlutterPluginEvent"; //事件通道，供原生主动调用flutter端使用
+
     BluetoothFlutterPlugin(Activity activity)
     {
         mActivity=activity;
@@ -77,6 +82,22 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
 
         //设置channel名称，之后flutter中也要一样
         MethodChannel channel = new MethodChannel(binding.getFlutterEngine().getDartExecutor(), "BluetoothFlutterPlugin");
+
+        new EventChannel(binding.getFlutterEngine().getDartExecutor(), EVENT_CHANNEL).setStreamHandler(new EventChannel.StreamHandler() {
+            @Override
+            public void onListen(Object o, EventChannel.EventSink eventSink) {
+                eventChannel = eventSink;
+                //eventSink.success("事件通道准备就绪");
+                //在此不建议做耗时操作，因为当onListen回调被触发后，在此注册当方法需要执行完毕才算结束回调函数
+                //的执行，耗时操作可能会导致界面卡死，这里读者需注意！！
+            }
+
+            @Override
+            public void onCancel(Object o) {
+
+            }
+        });
+
 
         //把当前的MethodCallHandler设置
         channel.setMethodCallHandler(new MethodChannel.MethodCallHandler() {
@@ -104,8 +125,14 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
                         connect(mBleDevice);
                     }
                     
-                }else if(method.equals("registerCustomDataRxCallback"))
+                }else if(method.equals("checkStateOn"))
                 {
+                    boolean isOn=checkStateOn();
+                    mResult.success(isOn);
+                }
+                else if(method.equals("registerCustomDataRxCallback"))
+                {
+                    skipApi.setEventChannelEventSink(eventChannel);
                     registerCustomDataRxCallback();
                 }else if(method.equals("setSkipMode"))
                 {
@@ -120,7 +147,9 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
                 else if(method.equals("writeSkipGetPublicKey"))
                 {
                     mSettingCallback.setTag("获取设备公钥");
+                    skipApi.setMethodChannelResult(mResult);
                     skipApi.writeSkipGetPublicKey(mBleDevice, mSettingCallback);
+
                 }
                 else if(method.equals("devReset"))
                 {
@@ -135,6 +164,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
                 else if(method.equals("writeSkipGenerateECCKey"))
                 {
                     mSettingCallback.setTag("创建设备ECC公钥");
+                    skipApi.setMethodChannelResult(mResult);
                     skipApi.writeSkipGenerateECCKey(mBleDevice, mSettingCallback);
                 }
                 else if(method.equals("writeSkipBondDev"))
@@ -165,7 +195,10 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
             return;
         }
     }
-
+    private boolean checkStateOn()
+    {
+      return BleManager.getInstance().isConnected(mBleDevice);
+    }
 
     private void checkPermissions() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -408,6 +441,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
                 final String s = "模式: " + modeStr + ", 设置: " + display.getSetting() + ParamStr + ", 时间: " + Integer.toString(display.getSkipSecSum()) + ", 次数: " + Integer.toString(display.getSkipCntSum()) +
                         ", 绊绳: " + Integer.toString(display.getTripCnt()) + ", 电量:" + Integer.toString(display.getBatteryPercent()) + ", 有效时长:" + Integer.toString(display.getSkipValidSec());
                 Toast.makeText(mActivity, s, Toast.LENGTH_LONG).show();
+
                 Log.i(TAG, s);
             }
         }
@@ -518,7 +552,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
             if ( current == total ) {
                 final String s = "[写入][成功]" + getTag();
                 Log.i(TAG, s);
-
+               // mResult.success(ss);
             }
         }
 
@@ -530,6 +564,5 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin {
 
         }
     };
-
 
 }

@@ -1,5 +1,6 @@
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
@@ -20,6 +21,27 @@ class DeviceConnectView extends StatefulWidget {
 }
 
 class _DeviceConnectViewState extends State<DeviceConnectView> {
+
+  static final EventChannel _eventChannel =
+  EventChannel("BluetoothFlutterPluginEvent"); //原生平台主动调用flutter端事件通道
+
+  @override
+  void initState() {
+    super.initState();
+    _eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onError);
+  }
+
+  /**
+   * 监听原生传递回来的值（通过eventChannel）
+   */
+  void _onEvent(dynamic object) {
+    print(object.toString() + "-------------从原生主动传递过来的值");
+  }
+
+  void _onError(Object object) {
+    print(object.toString() + "-------------从原生主动传递过来的值");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,6 +54,12 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
+                      mainButton('check connect', 20, Colors.black,
+                          Size(double.infinity, 44.h), () async {
+                            bool isconnect =
+                            await bluetooth_device.checkStateOn();
+                            LogUtil.d('isconnect: ${isconnect.toString()}');
+                          }),
                       mainButton('Scan Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         String devices = await bluetooth_device.scanDevice();
