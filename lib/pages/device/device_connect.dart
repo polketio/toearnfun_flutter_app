@@ -70,6 +70,11 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                         String connect = await bluetooth_device.connect();
                         LogUtil.d('connect: $connect');
                       }),
+                      mainButton('Register', 20, Colors.black,
+                          Size(double.infinity, 44.h), () async {
+                            String register = await bluetooth_device.registerCustomDataRxCallback();
+                            LogUtil.d('Register: $register');
+                          }),
                       mainButton('Get PublicKey', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         String result = await bluetooth_device
