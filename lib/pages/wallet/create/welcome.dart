@@ -106,6 +106,7 @@ class _CreateWalletWelcomeViewState extends State<NewWalletWelcomeView> {
         width: buttonSize.width,
         child: ElevatedButton.icon(
             style: ButtonStyle(
+              elevation: MaterialStateProperty.all(0),
               shape: MaterialStateProperty.all(RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12))),
               backgroundColor: MaterialStateProperty.all(HexColor('#e9e0fe')),

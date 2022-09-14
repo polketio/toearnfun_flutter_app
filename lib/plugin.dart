@@ -6,9 +6,13 @@ import 'package:polkawallet_sdk/plugin/homeNavItem.dart';
 import 'package:polkawallet_sdk/plugin/index.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
+import 'package:toearnfun_flutter_app/pages/device/device_connect.dart';
 import 'package:toearnfun_flutter_app/pages/root.dart';
+import 'package:toearnfun_flutter_app/pages/training/training_detail.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_one.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/create/step_three.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/create/step_two.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/welcome.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/wallet.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api.dart';
@@ -77,6 +81,10 @@ class PluginPolket extends PolkawalletPlugin {
       JumpRopeTrainingReportsView.route: (_) => JumpRopeTrainingReportsView(this, keyring),
       NewWalletWelcomeView.route: (_) => NewWalletWelcomeView(this, keyring),
       NewWalletStepOne.route: (_) => NewWalletStepOne(this, keyring),
+      NewWalletStepTwo.route: (_) => NewWalletStepTwo(this, keyring),
+      NewWalletStepThree.route: (_) => NewWalletStepThree(this, keyring),
+      DeviceConnectView.route: (_) => DeviceConnectView(this, keyring),
+      JumpRopeTrainingDetailView.route: (_) => JumpRopeTrainingDetailView(this, keyring),
     };
   }
 

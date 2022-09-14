@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/common/types/training_report.dart';
+import 'package:toearnfun_flutter_app/pages/training/training_detail.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
@@ -15,7 +16,7 @@ class JumpRopeTrainingReportsView extends StatefulWidget {
   final PluginPolket plugin;
   final Keyring keyring;
 
-  static const String route = '/toearnfun/training/reports';
+  static const String route = '/toearnfun/training/jumprope_report_list';
 
   @override
   State<JumpRopeTrainingReportsView> createState() =>
@@ -72,7 +73,7 @@ class _JumpRopeTrainingReportsViewState
 
   Widget trainingReportListView() {
     return SliverFixedExtentList(
-      itemExtent: 168,
+      itemExtent: 180,
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final d = jumpRopeTrainingReportList[index];
@@ -108,96 +109,103 @@ class JumpRopeTrainingReportItem extends StatelessWidget {
         color: Colors.white,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.w)),
-        child: Padding(
-            padding: EdgeInsets.only(left: 12.w, right: 12.w),
-            child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(
-                      height: 40.h,
-                      child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            //[reportTime, status]
-                            Text('06/12 09:30',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.black)),
-                            IconText(
-                              'assets/images/icon-dd.png',
-                              'Not Reported',
-                              style:
-                                  TextStyle(fontSize: 12, color: Colors.green),
-                            ),
-                          ])),
-                  SizedBox(
-                      height: 110.h,
-                      child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            //[image, report data, arror]
-                            Padding(
-                                padding: EdgeInsets.only(top: 6.h, right: 12.w),
-                                child: Image.asset(
-                                    'assets/images/icon-jumprope.png')),
-                            Expanded(
-                                flex: 1,
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      //[img, total jump count]
-                                      Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(children: [
-                                              IconText(
-                                                'assets/images/icon-ts.png',
-                                                '${data.totalJumpRopeCount}',
-                                                style: TextStyle(
-                                                    fontSize: 24,
-                                                    color: Colors.black),
-                                              ),
-                                              Text('Times'),
-                                            ]),
-                                            Image.asset(
-                                                'assets/images/icon-LeftArrow.png'),
-                                          ]),
-                                      Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            //[training time, calorie cost]
-                                            Expanded(
-                                                flex: 1,
-                                                child: IconText(
-                                                  'assets/images/icon-js.png',
-                                                  '00:12:30',
-                                                  style: TextStyle(
-                                                      fontSize: 16,
-                                                      color: Colors.black),
-                                                )),
-                                            Expanded(
-                                              flex: 1,
-                                              child: Row(children: [
-                                                IconText(
-                                                    'assets/images/icon-rl.png',
-                                                    '389',
+        child: GestureDetector(
+            child: Padding(
+                padding: EdgeInsets.only(left: 12.w, right: 12.w),
+                child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                          height: 40.h,
+                          child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                //[reportTime, status]
+                                Text('06/12 09:30',
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.black)),
+                                IconText(
+                                  'assets/images/icon-dd.png',
+                                  'Not Reported',
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.green),
+                                ),
+                              ])),
+                      SizedBox(
+                          height: 110.h,
+                          child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                //[image, report data, arror]
+                                Padding(
+                                    padding:
+                                        EdgeInsets.only(top: 6.h, right: 12.w),
+                                    child: Image.asset(
+                                        'assets/images/icon-jumprope.png')),
+                                Expanded(
+                                    flex: 1,
+                                    child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          //[img, total jump count]
+                                          Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Row(children: [
+                                                  IconText(
+                                                    'assets/images/icon-ts.png',
+                                                    '${data.totalJumpRopeCount}',
                                                     style: TextStyle(
-                                                        fontSize: 16,
-                                                        color: Colors.black)),
-                                                Text('kcal'),
+                                                        fontSize: 24,
+                                                        color: Colors.black),
+                                                  ),
+                                                  Text('Times'),
+                                                ]),
+                                                Image.asset(
+                                                    'assets/images/icon-LeftArrow.png'),
                                               ]),
-                                            ),
-                                          ]),
-                                    ])),
-                          ]))
-                ])));
+                                          Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: [
+                                                //[training time, calorie cost]
+                                                Expanded(
+                                                    flex: 1,
+                                                    child: IconText(
+                                                      'assets/images/icon-js.png',
+                                                      '00:12:30',
+                                                      style: TextStyle(
+                                                          fontSize: 16,
+                                                          color: Colors.black),
+                                                    )),
+                                                Expanded(
+                                                  flex: 1,
+                                                  child: Row(children: [
+                                                    IconText(
+                                                        'assets/images/icon-rl.png',
+                                                        '389',
+                                                        style: TextStyle(
+                                                            fontSize: 16,
+                                                            color:
+                                                                Colors.black)),
+                                                    Text('kcal'),
+                                                  ]),
+                                                ),
+                                              ]),
+                                        ])),
+                              ]))
+                    ])),
+            onTap: () {
+              Navigator.of(context).pushNamed(JumpRopeTrainingDetailView.route);
+            }));
   }
 }

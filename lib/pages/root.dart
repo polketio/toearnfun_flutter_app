@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/pages/home/home.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/wallet.dart';
@@ -45,7 +46,6 @@ PreferredSizeWidget getAppBarView(BuildContext context) {
     backgroundColor: HexColor('#956DFD'),
     title: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
       TextButton.icon(
-        // <-- TextButton
         onPressed: () {
           Navigator.of(context).pushNamed(WalletView.route);
         },
@@ -53,7 +53,6 @@ PreferredSizeWidget getAppBarView(BuildContext context) {
         label: Text('0.0', style: TextStyle(color: Colors.white, fontSize: 16)),
       ),
       TextButton.icon(
-        // <-- TextButton
         onPressed: () {
           Navigator.of(context).pushNamed(WalletView.route);
         },
