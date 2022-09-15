@@ -20,11 +20,18 @@ class bluetooth_device{
     var param = "hello";
     return await _channel.invokeMethod("scanDevice",param);
   }
-  static Future<String>  connect() async{
-    return await _channel.invokeMethod("connect");
+  static Future<String>  connect(String mac) async{
+    return await _channel.invokeMethod("connect",mac);
+  }
+
+  static Future<String>  stopConnect() async{
+    return await _channel.invokeMethod("stopConnect");
   }
   static Future<String>  registerCustomDataRxCallback() async{
     return await _channel.invokeMethod("registerCustomDataRxCallback");
+  }
+  static Future<String>  unregisterCustomDataRxCallback() async{
+    return await _channel.invokeMethod("unregisterCustomDataRxCallback");
   }
   //检查蓝牙是否连接
   static Future<bool>  checkStateOn() async{
