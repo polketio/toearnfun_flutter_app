@@ -6,8 +6,9 @@ public abstract class ReceiveDataCallback {
 
     public void onReceiveDisplayData(SkipDisplayData display){}
 
+    //02 跳绳结果上传
     public void onReceiveSkipRealTimeResultData(SkipResultData result, int pkt_idx){}
-
+    //03 跳绳历史数据上传
     public void onReceiveSkipHistoryResultData(SkipResultData result, int pkt_idx){}
 
     public void onReceiveEnteredOtaMode(String mac) {}

@@ -90,11 +90,17 @@ public class SkipApiActivity {
               /*  final String s = "模式: " + modeStr + ", 设置: " + display.getSetting() + ParamStr + ", 时间: " + Integer.toString(display.getSkipSecSum()) + ", 次数: " + Integer.toString(display.getSkipCntSum()) +
                         ", 绊绳: " + Integer.toString(display.getTripCnt()) + ", 电量:" + Integer.toString(display.getBatteryPercent()) + ", 有效时长:" + Integer.toString(display.getSkipValidSec());
                */
-                final String s = "mode: " + modeStr + ", setting: " + display.getSetting() + ParamStr + ", SkipSecSum: " + Integer.toString(display.getSkipSecSum()) + ", SkipCntSum: " + Integer.toString(display.getSkipCntSum()) +
-                        ", TripCnt: " + Integer.toString(display.getTripCnt()) + ", BatteryPercent:" + Integer.toString(display.getBatteryPercent()) + ", SkipValidSec:" + Integer.toString(display.getSkipValidSec());
+                //1实时结果数据上传
+                final String  param="{\"messageType\":\"1\",\"messageContext\":{\"mode\":\""+modeStr+"\"," +
+                        "\"setting\":\""+display.getSetting() + ParamStr+"\"," +
+                        "\"SkipSecSum\":\""+ Integer.toString(display.getSkipSecSum())+
+                        "\"SkipCntSum\":\""+ Integer.toString(display.getSkipCntSum())+
+                        "\"BatteryPercent\":\""+ Integer.toString(display.getBatteryPercent())+
+                        "\"SkipValidSec\":\""+ Integer.toString(display.getSkipValidSec())+
+                        "\"}}";
 
                 if(mEventChannel!=null)
-                   mEventChannel.success(s);
+                   mEventChannel.success(param);
             }
         }
 
@@ -129,21 +135,22 @@ public class SkipApiActivity {
             str += " 最大连跳: " + Integer.toString(result.getConsecutiveSkipMaxNum()) + "次";
             str += " 绊绳次数: " + Integer.toString(result.getSkipTripNum()) + "次";
             */
-
-            str += " SkipSecSum: " + Integer.toString(result.getSkipSecSum());
-            str += " SkipCntSum: " + Integer.toString(result.getSkipCntSum());
-            str += " SkipValidSec: " + Integer.toString(result.getSkipValidSec()) ;
-            str += " FreqAvg: " + Integer.toString(result.getFreqAvg());
-            str += " FreqMax: " + Integer.toString(result.getFreqMax()) ;
-            str += " ConsecutiveSkipMaxNum: " + Integer.toString(result.getConsecutiveSkipMaxNum()) ;
-            str += " SkipTripNum: " + Integer.toString(result.getSkipTripNum()) ;
-
             /*str += " 跳绳组: ";
             for(int i=0;i<result.getSkipGroupNum();i++) {
                 str += Integer.toString(result.getSkipGroupEleSkipSecs(i)) + "," + Integer.toString(result.getSkipGroupEleSkipCnt(i)) + " ";
             }*/
+
+            //2，跳绳结果上传
+            final String  param="{\"messageType\":\"2\",\"messageContext\":{\"SkipSecSum\":\""+Integer.toString(result.getSkipSecSum())+"\"," +
+                    "\"SkipCntSum\":\""+Integer.toString(result.getSkipCntSum())+"\"," +
+                    "\"SkipValidSec\":\""+ Integer.toString(result.getSkipValidSec())+
+                    "\"FreqAvg\":\""+Integer.toString(result.getFreqAvg())+
+                    "\"FreqMax\":\""+ Integer.toString(result.getFreqMax())+
+                    "\"ConsecutiveSkipMaxNum\":\""+ Integer.toString(result.getConsecutiveSkipMaxNum())+
+                    "\"SkipTripNum\":\""+ Integer.toString(result.getSkipTripNum())+
+                    "\"}}";
             if(mEventChannel!=null)
-                mEventChannel.success(str);
+                mEventChannel.success(param);
         }
 
         @Override
@@ -169,13 +176,7 @@ public class SkipApiActivity {
                     break;
             }
 
-            str += " SkipSecSum: " + Integer.toString(result.getSkipSecSum());
-            str += " SkipCntSum: " + Integer.toString(result.getSkipCntSum());
-            str += " SkipValidSec: " + Integer.toString(result.getSkipValidSec()) ;
-            str += " FreqAvg: " + Integer.toString(result.getFreqAvg());
-            str += " FreqMax: " + Integer.toString(result.getFreqMax()) ;
-            str += " ConsecutiveSkipMaxNum: " + Integer.toString(result.getConsecutiveSkipMaxNum()) ;
-            str += " SkipTripNum: " + Integer.toString(result.getSkipTripNum()) ;
+
 
            /* str += " 总时长: " + Integer.toString(result.getSkipSecSum()) + "秒";
             str += " 总次数: " + Integer.toString(result.getSkipCntSum()) + "次";
@@ -189,8 +190,18 @@ public class SkipApiActivity {
             for(int i=0;i<result.getSkipGroupNum();i++) {
                 str += Integer.toString(result.getSkipGroupEleSkipSecs(i)) + "," + Integer.toString(result.getSkipGroupEleSkipCnt(i)) + " ";
             }*/
+
+            //3，跳绳历史数据上传
+            final String  param="{\"messageType\":\"3\",\"messageContext\":{\"SkipSecSum\":\""+Integer.toString(result.getSkipSecSum())+"\"," +
+                    "\"SkipCntSum\":\""+Integer.toString(result.getSkipCntSum())+"\"," +
+                    "\"SkipValidSec\":\""+ Integer.toString(result.getSkipValidSec())+
+                    "\"FreqAvg\":\""+Integer.toString(result.getFreqAvg())+
+                    "\"FreqMax\":\""+ Integer.toString(result.getFreqMax())+
+                    "\"ConsecutiveSkipMaxNum\":\""+ Integer.toString(result.getConsecutiveSkipMaxNum())+
+                    "\"SkipTripNum\":\""+ Integer.toString(result.getSkipTripNum())+
+                    "\"}}";
             if(mEventChannel!=null)
-                mEventChannel.success(str);
+                mEventChannel.success(param);
             
         }
 
@@ -402,7 +413,7 @@ public class SkipApiActivity {
         byte[] d = txPack.writeSkipRealTimeResultRsp(pkt_idx);
 
         String sd= HexUtil.encodeHexStr(d);
-        Log.i("实时数据上传:", sd);
+        Log.i("02 跳绳结果上传:", sd);
 
         String uuid_service = SkipBleUUIDs.SERVICE_UUID;
         String uuid_write = SkipBleUUIDs.WRITE_CHARACTERISTIC_UUID;
