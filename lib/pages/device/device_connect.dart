@@ -67,12 +67,23 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                       }),
                       mainButton('Connect Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String connect = await bluetooth_device.connect();
+                        String mac="22:22:22:22:22:22";
+                        String connect = await bluetooth_device.connect(mac);
                         LogUtil.d('connect: $connect');
                       }),
+                      mainButton('stop Connect Device', 20, Colors.black,
+                          Size(double.infinity, 44.h), () async {
+                            String connect = await bluetooth_device.stopConnect();
+                            LogUtil.d('connect: $connect');
+                          }),
                       mainButton('Register', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                             String register = await bluetooth_device.registerCustomDataRxCallback();
+                            LogUtil.d('Register: $register');
+                          }),
+                      mainButton('unregister', 20, Colors.black,
+                          Size(double.infinity, 44.h), () async {
+                            String register = await bluetooth_device.unregisterCustomDataRxCallback();
                             LogUtil.d('Register: $register');
                           }),
                       mainButton('Get PublicKey', 20, Colors.black,

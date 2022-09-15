@@ -56,6 +56,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
     MethodChannel.Result mResult=null;
     String param="";
     BleDevice mBleDevice=null;
+    private List<BleDevice> bleDeviceList=new ArrayList<>();
     SkipApiActivity skipApi = new SkipApiActivity();
     SkipSettingProfiles api = new SkipSettingProfiles();
     private static int tmp_used_sec = 0;
@@ -104,6 +105,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
             @Override
             public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
                 String method = call.method;
+
                 mResult=result;
                 if (method.equals("getText")) {
 
@@ -118,8 +120,14 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
                 } else if(method.equals("scanDevice")){
                     checkPermissions();
                 //    mResult.success(param);
+                } else if(method.equals("stopConnect")) {
+                  stopConnect();
                 } else if(method.equals("connect"))
                 {
+                    String mac = call.arguments().toString();
+                    mBleDevice=getBleDevice(mac);
+                    if(mBleDevice==null)
+                        return;
                     if (!BleManager.getInstance().isConnected(mBleDevice)) {
                         BleManager.getInstance().cancelScan();
                         connect(mBleDevice);
@@ -134,7 +142,10 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
                 {
                     skipApi.setEventChannelEventSink(eventChannel);
                     registerCustomDataRxCallback();
-                }else if(method.equals("setSkipMode"))
+                }else if(method.equals("unregisterCustomDataRxCallback"))
+                {
+                 unregisterCustomDataRxCallback();
+                } else if(method.equals("setSkipMode"))
                 {
                     mSettingCallback.setTag("设置跳绳模式");
                     api.setSkipMode(mBleDevice, mSettingCallback);
@@ -184,6 +195,20 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
         
     }
 
+    private BleDevice getBleDevice(String mac)
+    {
+        for (int i=0;i< bleDeviceList.size();i++)
+        {
+            BleDevice  bleDevice=bleDeviceList.get(i);
+            if(bleDevice.getMac().equals(mac))
+            {
+                return bleDevice;
+            }
+        }
+
+        return null;
+    }
+
     private String getText() {
         return "hello world";
     }
@@ -222,6 +247,14 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
             ActivityCompat.requestPermissions(mActivity, deniedPermissions, REQUEST_CODE_PERMISSION_LOCATION);
         }
     }
+
+   private void stopConnect()
+   {
+       if (BleManager.getInstance().isConnected(mBleDevice))
+       {
+           BleManager.getInstance().disconnect(mBleDevice);
+       }
+   }
 
     private void onPermissionGranted(String permission) {
         switch (permission) {
@@ -321,10 +354,14 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
             @Override
             public void onScanning(BleDevice bleDevice) {
                 mBleDevice =bleDevice;
+                if(!bleDeviceList.contains(bleDevice))
+                {
+                    bleDeviceList.add(bleDevice);
+                }
                 if (bleDevice.getRssi()> (Integer.parseInt("-100"))) {
-                    param="{\"name\":"+bleDevice.getName()+",\"mac\":"+bleDevice.getMac()+",\"Rssi\":"+bleDevice.getRssi()+"}";
+                    param="{\"type:1,\"+\"name\":"+bleDevice.getName()+",\"mac\":"+bleDevice.getMac()+",\"Rssi\":"+bleDevice.getRssi()+"}";
                     Toast.makeText(mActivity, bleDevice.getMac()+"   "+bleDevice.getName(), Toast.LENGTH_LONG).show();
-                    mResult.success(param);
+                    eventChannel.success(param);
                 }
             }
 
@@ -407,6 +444,12 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
          skipApi.init(mBleDevice);
         //BleManager.getInstance().registerCustomDataRxCallback(mBleDevice, customRxDataCallback);
     }
+    private void unregisterCustomDataRxCallback()
+    {
+        BleManager.getInstance().unregisterCustomDataRxCallback(mBleDevice);
+        //BleManager.getInstance().registerCustomDataRxCallback(mBleDevice, customRxDataCallback);
+    }
+
 
     private ReceiveDataCallback customRxDataCallback = new ReceiveDataCallback()
     {
