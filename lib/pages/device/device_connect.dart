@@ -67,7 +67,8 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                       }),
                       mainButton('Connect Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String mac="22:22:22:22:22:22";
+                        // String mac="22:22:22:22:22:22";
+                        String mac="FF:FF:FF:FF:FF:FF";
                         String connect = await bluetooth_device.connect(mac);
                         LogUtil.d('connect: $connect');
                       }),
