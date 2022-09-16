@@ -324,7 +324,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
 
      //   boolean isAutoConnect = sw_auto.isChecked();
    //     boolean isFuzzy = sw_fuzzy.isChecked();
-        boolean isAutoConnect =false;
+        boolean isAutoConnect =true;
         boolean isFuzzy = true;
                 BleScanRuleConfig scanRuleConfig = new BleScanRuleConfig.Builder()
                 .setServiceUuids(serviceUuids)      // 只扫描指定的服务的设备，可选
@@ -358,8 +358,10 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
                 {
                     bleDeviceList.add(bleDevice);
                 }
+                //0 扫描蓝牙设备结果
                 if (bleDevice.getRssi()> (Integer.parseInt("-100"))) {
-                    param="{\"type:1,\"+\"name\":"+bleDevice.getName()+",\"mac\":"+bleDevice.getMac()+",\"Rssi\":"+bleDevice.getRssi()+"}";
+                    param="{\"messageType\":\"0\",\"messageContext\":{\"name\":\""+bleDevice.getName()+"\"," +
+                            "\"mac\":\""+bleDevice.getMac()+"\",\"Rssi\":\""+bleDevice.getRssi()+"\"}}";
                     Toast.makeText(mActivity, bleDevice.getMac()+"   "+bleDevice.getName(), Toast.LENGTH_LONG).show();
                     eventChannel.success(param);
                 }
