@@ -69,7 +69,7 @@ class bluetooth_device{
     return await _channel.invokeMethod("writeSkipGenerateECCKey");
   }
   //绑定设备
-  static Future<String>  writeSkipBondDev() async{
-    return await _channel.invokeMethod("writeSkipBondDev");
+  static Future<String>  writeSkipBondDev(String nonce,String address) async{
+    return await _channel.invokeMethod("writeSkipBondDev",{'nonce': nonce, 'address': address});
   }
 }

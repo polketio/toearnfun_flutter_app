@@ -76,6 +76,10 @@ public class DeviceApiActivity extends AppCompatActivity implements Observer {
     {
         return bleDevice;
     }
+    public void setBleDevice(BleDevice device)
+    {
+        bleDevice=device;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

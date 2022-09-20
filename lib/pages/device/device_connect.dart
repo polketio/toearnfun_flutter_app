@@ -98,6 +98,15 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                             await bluetooth_device.writeSkipGenerateECCKey();
                         LogUtil.d('key: $key');
                       }),
+                      mainButton('BondDev', 20, Colors.black,
+                          Size(double.infinity, 44.h), () async {
+
+                            String nonce ="100";
+                            String address ="13ca5e29cb83e23796f96fc6e195a70bc7f5e970";
+                            String key =
+                            await bluetooth_device.writeSkipBondDev(nonce, address);
+                            LogUtil.d('key: $key');
+                          }),
                     ]))));
   }
 

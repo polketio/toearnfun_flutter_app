@@ -20,6 +20,7 @@ import com.Ls.skipBle.SkipBleUUIDs;
 import com.Ls.skipBle.SkipDisplayData;
 import com.Ls.skipBle.SkipParamDef;
 import com.Ls.skipBle.SkipResultData;
+import com.example.toearnfun_flutter_app.BluetoothFlutterPlugin;
 import com.example.toearnfun_flutter_app.DeviceApiActivity;
 import com.example.toearnfun_flutter_app.R;
 import com.example.toearnfun_flutter_app.bluetooth.BleManager;
@@ -55,8 +56,8 @@ public class SkipApiActivity {
     {
         this.mEventChannel=eventChannel;
     }
-     
 
+    
     private ReceiveDataCallback customRxDataCallback = new ReceiveDataCallback()
     {
         @Override
@@ -269,14 +270,14 @@ public class SkipApiActivity {
 
             @Override
             public void onReceiveSkipRealTimeResultData(SkipResultData result, int pkt_idx) {
-                onWriteSkipRealTimeResultRsp(DeviceApiActivity.getBleDevice(), pkt_idx);
+                onWriteSkipRealTimeResultRsp(BluetoothFlutterPlugin.mBleDevice, pkt_idx);
                 receiveDataCallback.onReceiveSkipRealTimeResultData(result, pkt_idx);
                 Log.i(TAG, "onReceiveSkipRealTimeResultData");
             }
 
             @Override
             public void onReceiveSkipHistoryResultData(SkipResultData result, int pkt_idx) {
-                onWriteSkipHistoryResultRsp(DeviceApiActivity.getBleDevice(), pkt_idx);
+                onWriteSkipHistoryResultRsp(BluetoothFlutterPlugin.mBleDevice, pkt_idx);
                 receiveDataCallback.onReceiveSkipRealTimeResultData(result, pkt_idx);
                 Log.i(TAG, "onReceiveSkipHistoryResultData");
             }
@@ -499,10 +500,11 @@ public class SkipApiActivity {
                 callback);
     }
 
-    public void writeSkipBondDev(BleDevice bleDev,
+    public void writeSkipBondDev(BleDevice bleDev,String none,String address,
                                     BleManager.LcWriteBleCallback callback) {
-        String address="422d0010f16ae8539c53eb57a912890244a9eb5a";
-        byte[] d = txPack.writeSkipBondDev(address);
+       /* String address="422d0010f16ae8539c53eb57a912890244a9eb5a";
+        String none="100";*/
+        byte[] d = txPack.writeSkipBondDev(none,address);
         //Log.i(TAG, HexUtil.encodeHexStr(data));
         Log.i("绑定设备", HexUtil.encodeHexStr(d));
         Log.i(TAG, HexUtil.encodeHexStr(d));
