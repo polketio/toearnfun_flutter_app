@@ -54,6 +54,12 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
+                      mainButton('check bluetooth is open', 20, Colors.black,
+                          Size(double.infinity, 44.h), () async {
+                            String isOpen =
+                            await bluetooth_device.checkBluetoothIsOpen();
+                            LogUtil.d('bluetooth is open: ${isOpen.toString()}');
+                          }),
                       mainButton('check connect', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                             bool isconnect =
@@ -99,6 +105,12 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                             await bluetooth_device.writeSkipGenerateECCKey();
                         LogUtil.d('key: $key');
                       }),
+                      mainButton('Bind Device', 20, Colors.black,
+                          Size(double.infinity, 44.h), () async {
+                            String result =
+                            await bluetooth_device.writeSkipBondDev();
+                            LogUtil.d('Bind Device: $result');
+                          }),
                     ]))));
   }
 
