@@ -21,9 +21,8 @@ class DeviceConnectView extends StatefulWidget {
 }
 
 class _DeviceConnectViewState extends State<DeviceConnectView> {
-
   static final EventChannel _eventChannel =
-  EventChannel("BluetoothFlutterPluginEvent"); //原生平台主动调用flutter端事件通道
+      EventChannel("BluetoothFlutterPluginEvent"); //原生平台主动调用flutter端事件通道
 
   @override
   void initState() {
@@ -56,16 +55,15 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                     children: [
                       mainButton('check bluetooth is open', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                            String isOpen =
+                        String isOpen =
                             await bluetooth_device.checkBluetoothIsOpen();
-                            LogUtil.d('bluetooth is open: ${isOpen.toString()}');
-                          }),
+                        LogUtil.d('bluetooth is open: ${isOpen.toString()}');
+                      }),
                       mainButton('check connect', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                            bool isconnect =
-                            await bluetooth_device.checkStateOn();
-                            LogUtil.d('isconnect: ${isconnect.toString()}');
-                          }),
+                        bool isconnect = await bluetooth_device.checkStateOn();
+                        LogUtil.d('isconnect: ${isconnect.toString()}');
+                      }),
                       mainButton('Scan Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         String devices = await bluetooth_device.scanDevice();
@@ -74,29 +72,31 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                       mainButton('Connect Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         // String mac="22:22:22:22:22:22";
-                        String mac="FF:FF:FF:FF:FF:FF";
+                        String mac = "FF:FF:FF:FF:FF:FF";
                         String connect = await bluetooth_device.connect(mac);
                         LogUtil.d('connect: $connect');
                       }),
                       mainButton('stop Connect Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                            String connect = await bluetooth_device.stopConnect();
-                            LogUtil.d('connect: $connect');
-                          }),
+                        String connect = await bluetooth_device.stopConnect();
+                        LogUtil.d('connect: $connect');
+                      }),
                       mainButton('Register', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                            String register = await bluetooth_device.registerCustomDataRxCallback();
-                            LogUtil.d('Register: $register');
-                          }),
+                        String register = await bluetooth_device
+                            .registerCustomDataRxCallback();
+                        LogUtil.d('Register: $register');
+                      }),
                       mainButton('unregister', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                            String register = await bluetooth_device.unregisterCustomDataRxCallback();
-                            LogUtil.d('Register: $register');
-                          }),
+                        String register = await bluetooth_device
+                            .unregisterCustomDataRxCallback();
+                        LogUtil.d('Register: $register');
+                      }),
                       mainButton('Get PublicKey', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String result = await bluetooth_device
-                            .writeSkipGetPublicKey();
+                        String result =
+                            await bluetooth_device.writeSkipGetPublicKey();
                         LogUtil.d('PublicKey: $result');
                       }),
                       mainButton('Generate ECC Key', 20, Colors.black,
@@ -105,12 +105,15 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                             await bluetooth_device.writeSkipGenerateECCKey();
                         LogUtil.d('key: $key');
                       }),
-                      mainButton('Bind Device', 20, Colors.black,
+                      mainButton('BondDev', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                            String result =
-                            await bluetooth_device.writeSkipBondDev();
-                            LogUtil.d('Bind Device: $result');
-                          }),
+                        String nonce = "100";
+                        String address =
+                            "13ca5e29cb83e23796f96fc6e195a70bc7f5e970";
+                        String key = await bluetooth_device.writeSkipBondDev(
+                            nonce, address);
+                        LogUtil.d('key: $key');
+                      }),
                     ]))));
   }
 

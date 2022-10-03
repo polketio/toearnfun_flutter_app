@@ -40,6 +40,7 @@ import com.example.toearnfun_flutter_app.scan.BleScanRuleConfig;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,7 +56,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
     private static final String TAG = MainActivity.class.getSimpleName();
     MethodChannel.Result mResult=null;
     String param="";
-    BleDevice mBleDevice=null;
+    public static BleDevice mBleDevice=null;
     private List<BleDevice> bleDeviceList=new ArrayList<>();
     SkipApiActivity skipApi = new SkipApiActivity();
     SkipSettingProfiles api = new SkipSettingProfiles();
@@ -180,8 +181,12 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
                 }
                 else if(method.equals("writeSkipBondDev"))
                 {
+                    HashMap hashMap = call.arguments();
+                    String nonce = hashMap.get("nonce").toString();
+                    String adress = hashMap.get("address").toString();;
                     mSettingCallback.setTag("绑定设备");
-                    skipApi.writeSkipBondDev(mBleDevice, mSettingCallback);
+                    skipApi.setMethodChannelResult(mResult);
+                    skipApi.writeSkipBondDev(mBleDevice,nonce,adress,mSettingCallback);
                 } else {
                     //Flutter传过来id方法名没有找到，就调此方法
                     result.notImplemented();
@@ -398,6 +403,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
                 img_loading.setVisibility(View.INVISIBLE);
                 btn_scan.setText(getString(R.string.start_scan));
                 progressBar.setVisibility(View.GONE);*/
+                mResult.success(false);
                 Toast.makeText(mActivity, mActivity.getString(R.string.connect_fail), Toast.LENGTH_LONG).show();
             }
 
@@ -408,7 +414,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
               /*  progressBar.setVisibility(View.GONE);
                 mDeviceAdapter.addDevice(bleDevice);
                 mDeviceAdapter.notifyDataSetChanged();*/
-
+                mResult.success(true);
                 Toast.makeText(mActivity, mActivity.getString(R.string.connect_suc), Toast.LENGTH_LONG).show();
 
                 BleManager.getInstance().setMtu(bleDevice, 247, new BleMtuChangedCallback() {
@@ -430,6 +436,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
            //     mDeviceAdapter.removeDevice(bleDevice);
             //    mDeviceAdapter.notifyDataSetChanged();
 
+                mResult.success(true);
                 if (isActiveDisConnected) {
                     Toast.makeText(mActivity, mActivity.getString(R.string.active_disconnected), Toast.LENGTH_LONG).show();
                 } else {
