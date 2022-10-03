@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/pages/home/home.dart';
+import 'package:toearnfun_flutter_app/pages/profile/profile.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/wallet.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
@@ -37,7 +38,9 @@ PreferredSizeWidget getAppBarView(BuildContext context) {
       icon: Image.asset(
         'assets/images/home_icon_tl.png',
       ),
-      onPressed: null,
+      onPressed: (){
+        Navigator.of(context).pushNamed(ProfileView.route);
+      },
       alignment: Alignment.centerLeft,
     ),
     toolbarOpacity: 1,
