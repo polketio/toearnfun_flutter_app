@@ -308,6 +308,17 @@ public class SkipApiActivity {
                 }
                 Log.i("onReceivewriteSkipGetPublicKey", data);
             }
+
+            @SuppressLint("LongLogTag")
+            @Override
+            public void onReceivewriteSkipBondDev(String data) {
+                receiveDataCallback.onReceivewriteSkipBondDev(data);
+                if(mResult!=null)
+                {
+                    mResult.success(data);
+                }
+                Log.i("onReceivewriteSkipBondDev", data);
+            }
         });
     }
 

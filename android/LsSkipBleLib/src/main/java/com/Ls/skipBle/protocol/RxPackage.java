@@ -178,6 +178,7 @@ public class RxPackage {
 
             case SkipProtocolDef.CMD_BOND_DEV: {
                 Log.i(TAG, "CMD_BOND_DEV: " + retPackage.getCmd() + " " + HexUtil.encodeHexStr(retPackage.getPayload()));
+                receiveDataCallback.onReceivewriteSkipBondDev(HexUtil.encodeHexStr(retPackage.getPayload()));
             } break;
 
         }

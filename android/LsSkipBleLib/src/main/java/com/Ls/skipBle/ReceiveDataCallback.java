@@ -19,4 +19,6 @@ public abstract class ReceiveDataCallback {
 
     public void onReceivewriteSkipGenerateECCKey(String cmd,String data ) {}
     public void onReceivewriteSkipGetPublicKey(String cmd,String data) {}
+
+    public void onReceivewriteSkipBondDev(String data) {}
 }
