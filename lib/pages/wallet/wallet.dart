@@ -32,6 +32,8 @@ class WalletView extends StatefulWidget {
 class _WalletViewState extends State<WalletView> {
   KeyPairData? currentAccount;
 
+  final _backgroundColor = HexColor('#956DFD');
+
   @override
   void initState() {
     super.initState();
@@ -53,7 +55,7 @@ class _WalletViewState extends State<WalletView> {
       toolbarOpacity: 1,
       bottomOpacity: 0,
       elevation: 0,
-      backgroundColor: HexColor('#956DFD'),
+      backgroundColor: _backgroundColor,
       leading: MyBackButton(),
       centerTitle: true,
       title: Text('Wallet', style: TextStyle(color: Colors.white)),
@@ -101,7 +103,7 @@ class _WalletViewState extends State<WalletView> {
                     child: Stack(fit: StackFit.expand, children: [
                       Container(
                           decoration: new BoxDecoration(
-                        color: HexColor('#956DFD'),
+                        color: _backgroundColor,
                       )
                 ),
                       Container(
@@ -135,7 +137,7 @@ class _WalletViewState extends State<WalletView> {
     BalanceData? balancesInfo = widget.plugin.balances.native;
     return Container(
         decoration: new BoxDecoration(
-          color: HexColor('#956DFD'),
+          color: _backgroundColor,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.max,
