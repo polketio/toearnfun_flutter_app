@@ -142,13 +142,14 @@ public class SkipApiActivity {
             }*/
 
             //2，跳绳结果上传
-            final String  param="{\"messageType\":\"2\",\"messageContext\":{\"SkipSecSum\":\""+Integer.toString(result.getSkipSecSum())+"\"," +
+            final String param="{\"messageType\":\"2\",\"messageContext\":{\"SkipSecSum\":\""+Integer.toString(result.getSkipSecSum())+"\"," +
                     "\"SkipCntSum\":\""+Integer.toString(result.getSkipCntSum())+"\"," +
                     "\"SkipValidSec\":\""+ Integer.toString(result.getSkipValidSec())+
                     "\"FreqAvg\":\""+Integer.toString(result.getFreqAvg())+
                     "\"FreqMax\":\""+ Integer.toString(result.getFreqMax())+
                     "\"ConsecutiveSkipMaxNum\":\""+ Integer.toString(result.getConsecutiveSkipMaxNum())+
                     "\"SkipTripNum\":\""+ Integer.toString(result.getSkipTripNum())+
+                    "\"signature\":\""+ HexUtil.encodeHexStr(result.getSignature(), true)+
                     "\"}}";
             if(mEventChannel!=null)
                 mEventChannel.success(param);
@@ -511,11 +512,11 @@ public class SkipApiActivity {
                 callback);
     }
 
-    public void writeSkipBondDev(BleDevice bleDev,String none,String address,
+    public void writeSkipBondDev(BleDevice bleDev,int none, byte[] address,
                                     BleManager.LcWriteBleCallback callback) {
        /* String address="422d0010f16ae8539c53eb57a912890244a9eb5a";
         String none="100";*/
-        byte[] d = txPack.writeSkipBondDev(none,address);
+        byte[] d = txPack.writeSkipBondDev(none, address);
         //Log.i(TAG, HexUtil.encodeHexStr(data));
         Log.i("绑定设备", HexUtil.encodeHexStr(d));
         Log.i(TAG, HexUtil.encodeHexStr(d));

@@ -12,6 +12,7 @@ public class SkipResultData {
     private int skip_group_num;
     private int skip_group[][] = new int[SkipParamDef.SKIP_GROUP_MAX_NUM][2];
     private int skip_valid_sec;
+    private byte[] signature;
 
     public SkipResultData() {}
 
@@ -79,4 +80,7 @@ public class SkipResultData {
 
     public void setSkipValidSec(int skip_valid_sec) { this.skip_valid_sec = skip_valid_sec; }
     public int getSkipValidSec() { return this.skip_valid_sec; }
+
+    public void setSignature(byte[] signature) { this.signature = signature; }
+    public byte[] getSignature() { return this.signature; }
 }

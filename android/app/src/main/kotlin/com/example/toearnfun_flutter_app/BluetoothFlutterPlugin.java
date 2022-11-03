@@ -182,11 +182,12 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
                 else if(method.equals("writeSkipBondDev"))
                 {
                     HashMap hashMap = call.arguments();
-                    String nonce = hashMap.get("nonce").toString();
-                    String adress = hashMap.get("address").toString();;
+                    int nonce = Integer.parseInt(hashMap.get("nonce").toString());
+                    String address = hashMap.get("address").toString();
+                    byte[] adds = HexUtil.hexStringToBytes(address);
                     mSettingCallback.setTag("绑定设备");
                     skipApi.setMethodChannelResult(mResult);
-                    skipApi.writeSkipBondDev(mBleDevice,nonce,adress,mSettingCallback);
+                    skipApi.writeSkipBondDev(mBleDevice, nonce, adds, mSettingCallback);
                 } else {
                     //Flutter传过来id方法名没有找到，就调此方法
                     result.notImplemented();

@@ -73,7 +73,7 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                           Size(double.infinity, 44.h), () async {
                         // String mac="22:22:22:22:22:22";
                         String mac = "FF:FF:FF:FF:FF:FF";
-                        String connect = await bluetooth_device.connect(mac);
+                        bool connect = await bluetooth_device.connect(mac);
                         LogUtil.d('connect: $connect');
                       }),
                       mainButton('stop Connect Device', 20, Colors.black,
@@ -107,9 +107,9 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                       }),
                       mainButton('BondDev', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String nonce = "100";
+                        String nonce = "123";
                         String address =
-                            "13ca5e29cb83e23796f96fc6e195a70bc7f5e970";
+                            "184f0bc2046b560ad6b6b6180726d023a2ff3987";
                         String key = await bluetooth_device.writeSkipBondDev(
                             nonce, address);
                         LogUtil.d('key: $key');

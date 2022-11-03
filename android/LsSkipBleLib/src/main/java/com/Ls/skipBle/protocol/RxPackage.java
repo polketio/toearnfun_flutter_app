@@ -147,6 +147,15 @@ public class RxPackage {
                 ret.setSkipGroupNum(skip_miss_cnt + 1);
                 ret.setSkipValidSec( (buf[18] & 0xff ) + ( ( buf[19] & 0xff ) << 8) );
                 int pkt_idx = (buf[20] & 0xff );
+
+                //load signature
+                int signatureLen = 64;
+                byte[] signature = new byte[signatureLen];
+                for (int i=0 ; i < signatureLen; i++ ) {
+                    signature[i] = buf[20+i];
+                }
+                ret.setSignature(signature);
+
                 if(SkipProtocolDef.CMD_REALTIME_RESULT_DATA == retPackage.getCmd()) {
                     receiveDataCallback.onReceiveSkipRealTimeResultData(ret, pkt_idx);
                 }

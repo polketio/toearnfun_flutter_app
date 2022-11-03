@@ -46,7 +46,7 @@ public class SkipBleSendPack {
         return TxPackage.writeSkipGetPublicKey();
     }
 
-    public byte[] writeSkipBondDev(String none,String address) {
-        return TxPackage.writeSkipBondDev(none,address);
+    public byte[] writeSkipBondDev(int nonce, byte[] address) {
+        return TxPackage.writeSkipBondDev(nonce, address);
     }
 }

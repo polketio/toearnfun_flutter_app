@@ -145,16 +145,14 @@ public class TxPackage {
     }
 
 
-    public static byte[] writeSkipBondDev(String nonce,String address) {
+    public static byte[] writeSkipBondDev(int nonce, byte[] address) {
         byte[] data = new byte[BlePackageParamDef.DATA_PAYLOAD_LEN];
-
-        byte[] n=HexUtil.hexStringToBytes(nonce);
-        for (int i=0 ; i < n.length; i++ ) {
-            data[BlePackageParamDef.PKT_DATA_START_POS+i] = n[i];
-        }
-        byte[] adds=HexUtil.hexStringToBytes(address);
-        for (int i=0 ; i < adds.length; i++ ) {
-            data[BlePackageParamDef.PKT_DATA_START_POS+i+4] = adds[i];
+        data[BlePackageParamDef.PKT_DATA_START_POS] = (byte) ( nonce & 0xff );
+        data[BlePackageParamDef.PKT_DATA_START_POS+1] = (byte) ( (nonce >> 8) & 0xff );
+        data[BlePackageParamDef.PKT_DATA_START_POS+2] = (byte) ( (nonce >> 16) & 0xff );
+        data[BlePackageParamDef.PKT_DATA_START_POS+3] = (byte) ( (nonce >> 24) & 0xff );
+        for (int i=0 ; i < address.length; i++ ) {
+            data[BlePackageParamDef.PKT_DATA_START_POS+i+4] = address[i];
         }
         return blePktReady(data, SkipProtocolDef.CMD_BOND_DEV, 24);
     }
