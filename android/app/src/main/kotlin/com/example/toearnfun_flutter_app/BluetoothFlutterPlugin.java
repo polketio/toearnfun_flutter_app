@@ -1,4 +1,5 @@
 package com.example.toearnfun_flutter_app;
+
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -29,6 +30,7 @@ import com.Ls.skipBle.protocol.HexUtil;
 import com.example.toearnfun_flutter_app.bluetooth.BleManager;
 import com.example.toearnfun_flutter_app.callback.BleGattCallback;
 import com.example.toearnfun_flutter_app.callback.BleMtuChangedCallback;
+import com.example.toearnfun_flutter_app.callback.BleScanAndConnectCallback;
 import com.example.toearnfun_flutter_app.callback.BleScanCallback;
 import com.example.toearnfun_flutter_app.comm.ObserverManager;
 import com.example.toearnfun_flutter_app.data.BleDevice;
@@ -50,14 +52,14 @@ import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
-public class BluetoothFlutterPlugin  implements FlutterPlugin{
+public class BluetoothFlutterPlugin implements FlutterPlugin {
     Context applicationContext;
     Activity mActivity;
     private static final String TAG = MainActivity.class.getSimpleName();
-    MethodChannel.Result mResult=null;
-    String param="";
-    public static BleDevice mBleDevice=null;
-    private List<BleDevice> bleDeviceList=new ArrayList<>();
+    MethodChannel.Result mResult = null;
+    String param = "";
+    public static BleDevice mBleDevice = null;
+    private List<BleDevice> bleDeviceList = new ArrayList<>();
     SkipApiActivity skipApi = new SkipApiActivity();
     SkipSettingProfiles api = new SkipSettingProfiles();
     private static int tmp_used_sec = 0;
@@ -72,15 +74,14 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
     private EventChannel.EventSink eventChannel;
     private static final String EVENT_CHANNEL = "BluetoothFlutterPluginEvent"; //事件通道，供原生主动调用flutter端使用
 
-    BluetoothFlutterPlugin(Activity activity)
-    {
-        mActivity=activity;
+    BluetoothFlutterPlugin(Activity activity) {
+        mActivity = activity;
     }
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPlugin.FlutterPluginBinding binding) {
         //可以利用binding对象获取到Android中需要的Context对象
-         applicationContext = binding.getApplicationContext();
+        applicationContext = binding.getApplicationContext();
 
         //设置channel名称，之后flutter中也要一样
         MethodChannel channel = new MethodChannel(binding.getFlutterEngine().getDartExecutor(), "BluetoothFlutterPlugin");
@@ -107,7 +108,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
             public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
                 String method = call.method;
 
-                mResult=result;
+                mResult = result;
                 if (method.equals("getText")) {
 
                     //调用原生的方法，这里为了方便，我就把方法写在当前类了
@@ -118,69 +119,51 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
 
                     //这里也有error的方法，可以看情况使用
                     //result.error("code", "message", "detail");
-                } else if(method.equals("scanDevice")){
+                } else if (method.equals("scanDevice")) {
                     checkPermissions();
-                //    mResult.success(param);
-                } else if(method.equals("stopConnect")) {
-                  stopConnect();
-                } else if(method.equals("connect"))
-                {
+                    //    mResult.success(param);
+                } else if (method.equals("stopConnect")) {
+                    stopConnect();
+                } else if (method.equals("connect")) {
                     String mac = call.arguments().toString();
-                    mBleDevice=getBleDevice(mac);
-                    if(mBleDevice==null)
+                    mBleDevice = getBleDevice(mac);
+                    if (mBleDevice == null)
                         return;
                     if (!BleManager.getInstance().isConnected(mBleDevice)) {
                         BleManager.getInstance().cancelScan();
                         connect(mBleDevice);
                     }
-                    
-                }else if(method.equals("checkStateOn"))
-                {
-                    boolean isOn=checkStateOn();
+
+                } else if (method.equals("checkStateOn")) {
+                    boolean isOn = checkStateOn();
                     mResult.success(isOn);
-                }
-                else if(method.equals("registerCustomDataRxCallback"))
-                {
+                } else if (method.equals("registerCustomDataRxCallback")) {
                     skipApi.setEventChannelEventSink(eventChannel);
                     registerCustomDataRxCallback();
-                }else if(method.equals("unregisterCustomDataRxCallback"))
-                {
-                 unregisterCustomDataRxCallback();
-                } else if(method.equals("setSkipMode"))
-                {
+                } else if (method.equals("unregisterCustomDataRxCallback")) {
+                    unregisterCustomDataRxCallback();
+                } else if (method.equals("setSkipMode")) {
                     mSettingCallback.setTag("设置跳绳模式");
                     api.setSkipMode(mBleDevice, mSettingCallback);
-                }
-                else if(method.equals("devRevert"))
-                {
+                } else if (method.equals("devRevert")) {
                     mSettingCallback.setTag("设备恢复出厂");
                     api.devRevert(mBleDevice, mSettingCallback);
-                }
-                else if(method.equals("writeSkipGetPublicKey"))
-                {
+                } else if (method.equals("writeSkipGetPublicKey")) {
                     mSettingCallback.setTag("获取设备公钥");
                     skipApi.setMethodChannelResult(mResult);
                     skipApi.writeSkipGetPublicKey(mBleDevice, mSettingCallback);
 
-                }
-                else if(method.equals("devReset"))
-                {
+                } else if (method.equals("devReset")) {
                     mSettingCallback.setTag("设备复位");
                     api.devReset(mBleDevice, mSettingCallback);
-                }
-                else if(method.equals("stopSkip"))
-                {
+                } else if (method.equals("stopSkip")) {
                     mSettingCallback.setTag("停止跳绳");
                     api.stopSkip(mBleDevice, mSettingCallback);
-                }
-                else if(method.equals("writeSkipGenerateECCKey"))
-                {
+                } else if (method.equals("writeSkipGenerateECCKey")) {
                     mSettingCallback.setTag("创建设备ECC公钥");
                     skipApi.setMethodChannelResult(mResult);
                     skipApi.writeSkipGenerateECCKey(mBleDevice, mSettingCallback);
-                }
-                else if(method.equals("writeSkipBondDev"))
-                {
+                } else if (method.equals("writeSkipBondDev")) {
                     HashMap hashMap = call.arguments();
                     int nonce = Integer.parseInt(hashMap.get("nonce").toString());
                     String address = hashMap.get("address").toString();
@@ -198,16 +181,13 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
 
     @Override
     public void onDetachedFromEngine(@NonNull @NotNull FlutterPluginBinding binding) {
-        
+
     }
 
-    private BleDevice getBleDevice(String mac)
-    {
-        for (int i=0;i< bleDeviceList.size();i++)
-        {
-            BleDevice  bleDevice=bleDeviceList.get(i);
-            if(bleDevice.getMac().equals(mac))
-            {
+    private BleDevice getBleDevice(String mac) {
+        for (int i = 0; i < bleDeviceList.size(); i++) {
+            BleDevice bleDevice = bleDeviceList.get(i);
+            if (bleDevice.getMac().equals(mac)) {
                 return bleDevice;
             }
         }
@@ -218,17 +198,17 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
     private String getText() {
         return "hello world";
     }
-    private void checkBluetoothIsOpen()
-    {
+
+    private void checkBluetoothIsOpen() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (!bluetoothAdapter.isEnabled()) {
             Toast.makeText(applicationContext, applicationContext.getString(R.string.please_open_blue), Toast.LENGTH_LONG).show();
             return;
         }
     }
-    private boolean checkStateOn()
-    {
-      return BleManager.getInstance().isConnected(mBleDevice);
+
+    private boolean checkStateOn() {
+        return BleManager.getInstance().isConnected(mBleDevice);
     }
 
     private void checkPermissions() {
@@ -254,13 +234,11 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
         }
     }
 
-   private void stopConnect()
-   {
-       if (BleManager.getInstance().isConnected(mBleDevice))
-       {
-           BleManager.getInstance().disconnect(mBleDevice);
-       }
-   }
+    private void stopConnect() {
+        if (BleManager.getInstance().isConnected(mBleDevice)) {
+            BleManager.getInstance().disconnect(mBleDevice);
+        }
+    }
 
     private void onPermissionGranted(String permission) {
         switch (permission) {
@@ -298,7 +276,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
 
     private void setScanRule() {
         String[] uuids;
-        String str_uuid ="0000ffd0-0000-1000-8000-00805f9b34fb";
+        String str_uuid = "0000ffd0-0000-1000-8000-00805f9b34fb";
         if (TextUtils.isEmpty(str_uuid)) {
             uuids = null;
         } else {
@@ -319,20 +297,20 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
         }
 
         String[] names;
-        String str_name =""; //et_name.getText().toString();
+        String str_name = ""; //et_name.getText().toString();
         if (TextUtils.isEmpty(str_name)) {
             names = null;
         } else {
             names = str_name.split(",");
         }
 
-        String mac ="";// et_mac.getText().toString();
+        String mac = "";// et_mac.getText().toString();
 
-     //   boolean isAutoConnect = sw_auto.isChecked();
-   //     boolean isFuzzy = sw_fuzzy.isChecked();
-        boolean isAutoConnect =true;
+        //   boolean isAutoConnect = sw_auto.isChecked();
+        //     boolean isFuzzy = sw_fuzzy.isChecked();
+        boolean isAutoConnect = false;
         boolean isFuzzy = true;
-                BleScanRuleConfig scanRuleConfig = new BleScanRuleConfig.Builder()
+        BleScanRuleConfig scanRuleConfig = new BleScanRuleConfig.Builder()
                 .setServiceUuids(serviceUuids)      // 只扫描指定的服务的设备，可选
                 .setDeviceName(isFuzzy, names)   // 只扫描指定广播名的设备，可选
                 .setDeviceMac(mac)                  // 只扫描指定mac的设备，可选
@@ -343,32 +321,37 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
     }
 
     private void startScan() {
+
         BleManager.getInstance().scan(new BleScanCallback() {
             @Override
             public void onScanStarted(boolean success) {
-              //  mDeviceAdapter.clearScanDevice();
-              //  mDeviceAdapter.notifyDataSetChanged();
-              //  img_loading.startAnimation(operat ingAnim);
-              //  img_loading.setVisibility(View.VISIBLE);
-              //  btn_scan.setText(getString(R.string.stop_scan));
+                //  mDeviceAdapter.clearScanDevice();
+                //  mDeviceAdapter.notifyDataSetChanged();
+                //  img_loading.startAnimation(operat ingAnim);
+                //  img_loading.setVisibility(View.VISIBLE);
+                //  btn_scan.setText(getString(R.string.stop_scan));
             }
 
             @Override
             public void onLeScan(BleDevice bleDevice) {
                 super.onLeScan(bleDevice);
             }
+
             @Override
             public void onScanning(BleDevice bleDevice) {
-                mBleDevice =bleDevice;
-                if(!bleDeviceList.contains(bleDevice))
-                {
+                mBleDevice = bleDevice;
+                if (!bleDeviceList.contains(bleDevice)) {
                     bleDeviceList.add(bleDevice);
                 }
                 //0 扫描蓝牙设备结果
-                if (bleDevice.getRssi()> (Integer.parseInt("-100"))) {
-                    param="{\"messageType\":\"0\",\"messageContext\":{\"name\":\""+bleDevice.getName()+"\"," +
-                            "\"mac\":\""+bleDevice.getMac()+"\",\"Rssi\":\""+bleDevice.getRssi()+"\"}}";
-                    Toast.makeText(mActivity, bleDevice.getMac()+"   "+bleDevice.getName(), Toast.LENGTH_LONG).show();
+                if (bleDevice.getRssi() > (Integer.parseInt("-100"))) {
+                    param = "{\"messageType\": \"0\", " +
+                            "\"messageContext\": {\"" +
+                            "name\": \"" + bleDevice.getName() + "\", " +
+                            "\"mac\": \"" + bleDevice.getMac() + "\", " +
+                            "\"Rssi\": \"" + bleDevice.getRssi() + "\"" +
+                            "}}";
+                    Toast.makeText(mActivity, bleDevice.getMac() + "   " + bleDevice.getName(), Toast.LENGTH_LONG).show();
                     eventChannel.success(param);
                 }
             }
@@ -376,14 +359,16 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
             @Override
             public void onScanFinished(List<BleDevice> scanResultList) {
 
-         //       img_loading.clearAnimation();
-         //       img_loading.setVisibility(View.INVISIBLE);
-         //       btn_scan.setText(getString(R.string.start_scan));
+                //       img_loading.clearAnimation();
+                //       img_loading.setVisibility(View.INVISIBLE);
+                //       btn_scan.setText(getString(R.string.start_scan));
 
 
             }
         });
     }
+
+
     private boolean checkGPSIsOpen() {
         LocationManager locationManager = (LocationManager) applicationContext.getSystemService(Context.LOCATION_SERVICE);
         if (locationManager == null)
@@ -405,9 +390,8 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
                 btn_scan.setText(getString(R.string.start_scan));
                 progressBar.setVisibility(View.GONE);*/
                 mResult.success(false);
-                Toast.makeText(mActivity, mActivity.getString(R.string.connect_fail), Toast.LENGTH_LONG).show();
+//                Toast.makeText(mActivity, mActivity.getString(R.string.connect_fail), Toast.LENGTH_LONG).show();
             }
-
 
 
             @Override
@@ -416,7 +400,7 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
                 mDeviceAdapter.addDevice(bleDevice);
                 mDeviceAdapter.notifyDataSetChanged();*/
                 mResult.success(true);
-                Toast.makeText(mActivity, mActivity.getString(R.string.connect_suc), Toast.LENGTH_LONG).show();
+//                Toast.makeText(mActivity, mActivity.getString(R.string.connect_suc), Toast.LENGTH_LONG).show();
 
                 BleManager.getInstance().setMtu(bleDevice, 247, new BleMtuChangedCallback() {
                     @Override
@@ -433,15 +417,15 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
 
             @Override
             public void onDisConnected(boolean isActiveDisConnected, BleDevice bleDevice, BluetoothGatt gatt, int status) {
-           //     progressBar.setVisibility(View.GONE);
-           //     mDeviceAdapter.removeDevice(bleDevice);
-            //    mDeviceAdapter.notifyDataSetChanged();
+                //     progressBar.setVisibility(View.GONE);
+                //     mDeviceAdapter.removeDevice(bleDevice);
+                //    mDeviceAdapter.notifyDataSetChanged();
 
-                mResult.success(true);
+                mResult.success(false);
                 if (isActiveDisConnected) {
-                    Toast.makeText(mActivity, mActivity.getString(R.string.active_disconnected), Toast.LENGTH_LONG).show();
+//                    Toast.makeText(mActivity, mActivity.getString(R.string.active_disconnected), Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(mActivity, mActivity.getString(R.string.disconnected), Toast.LENGTH_LONG).show();
+//                    Toast.makeText(mActivity, mActivity.getString(R.string.disconnected), Toast.LENGTH_LONG).show();
                     ObserverManager.getInstance().notifyObserver(bleDevice);
                 }
 
@@ -449,44 +433,44 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
         });
     }
 
-    private void registerCustomDataRxCallback()
-    {
-         skipApi.init(mBleDevice);
+    private void registerCustomDataRxCallback() {
+        skipApi.init(mBleDevice);
         //BleManager.getInstance().registerCustomDataRxCallback(mBleDevice, customRxDataCallback);
     }
-    private void unregisterCustomDataRxCallback()
-    {
+
+    private void unregisterCustomDataRxCallback() {
         BleManager.getInstance().unregisterCustomDataRxCallback(mBleDevice);
         //BleManager.getInstance().registerCustomDataRxCallback(mBleDevice, customRxDataCallback);
     }
 
 
-    private ReceiveDataCallback customRxDataCallback = new ReceiveDataCallback()
-    {
+    private ReceiveDataCallback customRxDataCallback = new ReceiveDataCallback() {
         @Override
         public void onReceiveDisplayData(SkipDisplayData display) {
-            if(tmp_used_sec != display.getSkipSecSum() || tmp_skip_cnt != display.getSkipCntSum() || tmp_trip_cnt != display.getTripCnt() || tmp_batt_per != display.getBatteryPercent()) {
+            if (tmp_used_sec != display.getSkipSecSum() || tmp_skip_cnt != display.getSkipCntSum() || tmp_trip_cnt != display.getTripCnt() || tmp_batt_per != display.getBatteryPercent()) {
                 tmp_used_sec = display.getSkipSecSum();
                 tmp_skip_cnt = display.getSkipCntSum();
                 tmp_trip_cnt = display.getTripCnt();
                 tmp_batt_per = display.getBatteryPercent();
                 String modeStr = "";
                 String ParamStr = "";
-                switch(display.getMode())
-                {
+                switch (display.getMode()) {
                     case SkipParamDef.MODE_COUNT_DOWN: {
                         modeStr = "倒计时";
                         ParamStr = "秒";
-                    }break;
+                    }
+                    break;
 
                     case SkipParamDef.MODE_COUNT_BACK: {
                         modeStr = "倒计数";
                         ParamStr = "次";
-                    }break;
+                    }
+                    break;
 
                     case SkipParamDef.MODE_FREE_JUMP: {
                         modeStr = "自由跳";
-                    }break;
+                    }
+                    break;
 
                     default:
                         break;
@@ -503,19 +487,21 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
         public void onReceiveSkipRealTimeResultData(SkipResultData result, int pkt_idx) {
             String str = "[接收][成功] 跳绳实时结果: " + "(" + pkt_idx + ")";
             str += "UTC: " + Integer.toString(result.getUtc());
-            switch(result.getMode())
-            {
+            switch (result.getMode()) {
                 case SkipParamDef.MODE_COUNT_DOWN: {
                     str += " 倒计时: " + Integer.toString(result.getSetting()) + "秒";
-                }break;
+                }
+                break;
 
                 case SkipParamDef.MODE_COUNT_BACK: {
                     str += " 倒计数: " + Integer.toString(result.getSetting()) + "次";
-                }break;
+                }
+                break;
 
                 case SkipParamDef.MODE_FREE_JUMP: {
                     str += " 自由跳";
-                }break;
+                }
+                break;
 
                 default:
                     break;
@@ -540,19 +526,21 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
         public void onReceiveSkipHistoryResultData(SkipResultData result, int pkt_idx) {
             String str = "[接收][成功] 跳绳历史结果: " + "(" + pkt_idx + ")";
             str += "UTC: " + Integer.toString(result.getUtc());
-            switch(result.getMode())
-            {
+            switch (result.getMode()) {
                 case SkipParamDef.MODE_COUNT_DOWN: {
                     str += " 倒计时: " + Integer.toString(result.getSetting()) + "秒";
-                }break;
+                }
+                break;
 
                 case SkipParamDef.MODE_COUNT_BACK: {
                     str += " 倒计数: " + Integer.toString(result.getSetting()) + "次";
-                }break;
+                }
+                break;
 
                 case SkipParamDef.MODE_FREE_JUMP: {
                     str += " 自由跳";
-                }break;
+                }
+                break;
 
                 default:
                     break;
@@ -584,14 +572,14 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
         @Override
         public void onReceiveEnteredFactoryMode() {
             super.onReceiveEnteredFactoryMode();
-            final String s = "[接收][成功] 进入工厂模式" ;
+            final String s = "[接收][成功] 进入工厂模式";
             Log.i(TAG, s);
         }
 
         @Override
         public void onReceiveRevertDevice() {
             super.onReceiveRevertDevice();
-            final String s = "[接收][成功] 恢复出厂" ;
+            final String s = "[接收][成功] 恢复出厂";
             Log.i(TAG, s);
         }
 
@@ -601,11 +589,11 @@ public class BluetoothFlutterPlugin  implements FlutterPlugin{
         @Override
         public void onWriteSuccess(int current, int total, byte[] justWrite) {
             super.onWriteSuccess(current, total, justWrite);
-            String ss= com.Ls.skipBle.protocol.HexUtil.encodeHexStr(justWrite);
-            if ( current == total ) {
+            String ss = com.Ls.skipBle.protocol.HexUtil.encodeHexStr(justWrite);
+            if (current == total) {
                 final String s = "[写入][成功]" + getTag();
                 Log.i(TAG, s);
-               // mResult.success(ss);
+                // mResult.success(ss);
             }
         }
 

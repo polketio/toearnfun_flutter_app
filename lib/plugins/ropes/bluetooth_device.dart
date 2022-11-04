@@ -26,7 +26,7 @@ class bluetooth_device {
     return await _channel.invokeMethod("connect", mac);
   }
 
-  static Future<String> stopConnect() async {
+  static Future<bool> stopConnect() async {
     return await _channel.invokeMethod("stopConnect");
   }
 
