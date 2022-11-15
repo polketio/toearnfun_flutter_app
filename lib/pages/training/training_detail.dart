@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
-import 'package:toearnfun_flutter_app/common/types/training_report.dart';
+import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 

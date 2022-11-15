@@ -5,7 +5,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
-import 'package:toearnfun_flutter_app/common/types/training_report.dart';
+import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_detail.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
@@ -25,7 +25,7 @@ class JumpRopeTrainingReportsView extends StatefulWidget {
 
 class _JumpRopeTrainingReportsViewState
     extends State<JumpRopeTrainingReportsView> {
-  List<JumpRopeTrainingData> jumpRopeTrainingReportList = [];
+  List<SkipResultData> jumpRopeTrainingReportList = [];
 
   @override
   void initState() {
@@ -85,9 +85,9 @@ class _JumpRopeTrainingReportsViewState
   }
 
   Future<void> loadJumpRopeTrainingReport() async {
-    List<JumpRopeTrainingData> list = [];
+    List<SkipResultData> list = [];
     for (int i = 1; i <= 3; i++) {
-      list.add(JumpRopeTrainingData());
+      list.add(SkipResultData());
     }
     setState(() {
       jumpRopeTrainingReportList.addAll(list);
@@ -98,7 +98,7 @@ class _JumpRopeTrainingReportsViewState
 class JumpRopeTrainingReportItem extends StatelessWidget {
   JumpRopeTrainingReportItem(this.data);
 
-  JumpRopeTrainingData data;
+  SkipResultData data;
 
   @override
   Widget build(BuildContext context) {

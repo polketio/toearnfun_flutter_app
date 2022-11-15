@@ -26,7 +26,7 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion 33
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -74,4 +74,5 @@ dependencies {
     implementation project(path: ':LsDfuLib')
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0'
 }

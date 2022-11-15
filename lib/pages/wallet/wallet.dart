@@ -271,8 +271,8 @@ class _WalletViewState extends State<WalletView> {
         .generateMnemonic(widget.plugin.basic.ss58 ?? DEFAULT_SS58, key: key);
     LogUtil.d('mnemonic: ${addressInfo.mnemonic}');
     if (key.isEmpty && addressInfo.mnemonic != null) {
-      widget.plugin.store.account.setNewAccountKey(addressInfo.mnemonic!);
-      widget.plugin.store.account.setNewAccount('tester', '1234qwer');
+      widget.plugin.store?.account.setNewAccountKey(addressInfo.mnemonic!);
+      widget.plugin.store?.account.setNewAccount('tester', '1234qwer');
 
       try {
         final json = await widget.plugin.api.account.importAccount(
@@ -283,7 +283,7 @@ class _WalletViewState extends State<WalletView> {
           isFromCreatePage: true,
         );
 
-        widget.plugin.store.account.setAccountCreated();
+        widget.plugin.store?.account.setAccountCreated();
 
         setState(() {
           //update ui

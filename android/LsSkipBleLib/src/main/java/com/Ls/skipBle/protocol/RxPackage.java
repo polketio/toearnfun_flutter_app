@@ -173,17 +173,35 @@ public class RxPackage {
 
             //NFT
             case SkipProtocolDef.CMD_GEN_ECC_KEY: {
-                String hex = HexUtil.encodeHexStr(retPackage.getPayload());
-                Log.i(TAG, "CMD_GEN_ECC_KEY: " + retPackage.getCmd() + " " + HexUtil.encodeHexStr(retPackage.getPayload()));
+                byte[] buf = new byte[retPackage.getPayloadLen()];
+                System.arraycopy(retPackage.getPayload(), 0, buf, 0, retPackage.getPayloadLen());
+
+                //load public key
+                int keyLen = 33;
+                byte[] key = new byte[keyLen];
+                for (int i = 0; i < keyLen; i++) {
+                    key[i] = buf[i];
+                }
+                Log.i(TAG, "CMD_GEN_ECC_KEY: " + retPackage.getCmd() + " " + HexUtil.encodeHexStr(key));
                 //  String hex=HexUtil.HexUtil.encodeHexStr(retPackage.getPayload());
-                receiveDataCallback.onReceivewriteSkipGenerateECCKey(retPackage.getCmd() + "", HexUtil.encodeHexStr(retPackage.getPayload()));
+                receiveDataCallback.onReceivewriteSkipGenerateECCKey(retPackage.getCmd() + "", HexUtil.encodeHexStr(key));
             }
             break;
 
 
             case SkipProtocolDef.CMD_GET_DEV_PUB_KEY: {
-                Log.i(TAG, "CMD_GET_DEV_PUB_KEY: " + retPackage.getCmd() + " " + HexUtil.encodeHexStr(retPackage.getPayload()));
-                receiveDataCallback.onReceivewriteSkipGetPublicKey(retPackage.getCmd() + "", HexUtil.encodeHexStr(retPackage.getPayload()));
+
+                byte[] buf = new byte[retPackage.getPayloadLen()];
+                System.arraycopy(retPackage.getPayload(), 0, buf, 0, retPackage.getPayloadLen());
+
+                //load public key
+                int keyLen = 33;
+                byte[] key = new byte[keyLen];
+                for (int i = 0; i < keyLen; i++) {
+                    key[i] = buf[i];
+                }
+                Log.i(TAG, "CMD_GET_DEV_PUB_KEY: " + retPackage.getCmd() + " " + HexUtil.encodeHexStr(key));
+                receiveDataCallback.onReceivewriteSkipGetPublicKey(retPackage.getCmd() + "", HexUtil.encodeHexStr(key));
 
             }
             break;

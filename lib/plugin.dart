@@ -6,6 +6,9 @@ import 'package:polkawallet_sdk/plugin/homeNavItem.dart';
 import 'package:polkawallet_sdk/plugin/index.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
+import 'package:toearnfun_flutter_app/pages/device/bind_device_complete.dart';
+import 'package:toearnfun_flutter_app/pages/device/bind_device_scanner.dart';
+import 'package:toearnfun_flutter_app/pages/device/bind_device_tips.dart';
 import 'package:toearnfun_flutter_app/pages/device/device_connect.dart';
 import 'package:toearnfun_flutter_app/pages/profile/profile.dart';
 import 'package:toearnfun_flutter_app/pages/root.dart';
@@ -21,9 +24,9 @@ import 'package:toearnfun_flutter_app/store/plugin_store.dart';
 
 class PluginPolket extends PolkawalletPlugin {
   // store cache
-  late PluginStore _store;
+  PluginStore? _store;
 
-  PluginStore get store => _store;
+  PluginStore? get store => _store;
 
   //polket api
   late PolketApi _api;
@@ -87,6 +90,9 @@ class PluginPolket extends PolkawalletPlugin {
       DeviceConnectView.route: (_) => DeviceConnectView(this, keyring),
       JumpRopeTrainingDetailView.route: (_) => JumpRopeTrainingDetailView(this, keyring),
       ProfileView.route: (_) => ProfileView(this, keyring),
+      BindDeviceTips.route: (_) => BindDeviceTips(this, keyring),
+      BindDeviceScanner.route: (_) => BindDeviceScanner(this, keyring),
+      BindDeviceComplete.route: (_) => BindDeviceComplete(this, keyring),
     };
   }
 
@@ -94,13 +100,13 @@ class PluginPolket extends PolkawalletPlugin {
     balances.setTokens([]);
     balances.setExtraTokens([]);
 
-    _store.assets.loadCache(acc.pubKey);
+    _store?.assets.loadCache(acc.pubKey);
   }
 
   Future<void> _subscribeTokenBalances(String address) async {
     _api.assets.subscribeTokenBalances(address, (data) {
       balances.setTokens(data);
-      _store.assets.setTokenBalanceMap(data);
+      _store?.assets.setTokenBalanceMap(data);
     });
   }
 
@@ -109,7 +115,7 @@ class PluginPolket extends PolkawalletPlugin {
     _api = PolketApi(this, keyring);
 
     _store = PluginStore();
-    await _store.init();
+    await _store!.init();
     _loadCacheData(keyring.current);
     LogUtil.d('plugin.onWillStart');
   }

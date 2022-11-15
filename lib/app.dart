@@ -7,6 +7,7 @@ import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/pages/root.dart';
 import 'package:toearnfun_flutter_app/pages/start/start.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
+import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
 
 const get_storage_container = 'configuration';
 const log_tag = 'ToEarnFun';
@@ -28,6 +29,7 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
 
       LogUtil.init(tag: log_tag, isDebug: true);
 
+
       final network = PluginPolket();
       _keyring = Keyring();
       await _keyring!.init([network.basic.ss58 ?? 0]);
@@ -39,6 +41,8 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
       await _network?.beforeStart(_keyring!);
       await _network?.start(_keyring!);
       await _network?.updateNetworkState();
+
+      BluetoothDeviceConnector.init(network.store!.devices);
     }
 
     return 1;

@@ -95,12 +95,12 @@ public class SkipApiActivity {
                 //1实时结果数据上传
                 final String param = "{" +
                         "\"messageType\":\"1\", \"messageContext\":{" +
-                        "\"mode\":\"" + modeStr + "\", " +
-                        "\"setting\": \"" + display.getSetting() + ParamStr + "\", " +
-                        "\"SkipSecSum\": \"" + Integer.toString(display.getSkipSecSum()) + "\", " +
-                        "\"SkipCntSum\": \"" + Integer.toString(display.getSkipCntSum()) + "\", " +
-                        "\"BatteryPercent\": \"" + Integer.toString(display.getBatteryPercent()) + "\", " +
-                        "\"SkipValidSec\": \"" + Integer.toString(display.getSkipValidSec()) + "\"" +
+                        "\"mode\": " + display.getMode() + ", " +
+                        "\"setting\": " + display.getSetting() + ", " +
+                        "\"skipSecSum\": " + display.getSkipSecSum() + ", " +
+                        "\"skipCntSum\": " + display.getSkipCntSum() + ", " +
+                        "\"batteryPercent\": " + display.getBatteryPercent() + ", " +
+                        "\"skipValidSec\": " + display.getSkipValidSec() +
                         "}}";
 
                 if (mEventChannel != null)
@@ -149,15 +149,14 @@ public class SkipApiActivity {
             //2，跳绳结果上传
             final String param = "{\"messageType\":\"2\", " +
                     "\"messageContext\": {" +
-                    "\"timestamp\": \"" + Integer.toString(result.getUtc()) + "\", " +
-                    "\"skipSecSum\": \"" + Integer.toString(result.getSkipSecSum()) + "\", " +
-                    "\"skipCntSum\": \"" + Integer.toString(result.getSkipCntSum()) + "\", " +
-                    "\"skipValidSec\": \"" + Integer.toString(result.getSkipValidSec()) + "\", " +
-                    "\"freqAvg\": \"" + Integer.toString(result.getFreqAvg()) + "\", " +
-                    "\"freqMax\": \"" + Integer.toString(result.getFreqMax()) + "\", " +
-                    "\"consecutiveSkipMaxNum\": \"" + Integer.toString(result.getConsecutiveSkipMaxNum()) + "\", " +
-                    "\"skipTripNum\": \"" + Integer.toString(result.getSkipTripNum()) + "\", " +
-                    "\"skipValidSec\": \"" + Integer.toString(result.getSkipValidSec()) + "\", " +
+                    "\"timestamp\": " + result.getUtc() + ", " +
+                    "\"skipSecSum\": " + result.getSkipSecSum() + ", " +
+                    "\"skipCntSum\": " + result.getSkipCntSum() + ", " +
+                    "\"skipValidSec\": " + result.getSkipValidSec() + ", " +
+                    "\"freqAvg\": " + result.getFreqAvg() + ", " +
+                    "\"freqMax\": " + result.getFreqMax() + ", " +
+                    "\"consecutiveSkipMaxNum\": " + result.getConsecutiveSkipMaxNum() + ", " +
+                    "\"skipTripNum\": " + result.getSkipTripNum() + ", " +
                     "\"signature\": \"" + HexUtil.encodeHexStr(result.getSignature(), true) + "\"" +
                     "}}";
             if (mEventChannel != null)
@@ -207,15 +206,14 @@ public class SkipApiActivity {
             //3，跳绳历史数据上传
             final String param = "{\"messageType\":\"3\", " +
                     "\"messageContext\": {" +
-                    "\"timestamp\": \"" + Integer.toString(result.getUtc()) + "\", " +
-                    "\"skipSecSum\": \"" + Integer.toString(result.getSkipSecSum()) + "\", " +
-                    "\"skipCntSum\": \"" + Integer.toString(result.getSkipCntSum()) + "\", " +
-                    "\"skipValidSec\": \"" + Integer.toString(result.getSkipValidSec()) + "\", " +
-                    "\"freqAvg\": \"" + Integer.toString(result.getFreqAvg()) + "\", " +
-                    "\"freqMax\": \"" + Integer.toString(result.getFreqMax()) + "\", " +
-                    "\"consecutiveSkipMaxNum\": \"" + Integer.toString(result.getConsecutiveSkipMaxNum()) + "\", " +
-                    "\"skipTripNum\": \"" + Integer.toString(result.getSkipTripNum()) + "\", " +
-                    "\"skipValidSec\": \"" + Integer.toString(result.getSkipValidSec()) + "\", " +
+                    "\"timestamp\": " + result.getUtc() + ", " +
+                    "\"skipSecSum\": " + result.getSkipSecSum() + ", " +
+                    "\"skipCntSum\": " + result.getSkipCntSum() + ", " +
+                    "\"skipValidSec\": " + result.getSkipValidSec() + "\", " +
+                    "\"freqAvg\": " + result.getFreqAvg() + ", " +
+                    "\"freqMax\": " + result.getFreqMax() + ", " +
+                    "\"consecutiveSkipMaxNum\": " + result.getConsecutiveSkipMaxNum() + ", " +
+                    "\"skipTripNum\": " + result.getSkipTripNum() + ", " +
                     "\"signature\": \"" + HexUtil.encodeHexStr(result.getSignature(), true) + "\"" +
                     "}}";
             if (mEventChannel != null)

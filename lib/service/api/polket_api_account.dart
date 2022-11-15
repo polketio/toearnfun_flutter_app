@@ -10,6 +10,7 @@ import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
 import 'package:polkawallet_ui/components/passwordInputDialog.dart';
 import 'package:toearnfun_flutter_app/common/consts.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
+import 'package:toearnfun_flutter_app/store/account.dart';
 
 class PolketApiAccount {
   PolketApiAccount(this.plugin, this.keyring);
@@ -26,7 +27,7 @@ class PolketApiAccount {
     String derivePath = '',
     bool isFromCreatePage = false,
   }) async {
-    final acc = plugin.store.account.newAccount;
+    final acc = plugin.store?.account.newAccount ?? AccountCreate();
     if (isFromCreatePage &&
         (acc.name == null ||
             acc.name.isEmpty ||
@@ -53,7 +54,7 @@ class PolketApiAccount {
     String derivePath = '',
     bool isFromCreatePage = false,
   }) async {
-    final acc = plugin.store.account.newAccount;
+    final acc = plugin.store?.account.newAccount ?? AccountCreate();
     if (isFromCreatePage &&
         (acc.name == null ||
             acc.name.isEmpty ||
@@ -71,7 +72,7 @@ class PolketApiAccount {
   }
 
   void setBiometricEnabled(String pubKey) {
-    plugin.store.storage.write(
+    plugin.store?.storage.write(
         '$_biometricEnabledKey$pubKey', DateTime.now().millisecondsSinceEpoch);
   }
 
@@ -82,12 +83,12 @@ class PolketApiAccount {
 
   // Actively turn off the function and will not be automatically unlocked again
   void closeBiometricDisabled(String pubKey) {
-    plugin.store.storage.write('$_biometricEnabledKey$pubKey', 0);
+    plugin.store?.storage.write('$_biometricEnabledKey$pubKey', 0);
   }
 
   bool isCloseBiometricDisabled(String pubKey) {
     final timestamp =
-        plugin.store.storage.read('$_biometricEnabledKey$pubKey');
+        plugin.store?.storage.read('$_biometricEnabledKey$pubKey');
     if (timestamp == null || timestamp == 0) {
       return true;
     }
@@ -96,7 +97,7 @@ class PolketApiAccount {
 
   bool getBiometricEnabled(String pubKey) {
     final timestamp =
-        plugin.store.storage.read('$_biometricEnabledKey$pubKey');
+        plugin.store?.storage.read('$_biometricEnabledKey$pubKey');
     // we cache user's password with biometric for 7 days.
     if (timestamp != null &&
         timestamp + SECONDS_OF_DAY * 7000 >
@@ -190,18 +191,18 @@ class PolketApiAccount {
 
   Future<void> queryAddressIcons(List addresses) async {
     addresses.retainWhere(
-        (e) => !plugin.store.account.addressIconsMap.containsKey(e));
+        (e) => !plugin.store!.account.addressIconsMap.containsKey(e));
     if (addresses.length == 0) return;
 
     final icons =
         await plugin.sdk.api.account.getAddressIcons(addresses);
-    plugin.store.account.setAddressIconsMap(icons!);
+    plugin.store?.account.setAddressIconsMap(icons!);
   }
 
   Future<RecoveryInfo> queryRecoverable(String address) async {
 //    address = "J4sW13h2HNerfxTzPGpLT66B3HVvuU32S6upxwSeFJQnAzg";
     final res = await plugin.sdk.api.recovery.queryRecoverable(address);
-    plugin.store.account.setAccountRecoveryInfo(res!);
+    plugin.store!.account.setAccountRecoveryInfo(res!);
 
     if (res != null && res!.friends!.length > 0) {
       queryAddressIcons(res!.friends!);

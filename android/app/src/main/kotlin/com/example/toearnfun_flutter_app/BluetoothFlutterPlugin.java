@@ -119,6 +119,9 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
 
                     //这里也有error的方法，可以看情况使用
                     //result.error("code", "message", "detail");
+                } else if (method.equals("checkBluetoothIsOpen")) {
+                    boolean isOpen = checkBluetoothIsOpen();
+                    mResult.success(isOpen);
                 } else if (method.equals("scanDevice")) {
                     checkPermissions();
                     //    mResult.success(param);
@@ -140,8 +143,10 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
                 } else if (method.equals("registerCustomDataRxCallback")) {
                     skipApi.setEventChannelEventSink(eventChannel);
                     registerCustomDataRxCallback();
+                    mResult.success(true);
                 } else if (method.equals("unregisterCustomDataRxCallback")) {
                     unregisterCustomDataRxCallback();
+                    mResult.success(true);
                 } else if (method.equals("setSkipMode")) {
                     mSettingCallback.setTag("设置跳绳模式");
                     api.setSkipMode(mBleDevice, mSettingCallback);
@@ -199,12 +204,13 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
         return "hello world";
     }
 
-    private void checkBluetoothIsOpen() {
+    private boolean checkBluetoothIsOpen() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (!bluetoothAdapter.isEnabled()) {
-            Toast.makeText(applicationContext, applicationContext.getString(R.string.please_open_blue), Toast.LENGTH_LONG).show();
-            return;
-        }
+//        if (!bluetoothAdapter.isEnabled()) {
+//            Toast.makeText(applicationContext, applicationContext.getString(R.string.please_open_blue), Toast.LENGTH_LONG).show();
+//            return;
+//        }
+        return bluetoothAdapter.isEnabled();
     }
 
     private boolean checkStateOn() {
@@ -351,14 +357,17 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
                             "\"mac\": \"" + bleDevice.getMac() + "\", " +
                             "\"Rssi\": \"" + bleDevice.getRssi() + "\"" +
                             "}}";
-                    Toast.makeText(mActivity, bleDevice.getMac() + "   " + bleDevice.getName(), Toast.LENGTH_LONG).show();
+//                    Toast.makeText(mActivity, bleDevice.getMac() + "   " + bleDevice.getName(), Toast.LENGTH_LONG).show();
                     eventChannel.success(param);
                 }
             }
 
             @Override
             public void onScanFinished(List<BleDevice> scanResultList) {
-
+                param = "{\"messageType\": \"4\"}";
+//                    Toast.makeText(mActivity, bleDevice.getMac() + "   " + bleDevice.getName(), Toast.LENGTH_LONG).show();
+                eventChannel.success(param);
+//                Log.i(TAG, "onScanFinished");
                 //       img_loading.clearAnimation();
                 //       img_loading.setVisibility(View.INVISIBLE);
                 //       btn_scan.setText(getString(R.string.start_scan));
@@ -399,20 +408,22 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
               /*  progressBar.setVisibility(View.GONE);
                 mDeviceAdapter.addDevice(bleDevice);
                 mDeviceAdapter.notifyDataSetChanged();*/
-                mResult.success(true);
 //                Toast.makeText(mActivity, mActivity.getString(R.string.connect_suc), Toast.LENGTH_LONG).show();
 
                 BleManager.getInstance().setMtu(bleDevice, 247, new BleMtuChangedCallback() {
                     @Override
                     public void onSetMTUFailure(BleException exception) {
                         Log.i(TAG, "[写入][失败] MTU设置" + exception.toString());
+                        mResult.success(true);
                     }
 
                     @Override
                     public void onMtuChanged(int mtu) {
                         Log.i(TAG, "[写入][成功] MTU设置： " + mtu);
+                        mResult.success(true);
                     }
                 });
+
             }
 
             @Override
@@ -420,9 +431,19 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
                 //     progressBar.setVisibility(View.GONE);
                 //     mDeviceAdapter.removeDevice(bleDevice);
                 //    mDeviceAdapter.notifyDataSetChanged();
+//                Log.i(TAG, "onDisConnected: " + bleDevice);
+//                Log.i(TAG, "isActiveDisConnected: " + isActiveDisConnected);
+//                Log.i(TAG, "gatt: " + gatt);
+//                Log.i(TAG, "status: " + status);
 
-                mResult.success(false);
+                param = "{\"messageType\": \"5\", " +
+                        "\"messageContext\": {\"" +
+                        "name\": \"" + bleDevice.getName() + "\", " +
+                        "\"mac\": \"" + bleDevice.getMac() + "\"" +
+                        "}}";
+                eventChannel.success(param);
                 if (isActiveDisConnected) {
+                    mResult.success(false);
 //                    Toast.makeText(mActivity, mActivity.getString(R.string.active_disconnected), Toast.LENGTH_LONG).show();
                 } else {
 //                    Toast.makeText(mActivity, mActivity.getString(R.string.disconnected), Toast.LENGTH_LONG).show();
