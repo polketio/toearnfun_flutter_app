@@ -358,7 +358,9 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
                             "\"Rssi\": \"" + bleDevice.getRssi() + "\"" +
                             "}}";
 //                    Toast.makeText(mActivity, bleDevice.getMac() + "   " + bleDevice.getName(), Toast.LENGTH_LONG).show();
-                    eventChannel.success(param);
+                    if (eventChannel != null) {
+                        eventChannel.success(param);
+                    }
                 }
             }
 
@@ -441,7 +443,9 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
                         "name\": \"" + bleDevice.getName() + "\", " +
                         "\"mac\": \"" + bleDevice.getMac() + "\"" +
                         "}}";
-                eventChannel.success(param);
+                if (eventChannel != null) {
+                    eventChannel.success(param);
+                }
                 if (isActiveDisConnected) {
                     mResult.success(false);
 //                    Toast.makeText(mActivity, mActivity.getString(R.string.active_disconnected), Toast.LENGTH_LONG).show();

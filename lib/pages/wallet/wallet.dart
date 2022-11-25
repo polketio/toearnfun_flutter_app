@@ -4,9 +4,11 @@ import 'package:flukit/flukit.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/api/types/balanceData.dart';
+import 'package:polkawallet_sdk/api/types/txInfoData.dart';
 import 'package:polkawallet_sdk/plugin/store/balances.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
@@ -30,7 +32,7 @@ class WalletView extends StatefulWidget {
 }
 
 class _WalletViewState extends State<WalletView> {
-  KeyPairData? currentAccount;
+  KeyPairData? _currentAccount;
 
   final _backgroundColor = HexColor('#956DFD');
 
@@ -45,8 +47,10 @@ class _WalletViewState extends State<WalletView> {
       });
     } else {
       // show current account
-      this.currentAccount = widget.keyring.current;
-      LogUtil.d('current address: ${this.currentAccount!.address}');
+      _currentAccount = widget.keyring.current;
+      LogUtil.d('current address: ${_currentAccount!.address}');
+
+
     }
   }
 
@@ -181,13 +185,17 @@ class _WalletViewState extends State<WalletView> {
                       widgetHeight: 34.w,
                       direction: Direction.right,
                       name: Fmt.address(
-                          this.currentAccount?.address ?? "No Account"),
+                          _currentAccount?.address ?? "No Account"),
                       iconWidget: Image.asset('assets/images/icon-Connect.png'),
                       iconHeight: 28.w,
                       iconWidth: 28.w,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       style:
                           TextStyle(fontSize: 18, color: HexColor('#956DFD')),
+                      onTap: () async {
+                        Clipboard.setData(ClipboardData(text: _currentAccount?.address));
+                        BrnToast.show("Copied", context);
+                      },
                     ))),
           ],
         ));
@@ -197,18 +205,18 @@ class _WalletViewState extends State<WalletView> {
   Widget assetsListView() {
     List<TokenBalanceData> currencies = [];
 
-    final nativeName = widget.plugin.networkState.name ?? "";
-    final nativeSymbol = (widget.plugin.networkState.tokenSymbol ?? [''])[0];
-    final nativeDecimals =
-        (widget.plugin.networkState.tokenDecimals ?? [12])[0];
-    final native = widget.plugin.balances.native;
-
-    //add native
-    currencies.add(TokenBalanceData(
-        name: nativeName,
-        symbol: nativeSymbol,
-        decimals: nativeDecimals,
-        amount: native?.freeBalance.toString()));
+    // final nativeName = widget.plugin.networkState.name ?? "";
+    // final nativeSymbol = (widget.plugin.networkState.tokenSymbol ?? [''])[0];
+    // final nativeDecimals =
+    //     (widget.plugin.networkState.tokenDecimals ?? [12])[0];
+    // final native = widget.plugin.balances.native;
+    //
+    // //add native
+    // currencies.add(TokenBalanceData(
+    //     name: nativeName,
+    //     symbol: nativeSymbol,
+    //     decimals: nativeDecimals,
+    //     amount: native?.freeBalance.toString()));
 
     final tokens = widget.plugin.balances.tokens;
     LogUtil.d('tokens count: ${tokens.length}');
@@ -287,7 +295,7 @@ class _WalletViewState extends State<WalletView> {
 
         setState(() {
           //update ui
-          this.currentAccount = widget.keyring.current;
+          this._currentAccount = widget.keyring.current;
           LogUtil.d('current: ${widget.keyring.current.address}');
         });
       } catch (err) {
@@ -300,5 +308,39 @@ class _WalletViewState extends State<WalletView> {
   Future<void> loadCurrencies() async {
     final tokens = await widget.plugin.api.assets.getAllAssets();
     widget.plugin.balances.setTokens(tokens);
+  }
+
+  Future<void> _sendTx() async {
+    if (widget.keyring.keyPairs.length == 0) {
+      return;
+    }
+
+    final sender = TxSenderData(
+      widget.keyring.current.address,
+      widget.keyring.current.pubKey,
+    );
+    final txInfo = TxInfoData('balances', 'transfer', sender);
+    try {
+      final hash = await widget.plugin.sdk.api.tx.signAndSend(
+        txInfo,
+        [
+          // params.to
+          // _testAddressGav,
+          '5D88MBhvGEuEooNV7BYGXJsvrc1zo9X3rrGAeoSWMgSc9kGs',
+          // params.amount
+          500000000000
+        ],
+        "1234qwer",
+        onStatusChange: (status) {
+          LogUtil.d(status);
+          // setState(() {
+          //   _status = status;
+          // });
+        },
+      );
+      LogUtil.d('sendTx txid: ${hash.toString()}');
+    } catch (err) {
+      LogUtil.d('sendTx failed: ${err.toString()}');
+    }
   }
 }

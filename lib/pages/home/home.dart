@@ -41,6 +41,10 @@ class _HomeViewState extends State<HomeView>
         AnimationController(vsync: this, duration: Duration(seconds: 3));
     _animationController.forward();
     BluetoothDeviceConnector.addObserver(this);
+
+    Future.delayed(Duration(seconds: 10), () {
+      _loadUserVFEs();
+    });
   }
 
   @override
@@ -50,7 +54,7 @@ class _HomeViewState extends State<HomeView>
     super.dispose();
   }
 
-  Future<void> _updateBalances() async {
+  Future<void> _loadUserVFEs() async {
     if (!widget.plugin.connected) {
       // TODO: service is disconnected
       return;
@@ -59,7 +63,12 @@ class _HomeViewState extends State<HomeView>
     setState(() {
       _refreshing = true;
     });
-    await widget.plugin.updateBalances(widget.keyring.current);
+    final userAddr = widget.keyring.current?.address ?? "";
+    final vfes =
+        await widget.plugin.api.vfe.getVFEDetailsByAddress(userAddr, 1);
+    vfes?.forEach((e) {
+      LogUtil.d("vfe detail: $e}");
+    });
     setState(() {
       _refreshing = false;
     });
@@ -79,7 +88,6 @@ class _HomeViewState extends State<HomeView>
 
   Widget vfeCardView(BuildContext context) {
     return Observer(builder: (_) {
-
       return Container(
         child: Stack(children: <Widget>[
           // background
@@ -370,13 +378,18 @@ class _HomeViewState extends State<HomeView>
   }
 
   @override
-  void onReceiveDisplayData(SkipDisplayData display) { }
+  void onReceiveDisplayData(SkipDisplayData display) {}
 
   @override
-  void onReceiveSkipHistoryResultData(SkipResultData result) { }
+  void onReceiveSkipHistoryResultData(SkipResultData result) {}
 
   @override
-  void onReceiveSkipRealTimeResultData(SkipResultData result) {}
+  void onReceiveSkipRealTimeResultData(SkipResultData result) {
+    LogUtil.d("training data encode: ${result.encodeData()}");
+    LogUtil.d("training signature: ${result.signature}");
+    LogUtil.d(
+        "device pubkey: ${BluetoothDeviceConnector.connectedDevice?.pubKey ?? ""}");
+  }
 
   @override
   void onScanFinished() {

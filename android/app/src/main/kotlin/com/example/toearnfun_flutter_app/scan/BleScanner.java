@@ -114,6 +114,7 @@ public class BleScanner {
             if (imp != null) {
                 imp.onScanStarted(false);
             }
+            stopLeScan();
             return;
         }
 

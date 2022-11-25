@@ -126,23 +126,23 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                       mainButton('Get PublicKey', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         String result = await BluetoothDeviceConnector
-                            .writeSkipGetPublicKey();
+                            .getPublicKey();
                         LogUtil.d('PublicKey: $result');
                       }),
                       mainButton('Generate ECC Key', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         String key = await BluetoothDeviceConnector
-                            .writeSkipGenerateECCKey();
+                            .generateNewKeypair();
                         LogUtil.d('key: $key');
                       }),
                       mainButton('BondDev', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String nonce = "123";
+                        int nonce = 123;
                         String address =
                             "184f0bc2046b560ad6b6b6180726d023a2ff3987";
                         String key =
-                            await BluetoothDeviceConnector.writeSkipBondDev(
-                                nonce, address);
+                            await BluetoothDeviceConnector.sigBindDevice(
+                              address, nonce);
                         LogUtil.d('key: $key');
                       }),
                     ]))));

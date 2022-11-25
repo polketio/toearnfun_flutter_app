@@ -7,7 +7,7 @@ function expect(actual, matcher) {
 async function runSettingsTest() {
   console.log("test connect");
   // const endpoint = "wss://kusama.api.onfinality.io/public-ws";
-  const endpoint = "wss://testnet.playonchain.fun";
+  const endpoint = "wss://testnet-node.polket.io";
   const connected = await settings.connect([endpoint]);
   expect(connected, endpoint);
   expect(!!api, true);
@@ -164,6 +164,13 @@ async function runAssetsTest() {
   console.log(assetsList);
 }
 
+async function runVFEDetailsTest() {
+  const userAddr = '5Ejq3y9rnwEzPLJjNd8qZHapjHt3c2LmV6j9V7Vh7cfUikLU';
+  const brandId = 1;
+  const details = await vfe.getVFEDetailsByAddress(api, userAddr, brandId);
+  console.log(details);
+}
+
 async function runTests() {
   // keyring api run without network
   await runKeyringTest();
@@ -173,6 +180,8 @@ async function runTests() {
   // await runAccountTest();
 
   await runAssetsTest();
+
+  await runVFEDetailsTest();
 
   console.log("all tests passed.");
 }

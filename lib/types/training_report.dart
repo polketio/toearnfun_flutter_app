@@ -1,3 +1,7 @@
+import "dart:typed_data";
+import 'package:convert/convert.dart';
+import 'package:toearnfun_flutter_app/utils/bytes.dart';
+
 class SkipResultData {
   int reportTime = 0; //时间戳
   int trainingDuration = 0; //跳绳总时长
@@ -38,6 +42,19 @@ class SkipResultData {
         interruptions = json['skipTripNum'],
         jumpRopeDuration = json['skipValidSec'],
         signature = json['signature'];
+
+  String encodeData() {
+    final data = BytesBuilder();
+    data.add(int32Bytes(reportTime, Endian.little)); // 4 bytes
+    data.add(int16Bytes(trainingDuration, Endian.little)); // 2 bytes
+    data.add(int16Bytes(totalJumpRopeCount, Endian.little)); // 2 bytes
+    data.add(int16Bytes(averageSpeed, Endian.little)); // 2 bytes
+    data.add(int16Bytes(maxSpeed, Endian.little)); // 2 bytes
+    data.add(int16Bytes(maxJumpRopeCount, Endian.little)); // 2 bytes
+    data.add(int8Bytes(interruptions)); // 1 bytes
+    data.add(int16Bytes(jumpRopeDuration, Endian.little)); // 2 bytes
+    return hex.encode(data.toBytes());
+  }
 }
 
 class SkipDisplayData {

@@ -19,3 +19,10 @@ abstract class _AssetMetadata {
   int? decimals;
   bool? isFrozen;
 }
+
+
+class MintCost {
+  int assetId;
+  String cost;
+  MintCost(this.assetId, this.cost);
+}

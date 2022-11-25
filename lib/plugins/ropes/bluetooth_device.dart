@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:toearnfun_flutter_app/store/devices.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/types/training_report.dart';
+import 'package:toearnfun_flutter_app/utils/crypto.dart';
 
 // messageType = 0：扫描蓝牙设备，1: 实时跳绳数据，2：实时跳绳结果，3：历史跳绳结果
 class BlueEventMessageType {
@@ -155,7 +156,7 @@ class BluetoothDeviceConnector {
   }
 
   //获取设备公钥
-  static Future<String> writeSkipGetPublicKey() async {
+  static Future<String> getPublicKey() async {
     return await _channel.invokeMethod("writeSkipGetPublicKey");
   }
 
@@ -175,14 +176,16 @@ class BluetoothDeviceConnector {
   }
 
   //创建设备ECC公钥
-  static Future<String> writeSkipGenerateECCKey() async {
+  static Future<String> generateNewKeypair() async {
     return await _channel.invokeMethod("writeSkipGenerateECCKey");
   }
 
   //绑定设备
-  static Future<String> writeSkipBondDev(String nonce, String address) async {
-    return await _channel
-        .invokeMethod("writeSkipBondDev", {'nonce': nonce, 'address': address});
+  static Future<String> sigBindDevice(String accountId, int deviceNonce) async {
+    final hash = Hash.ripemd160(accountId);
+    final signature = await _channel
+        .invokeMethod("writeSkipBondDev", {'nonce': deviceNonce, 'address': hash});
+    return signature;
   }
 
   // 自动连接已连接过的设备
@@ -196,6 +199,7 @@ class BluetoothDeviceConnector {
         if (d.mac == device.mac) {
           if (targetDeviceKey.isNotEmpty) {
             if (d.pubKey == targetDeviceKey) {
+              device.pubKey = targetDeviceKey;
               connect(device);
             }
           } else {

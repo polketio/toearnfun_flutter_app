@@ -115,10 +115,11 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
                 return Column(
                   children: [
                     ListTile(
-                        title: Text(name, style: TextStyle(fontSize: 18)),
+                        title: Text(name, style: TextStyle(fontSize: 14)),
                         onTap: () async {
                           await selectDevice(context, d);
-                        }),
+                        },
+                        trailing: Image.asset('assets/images/icon-Connect.png')),
                     const Divider(
                       height: 0.0,
                       indent: 0.0,
@@ -163,7 +164,6 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
       await widget.plugin.store?.devices.clearScannedDevices();
       await BluetoothDeviceConnector.scanDevice();
     }
-
   }
 
   Future<void> selectDevice(

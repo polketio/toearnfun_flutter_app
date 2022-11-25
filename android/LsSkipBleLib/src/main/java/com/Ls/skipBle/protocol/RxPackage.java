@@ -153,7 +153,7 @@ public class RxPackage {
                 int signatureLen = 64;
                 byte[] signature = new byte[signatureLen];
                 for (int i = 0; i < signatureLen; i++) {
-                    signature[i] = buf[20 + i];
+                    signature[i] = buf[21 + i];
                 }
                 ret.setSignature(signature);
 
@@ -208,8 +208,17 @@ public class RxPackage {
 
 
             case SkipProtocolDef.CMD_BOND_DEV: {
-                Log.i(TAG, "CMD_BOND_DEV: " + retPackage.getCmd() + " " + HexUtil.encodeHexStr(retPackage.getPayload()));
-                receiveDataCallback.onReceivewriteSkipBondDev(HexUtil.encodeHexStr(retPackage.getPayload()));
+                byte[] buf = new byte[retPackage.getPayloadLen()];
+                System.arraycopy(retPackage.getPayload(), 0, buf, 0, retPackage.getPayloadLen());
+
+                //load signature
+                int signatureLen = 64;
+                byte[] signature = new byte[signatureLen];
+                for (int i = 0; i < signatureLen; i++) {
+                    signature[i] = buf[i];
+                }
+                Log.i(TAG, "CMD_BOND_DEV: " + retPackage.getCmd() + " " + HexUtil.encodeHexStr(signature));
+                receiveDataCallback.onReceivewriteSkipBondDev(HexUtil.encodeHexStr(signature));
             }
             break;
 

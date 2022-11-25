@@ -11,7 +11,7 @@ class PolketApiAssets {
 
   final Map _assetBalances = {};
   final assetBalanceChannel = 'assetBalance';
-  final module = 'assetsModule';
+  final module = 'assets';
 
   Future<List<TokenBalanceData>> getAllAssets() async {
     final List res = await plugin.sdk.api.assets.service.getAssetsAll() ?? [];

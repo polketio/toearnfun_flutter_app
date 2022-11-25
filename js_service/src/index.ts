@@ -11,6 +11,7 @@ import gov from "./service/gov";
 import parachain from "./service/parachain";
 import assets from "./service/assets";
 import { genLinks } from "./utils/config/config";
+import vfe from "./service/vfe";
 
 // console.log will send message to MsgChannel to App
 function send(path: string, data: any) {
@@ -84,6 +85,7 @@ const settings = {
 (<any>window).gov = gov;
 (<any>window).parachain = parachain;
 (<any>window).assets = assets;
+(<any>window).vfe = vfe;
 
 // walletConnect supporting is not ready.
 // (<any>window).walletConnect = wc;
