@@ -14,3 +14,27 @@ class PolketApi {
   final PolketApiAccount account;
   final PolketApiVFE vfe;
 }
+
+class DispatchResult {
+  String txId = "";
+  String blockHash= "";
+  String error = "";
+  bool success = false;
+
+  static DispatchResult fromJson(dynamic json) {
+    final data = DispatchResult();
+    data.txId = json['hash'] ?? "";
+    data.blockHash = json['blockHash'] ?? "";
+    data.success = true;
+    return data;
+  }
+
+  static DispatchResult fail(dynamic error) {
+    final data = DispatchResult();
+    data.success = false;
+    data.error = error.toString();
+    return data;
+  }
+
+
+}

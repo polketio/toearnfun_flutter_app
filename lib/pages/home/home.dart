@@ -42,7 +42,7 @@ class _HomeViewState extends State<HomeView>
     _animationController.forward();
     BluetoothDeviceConnector.addObserver(this);
 
-    Future.delayed(Duration(seconds: 10), () {
+    Future.delayed(Duration(seconds: 5), () {
       _loadUserVFEs();
     });
   }

@@ -2,6 +2,7 @@ import 'package:flustars/flustars.dart';
 import 'package:polkawallet_sdk/api/types/txInfoData.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
+import 'package:toearnfun_flutter_app/service/api/polket_api.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/types/vfe_detail.dart';
 
@@ -23,7 +24,7 @@ class PolketApiVFE {
     }
   }
 
-  Future<bool> bindDevice(String pubkey, String signature, int nonce,
+  Future<DispatchResult> bindDevice(String pubkey, String signature, int nonce,
       int? itemId, String password) async {
     final sender = TxSenderData(
       keyring.current.address,
@@ -31,7 +32,7 @@ class PolketApiVFE {
     );
     final txInfo = TxInfoData(module, "bindDevice", sender);
     try {
-      final hash = await plugin.sdk.api.tx.signAndSend(
+      final result = await plugin.sdk.api.tx.signAndSend(
         txInfo,
         [
           // puk
@@ -46,16 +47,13 @@ class PolketApiVFE {
           LogUtil.d(status);
         },
       );
-      LogUtil.d('sendTx txid: ${hash.toString()}');
+      return DispatchResult.fromJson(result);
     } catch (err) {
-      LogUtil.d('sendTx failed: ${err.toString()}');
-      return false;
+      return DispatchResult.fail(err);
     }
-
-    return true;
   }
 
-  Future<String> registerDevice(
+  Future<DispatchResult> registerDevice(
       String pubkey, int producerId, int brandId, String password) async {
     final sender = TxSenderData(
       keyring.current.address,
@@ -63,7 +61,7 @@ class PolketApiVFE {
     );
     final txInfo = TxInfoData(module, "registerDevice", sender);
     try {
-      final hash = await plugin.sdk.api.tx.signAndSend(
+      final result = await plugin.sdk.api.tx.signAndSend(
         txInfo,
         [
           "0x$pubkey",
@@ -75,26 +73,18 @@ class PolketApiVFE {
           LogUtil.d(status);
         },
       );
-      LogUtil.d('sendTx txid: ${hash.toString()}');
+      return DispatchResult.fromJson(result);
     } catch (err) {
-      LogUtil.d('sendTx failed: ${err.toString()}');
-      return "";
+      return DispatchResult.fail(err);
     }
-
-    return "";
   }
 
-  Future<List<VFEDetail>?> getVFEDetailsByAddress(
+  Future<List<VFEDetail>> getVFEDetailsByAddress(
       String address, int brandId) async {
-
-    final res =
-    await plugin.sdk.api.service.webView?.evalJavascript('vfe.getVFEDetailsByAddress(api, "$address", $brandId)');
-
-    if (res != null) {
-      List<VFEDetail> list = res.map((e) => VFEDetail.fromJson(e)).toList();
-      return list;
-    } else {
-      return null;
-    }
+    final List res = await plugin.sdk.api.service.webView?.evalJavascript(
+            'vfe.getVFEDetailsByAddress(api, "$address", $brandId)') ??
+        [];
+    final list = res.map((e) => VFEDetail.fromJson(e)).toList();
+    return list;
   }
 }

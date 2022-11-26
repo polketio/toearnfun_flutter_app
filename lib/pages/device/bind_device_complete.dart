@@ -121,6 +121,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
         margin: EdgeInsets.only(top: 16.h),
         child: ElevatedButton(
           onPressed: () async {
+            BrnLoadingDialog.show(context, content: 'Registering', barrierDismissible: false);
             await registerDeviceOnChain(context);
           },
           child: const Text('Register', style: TextStyle(fontSize: 24)),
@@ -175,8 +176,12 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
           final signature =
               await BluetoothDeviceConnector.sigBindDevice(accountId, nonce);
           // LogUtil.d("signature: $signature");
-          await widget.plugin.api.vfe
+          final result = await widget.plugin.api.vfe
               .bindDevice(pubKey, signature, nonce, null, "1234qwer");
+          if (!result.success) {
+            if (!mounted) return;
+            BrnToast.show(result.error, context);
+          }
         } else {
           //todo: check if device bond with this VFE
 
@@ -202,7 +207,14 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
   Future<void> registerDeviceOnChain(BuildContext context) async {
     //generate new keypair for device
     final newPubKey = await BluetoothDeviceConnector.generateNewKeypair();
-    final txid =
-        await widget.plugin.api.vfe.registerDevice(newPubKey, 2, 1, "1234qwer");
+    final result =
+        await widget.plugin.api.vfe.registerDevice(newPubKey, 1, 1, "1234qwer");
+    if (!mounted) return;
+    BrnLoadingDialog.dismiss(context);
+    if (!result.success) {
+      BrnToast.show(result.error, context);
+    } else {
+      BrnToast.show("Register device successfully", context);
+    }
   }
 }
