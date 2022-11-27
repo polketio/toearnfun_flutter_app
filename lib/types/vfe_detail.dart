@@ -1,3 +1,6 @@
+import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
+import 'package:toearnfun_flutter_app/types/vfe_brand.dart';
+
 class VFEDetail {
   int? brandId;
   int? itemId;
@@ -11,6 +14,9 @@ class VFEDetail {
   bool isUpgrading = false;
   int lastBlock = 0;
   int availablePoints = 0;
+
+  VFEBrand? brandInfo;
+  BluetoothDevice? deviceBond;
 
   VFEDetail.fromJson(Map<String, dynamic> json)
       : brandId = json['brandId'] ?? 0,

@@ -10,6 +10,17 @@ async function getVFEDetailsByAddress(api: ApiPromise, address: string, brandId:
     return details.map((e)=> e.toJSON());
 }
 
+/**
+ * query all VFE brands
+ * @param api ApiPromise
+ * @returns VFEBrand
+ */
+async function getVFEBrandsAll(api: ApiPromise) {
+    const brands = await api.query.vfe.vfeBrands.entries<any>();
+    return brands.map(([_, d]) => d.toJSON());
+}
+
 export default {
     getVFEDetailsByAddress,
+    getVFEBrandsAll,
 };

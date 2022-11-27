@@ -1,5 +1,6 @@
 import 'package:get_storage/get_storage.dart';
 import 'package:mobx/mobx.dart';
+import 'package:toearnfun_flutter_app/types/vfe_brand.dart';
 import 'package:toearnfun_flutter_app/types/vfe_detail.dart';
 
 part 'vfe.g.dart';
@@ -13,28 +14,42 @@ abstract class _VFEStore with Store {
 
   final GetStorage storage;
 
-  final String userVFEListKey = 'user_vfe_list';
+  final String userCurrentVFEKey = 'user_current_vfe';
 
   @observable
-  VFEDetail? currentVFE;
+  VFEDetail? current;
 
   @observable
-  ObservableList<VFEDetail> userVFEList =
-  ObservableList<VFEDetail>();
+  ObservableList<VFEDetail> userVFEList = ObservableList<VFEDetail>();
+
+  @observable
+  ObservableList<VFEBrand> allVFEBrands = ObservableList<VFEBrand>();
 
   @action
-  Future<void> addUserVFE(String user, VFEDetail vfe) async {
-    // if (_connectedDevices.isEmpty) {
-    //   loadConnectedDevices();
-    // }
-    //
-    // for (var d in _connectedDevices) {
-    //   if (d.mac == device.mac) {
-    //     return;
-    //   }
-    // }
-    //
-    // _connectedDevices.add(device);
-    // await storage.write(connectedDevicesKey, _connectedDevices);
+  void clearUserVFE() {
+    userVFEList.clear();
+  }
+
+  @action
+  Future<void> addUserVFE(VFEDetail vfe) async {
+    for (var existed in userVFEList) {
+      if (existed.itemId == vfe.itemId && existed.brandId == vfe.brandId) {
+        return;
+      }
+    }
+    userVFEList.add(vfe);
+  }
+
+  @action
+  void loadUserCurrent(String? pubKey) {
+    final key = '${userCurrentVFEKey}_$pubKey';
+    current = storage.read(key);
+  }
+
+  @action
+  Future<void> setUserCurrent(String? pubKey, VFEDetail vfe) async {
+    current = vfe;
+    final key = '${userCurrentVFEKey}_$pubKey';
+    await storage.write(key, vfe);
   }
 }

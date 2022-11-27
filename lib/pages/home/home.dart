@@ -42,9 +42,9 @@ class _HomeViewState extends State<HomeView>
     _animationController.forward();
     BluetoothDeviceConnector.addObserver(this);
 
-    Future.delayed(Duration(seconds: 5), () {
-      _loadUserVFEs();
-    });
+    // Future.delayed(Duration(seconds: 5), () {
+    //   _loadUserVFEs();
+    // });
   }
 
   @override
@@ -88,6 +88,16 @@ class _HomeViewState extends State<HomeView>
 
   Widget vfeCardView(BuildContext context) {
     return Observer(builder: (_) {
+      var itemId = "N/A";
+      var battery = 0;
+      var vfeImage = "assets/images/img-Unbound.png";
+      final userSelectedVFE = widget.plugin.store?.vfe.current;
+      if (userSelectedVFE != null) {
+        vfeImage = "assets/images/img-Bound.png";
+        itemId = "#${userSelectedVFE.itemId}";
+        battery = userSelectedVFE.remainingBattery;
+      }
+
       return Container(
         child: Stack(children: <Widget>[
           // background
@@ -106,10 +116,9 @@ class _HomeViewState extends State<HomeView>
                 child: GestureDetector(
                     onTap: () async {
                       //todo: check if user have any VFEs
-                      LogUtil.d('showDeviceTypesSelector');
                       BindDeviceSelector.showDeviceTypesSelector(context);
                     },
-                    child: Image.asset("assets/images/img-Bound.png"))),
+                    child: Image.asset(vfeImage))),
             Padding(
                 padding: EdgeInsets.only(top: 16.h, left: 24.w, right: 24.w),
                 child: Row(
@@ -128,8 +137,8 @@ class _HomeViewState extends State<HomeView>
                                     color: Colors.greenAccent, fontSize: 12)),
                             SizedBox(
                                 height: 24.h,
-                                child: const Text('#0001',
-                                    style: TextStyle(
+                                child: Text(itemId,
+                                    style: const TextStyle(
                                         color: Colors.white, fontSize: 16))),
                           ],
                         )),
@@ -151,6 +160,10 @@ class _HomeViewState extends State<HomeView>
                               ],
                             ),
                             onTap: () {
+                              if (userSelectedVFE == null) {
+                                BrnToast.show('Please bind the device first', context);
+                                return;
+                              }
                               setState(() {
                                 connectedStatus = "connecting...";
                               });
@@ -158,8 +171,7 @@ class _HomeViewState extends State<HomeView>
                                   "0339d3e6e837d675ce77e85d708caf89ddcdbf53c8e510775c9cb9ec06282475a0";
                               BluetoothDeviceConnector.autoScanAndConnect(
                                   deviceKey);
-                              // Navigator.of(context)
-                              //     .pushNamed(DeviceConnectView.route);
+
                             })),
                     Expanded(
                         flex: 1,
@@ -177,7 +189,7 @@ class _HomeViewState extends State<HomeView>
                                 width: 80.w,
                                 height: 24.h,
                                 child: EProgress(
-                                    progress: 80,
+                                    progress: battery,
                                     colors: [HexColor('#b7e9e0')],
                                     backgroundColor: Colors.grey,
                                     textStyle: const TextStyle(

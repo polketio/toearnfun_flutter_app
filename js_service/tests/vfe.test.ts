@@ -1,7 +1,6 @@
 
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { u64 } from "@polkadot/types-codec";
 import vfe from "../src/service/vfe";
 
 
@@ -109,7 +108,15 @@ describe('polket-node module: `VFE` unit test', () => {
         // const details = await api.query.vfe.vfeDetails.multi(ids);
 
         details.forEach((detail) => {
-            console.log(`detail: ${detail}`);
+            console.log(`detail: ${JSON.stringify(detail)}`);
+        });
+    });
+
+    test('query VFE brands unit test', async () => {
+        const brands = await vfe.getVFEBrandsAll(api);
+
+        brands.forEach((brand) => {
+            console.log(`brand: ${JSON.stringify(brand)}`);
         });
     });
 });

@@ -49,8 +49,6 @@ class _WalletViewState extends State<WalletView> {
       // show current account
       _currentAccount = widget.keyring.current;
       LogUtil.d('current address: ${_currentAccount!.address}');
-
-
     }
   }
 
@@ -76,69 +74,63 @@ class _WalletViewState extends State<WalletView> {
 
   @override
   Widget build(BuildContext context) {
-    return Observer(builder: (_) {
-      return Scaffold(
-          backgroundColor: Colors.white,
-          appBar: getAppBarView(),
-          body: SafeArea(
-              child: PullRefreshScope(
-                  child: CustomScrollView(
-            physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics()),
-            slivers: [
-              SliverPullRefreshIndicator(
-                refreshTriggerPullDistance: 100.h,
-                refreshIndicatorExtent: 60.h,
-                onRefresh: loadCurrencies,
+    return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: getAppBarView(),
+        body: SafeArea(
+            child: PullRefreshScope(
+                child: CustomScrollView(
+          physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics()),
+          slivers: [
+            SliverPullRefreshIndicator(
+              refreshTriggerPullDistance: 100.h,
+              refreshIndicatorExtent: 60.h,
+              onRefresh: loadCurrencies,
+            ),
+            SliverPersistentHeader(
+              delegate: SliverHeaderDelegate(
+                maxHeight: 180.h,
+                minHeight: 134.h,
+                child: mainAssetView(context),
               ),
-              SliverPersistentHeader(
-                delegate: SliverHeaderDelegate(
-                  maxHeight: 180.h,
-                  minHeight: 134.h,
-                  child: mainAssetView(context),
-                ),
-              ),
-              SliverPersistentHeader(
-                pinned: true,
-                floating: true,
-                delegate: SliverHeaderDelegate(
-                    maxHeight: 60.h,
-                    minHeight: 60.h,
-                    child: Stack(fit: StackFit.expand, children: [
-                      Container(
-                          decoration: new BoxDecoration(
-                        color: _backgroundColor,
-                      )
-                ),
-                      Container(
-                          decoration: new BoxDecoration(
-                            color: Colors.white,
-                            borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(20)),
-                          ),
-                          child: ListTile(
-                              onTap: null,
-                              title: const Text('Assets'),
-                              trailing: TextButton.icon(
-                                onPressed: null,
-                                icon: const Icon(Icons.history),
-                                label: const Text('History',
-                                    style: TextStyle(
-                                        color: Colors.black, fontSize: 16)),
-                              ))),
-                    ])),
-              ),
-              assetsListView(),
-            ],
-          ))));
-    });
+            ),
+            SliverPersistentHeader(
+              pinned: true,
+              floating: true,
+              delegate: SliverHeaderDelegate(
+                  maxHeight: 60.h,
+                  minHeight: 60.h,
+                  child: Stack(fit: StackFit.expand, children: [
+                    Container(
+                        decoration: new BoxDecoration(
+                      color: _backgroundColor,
+                    )),
+                    Container(
+                        decoration: new BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        child: ListTile(
+                            onTap: null,
+                            title: const Text('Assets'),
+                            trailing: TextButton.icon(
+                              onPressed: null,
+                              icon: const Icon(Icons.history),
+                              label: const Text('History',
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 16)),
+                            ))),
+                  ])),
+            ),
+            assetsListView(),
+          ],
+        ))));
   }
 
   // show user main asset view
   Widget mainAssetView(BuildContext context) {
-    final symbol = (widget.plugin.networkState.tokenSymbol ?? [''])[0];
-    final decimals = (widget.plugin.networkState.tokenDecimals ?? [12])[0];
-    BalanceData? balancesInfo = widget.plugin.balances.native;
     return Container(
         decoration: new BoxDecoration(
           color: _backgroundColor,
@@ -167,13 +159,20 @@ class _WalletViewState extends State<WalletView> {
                 )),
             SizedBox(
                 height: 34.h,
-                child: Text(
-                  '${Fmt.balance(balancesInfo?.freeBalance, decimals)} $symbol',
-                  style: TextStyle(
-                      fontSize: 28,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold),
-                )),
+                child: Observer(builder: (_) {
+                  final symbol =
+                      (widget.plugin.networkState.tokenSymbol ?? [''])[0];
+                  final decimals =
+                      (widget.plugin.networkState.tokenDecimals ?? [12])[0];
+                  BalanceData? balancesInfo = widget.plugin.balances.native;
+                  return Text(
+                    '${Fmt.balance(balancesInfo?.freeBalance, decimals)} $symbol',
+                    style: TextStyle(
+                        fontSize: 28,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold),
+                  );
+                })),
             Card(
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -184,8 +183,8 @@ class _WalletViewState extends State<WalletView> {
                       widgetWidth: 180.w,
                       widgetHeight: 34.w,
                       direction: Direction.right,
-                      name: Fmt.address(
-                          _currentAccount?.address ?? "No Account"),
+                      name:
+                          Fmt.address(_currentAccount?.address ?? "No Account"),
                       iconWidget: Image.asset('assets/images/icon-Connect.png'),
                       iconHeight: 28.w,
                       iconWidth: 28.w,
@@ -193,7 +192,8 @@ class _WalletViewState extends State<WalletView> {
                       style:
                           TextStyle(fontSize: 18, color: HexColor('#956DFD')),
                       onTap: () async {
-                        Clipboard.setData(ClipboardData(text: _currentAccount?.address));
+                        Clipboard.setData(
+                            ClipboardData(text: _currentAccount?.address));
                         BrnToast.show("Copied", context);
                       },
                     ))),
@@ -203,49 +203,44 @@ class _WalletViewState extends State<WalletView> {
 
   // show currencies info
   Widget assetsListView() {
-    List<TokenBalanceData> currencies = [];
+    return Observer(builder: (_) {
+      List<TokenBalanceData> currencies = [];
+      final nativeSymbol = (widget.plugin.networkState.tokenSymbol ?? [''])[0];
+      final nativeDecimals =
+          (widget.plugin.networkState.tokenDecimals ?? [12])[0];
+      final native = widget.plugin.balances.native;
 
-    // final nativeName = widget.plugin.networkState.name ?? "";
-    // final nativeSymbol = (widget.plugin.networkState.tokenSymbol ?? [''])[0];
-    // final nativeDecimals =
-    //     (widget.plugin.networkState.tokenDecimals ?? [12])[0];
-    // final native = widget.plugin.balances.native;
-    //
-    // //add native
-    // currencies.add(TokenBalanceData(
-    //     name: nativeName,
-    //     symbol: nativeSymbol,
-    //     decimals: nativeDecimals,
-    //     amount: native?.freeBalance.toString()));
+      final tokens = widget.plugin.balances.tokens;
 
-    final tokens = widget.plugin.balances.tokens;
-    LogUtil.d('tokens count: ${tokens.length}');
+      currencies.addAll(tokens);
 
-    currencies.addAll(tokens);
-
-    return SliverFixedExtentList(
-      itemExtent: 82,
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final d = currencies[index];
-          return Card(
-              elevation: 0,
-              margin: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
-              color: HexColor('#e9e0ff'),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.w)),
-              child: ListTile(
-                  // leading: Image.asset('assets/images/icon-${d.symbol}.png'),
-                  leading: Image.asset('assets/images/icon-PNT.png'),
-                  title: Text('${d.symbol}', style: TextStyle(fontSize: 18)),
-                  subtitle: Text('${d.name}', style: TextStyle(fontSize: 12)),
-                  trailing: Text('${Fmt.balance(d.amount, d.decimals ?? 12)}',
-                      style: TextStyle(fontSize: 18)),
-                  onTap: () => print(index)));
-        },
-        childCount: currencies.length,
-      ),
-    );
+      return SliverFixedExtentList(
+        itemExtent: 82,
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final d = currencies[index];
+            if (d.symbol == nativeSymbol) {
+              d.amount = native?.freeBalance;
+            }
+            return Card(
+                elevation: 0,
+                margin: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
+                color: HexColor('#e9e0ff'),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.w)),
+                child: ListTile(
+                    // leading: Image.asset('assets/images/icon-${d.symbol}.png'),
+                    leading: Image.asset('assets/images/icon-PNT.png'),
+                    title: Text('${d.symbol}', style: TextStyle(fontSize: 18)),
+                    subtitle: Text('${d.name}', style: TextStyle(fontSize: 12)),
+                    trailing: Text('${Fmt.balance(d.amount, d.decimals ?? nativeDecimals)}',
+                        style: TextStyle(fontSize: 18)),
+                    onTap: () => print(index)));
+          },
+          childCount: currencies.length,
+        ),
+      );
+    });
   }
 
   void showCreateWalletDialog() {

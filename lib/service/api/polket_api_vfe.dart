@@ -4,6 +4,7 @@ import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
+import 'package:toearnfun_flutter_app/types/vfe_brand.dart';
 import 'package:toearnfun_flutter_app/types/vfe_detail.dart';
 
 class PolketApiVFE {
@@ -79,6 +80,14 @@ class PolketApiVFE {
     }
   }
 
+  Future<List<VFEBrand>> getVFEBrandsAll() async {
+    final List res = await plugin.sdk.api.service.webView?.evalJavascript(
+        'vfe.getVFEBrandsAll(api)') ??
+        [];
+    final list = res.map((e) => VFEBrand.fromJson(e)).toList();
+    return list;
+  }
+
   Future<List<VFEDetail>> getVFEDetailsByAddress(
       String address, int brandId) async {
     final List res = await plugin.sdk.api.service.webView?.evalJavascript(
@@ -87,4 +96,6 @@ class PolketApiVFE {
     final list = res.map((e) => VFEDetail.fromJson(e)).toList();
     return list;
   }
+
+
 }

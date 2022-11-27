@@ -239,13 +239,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.3"
-  eip55:
-    dependency: transitive
-    description:
-      name: eip55
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.2"
   ele_progress:
     dependency: "direct main"
     description:
@@ -849,13 +842,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.3"
-  sec:
-    dependency: transitive
-    description:
-      name: sec
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.1"
   share_plus:
     dependency: transitive
     description:
@@ -1156,12 +1142,12 @@ packages:
     source: hosted
     version: "1.0.2"
   web3dart:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: web3dart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.5.0"
+    version: "2.3.5"
   web_socket_channel:
     dependency: transitive
     description:

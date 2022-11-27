@@ -82,13 +82,15 @@ class PluginPolket extends PolkawalletPlugin {
     return {
       RootView.route: (_) => RootView(this, keyring),
       WalletView.route: (_) => WalletView(this, keyring),
-      JumpRopeTrainingReportsView.route: (_) => JumpRopeTrainingReportsView(this, keyring),
+      JumpRopeTrainingReportsView.route: (_) =>
+          JumpRopeTrainingReportsView(this, keyring),
       NewWalletWelcomeView.route: (_) => NewWalletWelcomeView(this, keyring),
       NewWalletStepOne.route: (_) => NewWalletStepOne(this, keyring),
       NewWalletStepTwo.route: (_) => NewWalletStepTwo(this, keyring),
       NewWalletStepThree.route: (_) => NewWalletStepThree(this, keyring),
       DeviceConnectView.route: (_) => DeviceConnectView(this, keyring),
-      JumpRopeTrainingDetailView.route: (_) => JumpRopeTrainingDetailView(this, keyring),
+      JumpRopeTrainingDetailView.route: (_) =>
+          JumpRopeTrainingDetailView(this, keyring),
       ProfileView.route: (_) => ProfileView(this, keyring),
       BindDeviceTips.route: (_) => BindDeviceTips(this, keyring),
       BindDeviceScanner.route: (_) => BindDeviceScanner(this, keyring),
@@ -101,6 +103,22 @@ class PluginPolket extends PolkawalletPlugin {
     balances.setExtraTokens([]);
 
     _store?.assets.loadCache(acc.pubKey);
+    _store?.vfe.loadUserCurrent(acc.pubKey);
+  }
+
+  Future<void> _loadUserVFEs(String user) async {
+    final brands = await _api.vfe.getVFEBrandsAll();
+    if (brands.isNotEmpty) {
+      _store?.vfe.allVFEBrands.addAll(brands);
+      for (var b in brands) {
+        final details =
+            await _api.vfe.getVFEDetailsByAddress(user, b.brandId ?? 0);
+        for (var d in details) {
+          d.brandInfo = b;
+          _store?.vfe.userVFEList.add(d);
+        }
+      }
+    }
   }
 
   Future<void> _subscribeTokenBalances(String address) async {
@@ -125,7 +143,10 @@ class PluginPolket extends PolkawalletPlugin {
     _connected = true;
 
     if (keyring.current.address != null) {
+      // subscribe assets balance
       _subscribeTokenBalances(keyring.current.address!);
+      // load user vfe
+      _loadUserVFEs(keyring.current.address!);
     }
     LogUtil.d('plugin.onStarted');
   }
