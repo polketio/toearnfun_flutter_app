@@ -23,10 +23,11 @@ import 'package:toearnfun_flutter_app/service/api/polket_api.dart';
 import 'package:toearnfun_flutter_app/store/plugin_store.dart';
 
 class PluginPolket extends PolkawalletPlugin {
-  // store cache
-  PluginStore? _store;
 
-  PluginStore? get store => _store;
+  PluginPolket(this.store);
+
+  // store cache
+  PluginStore store;
 
   //polket api
   late PolketApi _api;
@@ -102,20 +103,25 @@ class PluginPolket extends PolkawalletPlugin {
     balances.setTokens([]);
     balances.setExtraTokens([]);
 
-    _store?.assets.loadCache(acc.pubKey);
-    _store?.vfe.loadUserCurrent(acc.pubKey);
+    store.assets.loadCache(acc.pubKey);
+    store.vfe.loadUserCurrent(acc.pubKey);
   }
 
-  Future<void> _loadUserVFEs(String user) async {
+  Future<void> loadUserVFEs(String user) async {
     final brands = await _api.vfe.getVFEBrandsAll();
     if (brands.isNotEmpty) {
-      _store?.vfe.allVFEBrands.addAll(brands);
+      store.vfe.allVFEBrands.addAll(brands);
+      var currentVFE = store.vfe.current;
       for (var b in brands) {
         final details =
             await _api.vfe.getVFEDetailsByAddress(user, b.brandId ?? 0);
         for (var d in details) {
-          d.brandInfo = b;
-          _store?.vfe.userVFEList.add(d);
+          d.setBrandInfo(b);
+          store.vfe.userVFEList.add(d);
+          if (currentVFE == null) {
+            currentVFE = d;
+            await store.vfe.setUserCurrent(user, d);
+          }
         }
       }
     }
@@ -124,7 +130,7 @@ class PluginPolket extends PolkawalletPlugin {
   Future<void> _subscribeTokenBalances(String address) async {
     _api.assets.subscribeTokenBalances(address, (data) {
       balances.setTokens(data);
-      _store?.assets.setTokenBalanceMap(data);
+      store.assets.setTokenBalanceMap(data);
     });
   }
 
@@ -132,8 +138,6 @@ class PluginPolket extends PolkawalletPlugin {
   Future<void> onWillStart(Keyring keyring) async {
     _api = PolketApi(this, keyring);
 
-    _store = PluginStore();
-    await _store!.init();
     _loadCacheData(keyring.current);
     LogUtil.d('plugin.onWillStart');
   }
@@ -146,7 +150,7 @@ class PluginPolket extends PolkawalletPlugin {
       // subscribe assets balance
       _subscribeTokenBalances(keyring.current.address!);
       // load user vfe
-      _loadUserVFEs(keyring.current.address!);
+      loadUserVFEs(keyring.current.pubKey!);
     }
     LogUtil.d('plugin.onStarted');
   }

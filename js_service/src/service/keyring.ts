@@ -202,7 +202,7 @@ function _extractEvents(api: ApiPromise, result: SubmittableResult) {
       } else {
         (<any>window).send("txUpdateEvent", {
           title: `${section}.${method}`,
-          message: "ok",
+          message: data.toJSON(),
         });
         if (section == "system" && method == "ExtrinsicSuccess") {
           success = true;

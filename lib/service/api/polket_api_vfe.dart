@@ -4,6 +4,7 @@ import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
+import 'package:toearnfun_flutter_app/types/producer.dart';
 import 'package:toearnfun_flutter_app/types/vfe_brand.dart';
 import 'package:toearnfun_flutter_app/types/vfe_detail.dart';
 
@@ -97,5 +98,34 @@ class PolketApiVFE {
     return list;
   }
 
+  Future<List<Producer>> getProducerAll() async {
+    final List res = await plugin.sdk.api.service.webView?.evalJavascript(
+        'vfe.getProducerAll(api)') ??
+        [];
+    final list = res.map((e) => Producer.fromJson(e)).toList();
+    return list;
+  }
+
+  Future<DispatchResult> producerRegister(String password) async {
+    final sender = TxSenderData(
+      keyring.current.address,
+      keyring.current.pubKey,
+    );
+    final txInfo = TxInfoData(module, "producerRegister", sender);
+    try {
+      final result = await plugin.sdk.api.tx.signAndSend(
+        txInfo,
+        [
+        ],
+        password,
+        onStatusChange: (status) {
+          LogUtil.d(status);
+        },
+      );
+      return DispatchResult.fromJson(result);
+    } catch (err) {
+      return DispatchResult.fail(err);
+    }
+  }
 
 }

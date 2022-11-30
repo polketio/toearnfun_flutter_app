@@ -49,7 +49,7 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
   Widget build(BuildContext context) {
     return Observer(builder: (_) {
       List<Widget> children = <Widget>[];
-      final devices = widget.plugin.store?.devices.scannedDevices;
+      final devices = widget.plugin.store.devices.scannedDevices;
       if (devices != null && devices.isNotEmpty) {
         children.add(
             Expanded(flex: 1, child: scannedDeviceListView(context, devices)));
@@ -161,7 +161,7 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
         showRescanButton = false;
       });
 
-      await widget.plugin.store?.devices.clearScannedDevices();
+      await widget.plugin.store.devices.clearScannedDevices();
       await BluetoothDeviceConnector.scanDevice();
     }
   }
@@ -176,7 +176,7 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
   @override
   void onScanning(BluetoothDevice bleDevice) {
     setState(() {
-      widget.plugin.store?.devices.addScannedDevice(bleDevice);
+      widget.plugin.store.devices.addScannedDevice(bleDevice);
     });
   }
 

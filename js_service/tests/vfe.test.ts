@@ -119,6 +119,14 @@ describe('polket-node module: `VFE` unit test', () => {
             console.log(`brand: ${JSON.stringify(brand)}`);
         });
     });
+
+    test('query device producers unit test', async () => {
+        const producers = await vfe.getProducerAll(api);
+
+        producers.forEach((producer) => {
+            console.log(`producer: ${JSON.stringify(producer)}`);
+        });
+    });
 });
 
 

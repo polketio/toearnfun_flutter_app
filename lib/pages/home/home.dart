@@ -87,19 +87,19 @@ class _HomeViewState extends State<HomeView>
   }
 
   Widget vfeCardView(BuildContext context) {
-    return Observer(builder: (_) {
-      var itemId = "N/A";
-      var battery = 0;
-      var vfeImage = "assets/images/img-Unbound.png";
-      final userSelectedVFE = widget.plugin.store?.vfe.current;
-      if (userSelectedVFE != null) {
-        vfeImage = "assets/images/img-Bound.png";
-        itemId = "#${userSelectedVFE.itemId}";
-        battery = userSelectedVFE.remainingBattery;
-      }
+    return Container(
+      child: Observer(builder: (_) {
+        var itemId = "N/A";
+        var battery = 0;
+        var vfeImage = "assets/images/img-Unbound.png";
+        final userSelectedVFE = widget.plugin.store.vfe.current;
+        if (userSelectedVFE.itemId != null) {
+          vfeImage = "assets/images/img-Bound.png";
+          itemId = "#${userSelectedVFE.itemId.toString().padLeft(4, '0')}";
+          battery = userSelectedVFE.remainingBattery;
+        }
 
-      return Container(
-        child: Stack(children: <Widget>[
+        return Stack(children: <Widget>[
           // background
           Container(
             margin: EdgeInsets.fromLTRB(8.w, 0.h, 8.w, 0.h),
@@ -116,6 +116,12 @@ class _HomeViewState extends State<HomeView>
                 child: GestureDetector(
                     onTap: () async {
                       //todo: check if user have any VFEs
+                      final accountId = widget.keyring.current.pubKey;
+                      if (accountId == null) {
+                        BrnToast.show("Please create a wallet first", context);
+                        return;
+                      }
+
                       BindDeviceSelector.showDeviceTypesSelector(context);
                     },
                     child: Image.asset(vfeImage))),
@@ -161,7 +167,8 @@ class _HomeViewState extends State<HomeView>
                             ),
                             onTap: () {
                               if (userSelectedVFE == null) {
-                                BrnToast.show('Please bind the device first', context);
+                                BrnToast.show(
+                                    'Please bind the device first', context);
                                 return;
                               }
                               setState(() {
@@ -171,7 +178,6 @@ class _HomeViewState extends State<HomeView>
                                   "0339d3e6e837d675ce77e85d708caf89ddcdbf53c8e510775c9cb9ec06282475a0";
                               BluetoothDeviceConnector.autoScanAndConnect(
                                   deviceKey);
-
                             })),
                     Expanded(
                         flex: 1,
@@ -199,9 +205,9 @@ class _HomeViewState extends State<HomeView>
                   ],
                 ))
           ]),
-        ]),
-      );
-    });
+        ]);
+      }),
+    );
   }
 
   Widget myTrainingView(BuildContext context) {

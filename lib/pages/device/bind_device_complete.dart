@@ -99,9 +99,9 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
         margin: EdgeInsets.only(top: 16.h),
         child: ElevatedButton(
           onPressed: () async {
-            BrnLoadingDialog.show(context, content: 'Binding', barrierDismissible: false);
+            BrnLoadingDialog.show(context,
+                content: 'Binding', barrierDismissible: false);
             await bindDeviceOnChain(context);
-
           },
           child: const Text('Bind', style: TextStyle(fontSize: 24)),
           style: ButtonStyle(
@@ -121,7 +121,8 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
         margin: EdgeInsets.only(top: 16.h),
         child: ElevatedButton(
           onPressed: () async {
-            BrnLoadingDialog.show(context, content: 'Registering', barrierDismissible: false);
+            BrnLoadingDialog.show(context,
+                content: 'Registering', barrierDismissible: false);
             await registerDeviceOnChain(context);
           },
           child: const Text('Register', style: TextStyle(fontSize: 24)),
@@ -161,6 +162,15 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
   }
 
   Future<void> bindDeviceOnChain(BuildContext context) async {
+    final accountId = widget.keyring.current.pubKey;
+
+    if (accountId == null) {
+      if (!mounted) return;
+      BrnToast.show("Please create a wallet first", context);
+      BrnLoadingDialog.dismiss(context);
+      return;
+    }
+
     if (deviceToBind != null) {
       final pubKey = await BluetoothDeviceConnector.getPublicKey();
       deviceToBind!.pubKey = pubKey;
@@ -168,11 +178,9 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
       //check if device bond
       final deviceExisted = await widget.plugin.api.vfe.queryDevice(pubKey);
       if (deviceExisted != null) {
-
         if (deviceExisted.status == DeviceStatus.Registered.name) {
           //the device is not bond, try to bind device
           final nonce = deviceExisted.nonce + 1;
-          final accountId = widget.keyring.current.pubKey ?? "";
           final signature =
               await BluetoothDeviceConnector.sigBindDevice(accountId, nonce);
           // LogUtil.d("signature: $signature");
@@ -181,14 +189,18 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
           if (!result.success) {
             if (!mounted) return;
             BrnToast.show(result.error, context);
+            BrnLoadingDialog.dismiss(context);
+            return;
           }
         } else {
           //todo: check if device bond with this VFE
 
         }
+        //load vfe
+        await widget.plugin.loadUserVFEs(accountId!);
 
         // add connected device
-        await widget.plugin.store?.devices.addConnectedDevice(deviceToBind!);
+        await widget.plugin.store.devices.addConnectedDevice(deviceToBind!);
         //auto reconnect device
         BluetoothDeviceConnector.autoScanAndConnect(pubKey);
 
@@ -205,16 +217,43 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
   }
 
   Future<void> registerDeviceOnChain(BuildContext context) async {
-    //generate new keypair for device
-    final newPubKey = await BluetoothDeviceConnector.generateNewKeypair();
-    final result =
-        await widget.plugin.api.vfe.registerDevice(newPubKey, 1, 1, "1234qwer");
+    final user = widget.keyring.current.address;
+    var producerId = 0;
+    if (user == null) {
+      BrnToast.show("Please create a wallet first", context);
+      BrnLoadingDialog.dismiss(context);
+      return;
+    }
+
+    //check if user register producer
+    final producers = await widget.plugin.api.vfe.getProducerAll();
+    for (var p in producers) {
+      if (p.owner == user) {
+        producerId = p.id;
+      }
+    }
+    if (producerId == 0) {
+      final result = await widget.plugin.api.vfe.producerRegister("1234qwer");
+      if (!mounted) return;
+      if (!result.success) {
+        BrnToast.show(result.error, context);
+      } else {
+        BrnToast.show("Register producer successfully", context);
+      }
+    } else {
+      //generate new keypair for device
+      final newPubKey = await BluetoothDeviceConnector.generateNewKeypair();
+      final result = await widget.plugin.api.vfe
+          .registerDevice(newPubKey, producerId, 1, "1234qwer");
+      if (!mounted) return;
+      if (!result.success) {
+        BrnToast.show(result.error, context);
+      } else {
+        BrnToast.show("Register device successfully", context);
+      }
+    }
+
     if (!mounted) return;
     BrnLoadingDialog.dismiss(context);
-    if (!result.success) {
-      BrnToast.show(result.error, context);
-    } else {
-      BrnToast.show("Register device successfully", context);
-    }
   }
 }

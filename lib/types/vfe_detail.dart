@@ -1,3 +1,4 @@
+import 'package:get_storage/get_storage.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/types/vfe_brand.dart';
 
@@ -14,15 +15,31 @@ class VFEDetail {
   bool isUpgrading = false;
   int lastBlock = 0;
   int availablePoints = 0;
+  String deviceKey = "";
 
-  VFEBrand? brandInfo;
-  BluetoothDevice? deviceBond;
+  VFEBrand? _brandInfo;
+
+  VFEBrand? getBrandInfo() => _brandInfo;
+
+  void setBrandInfo(VFEBrand value) {
+    _brandInfo = value;
+  }
+
+  BluetoothDevice? _deviceBond;
+
+  BluetoothDevice? getDeviceBond() => _deviceBond;
+
+  void setDeviceBond(BluetoothDevice value) {
+    _deviceBond = value;
+  }
+
+  VFEDetail();
 
   VFEDetail.fromJson(Map<String, dynamic> json)
       : brandId = json['brandId'] ?? 0,
         itemId = json['itemId'] ?? 0,
         owner = json['owner'] ?? "",
-        rarity =  VFERarity.values.byName(json['rarity'] ?? "Common"),
+        rarity = VFERarity.values.byName(json['rarity'] ?? "Common"),
         level = json['level'] ?? 0,
         remainingBattery = json['remainingBattery'] ?? 0,
         gene = json['gene'] ?? "",
@@ -30,23 +47,24 @@ class VFEDetail {
         lastBlock = json['lastBlock'] ?? 0,
         availablePoints = json['availablePoints'] ?? 0,
         baseAbility = VFEAbility.fromJson(json['baseAbility']),
-        currentAbility = VFEAbility.fromJson(json['currentAbility']);
+        currentAbility = VFEAbility.fromJson(json['currentAbility']),
+        deviceKey = json['deviceKey'] ?? "";
 
   Map<String, dynamic> toJson() => {
-    'brandId': brandId,
-    'itemId': itemId,
-    'owner': owner,
-    'rarity': rarity,
-    'level': level,
-    'remainingBattery': remainingBattery,
-    'gene': gene,
-    'isUpgrading': isUpgrading,
-    'lastBlock': lastBlock,
-    'availablePoints': availablePoints,
-    'baseAbility': baseAbility.toJson(),
-    'currentAbility': currentAbility.toJson(),
-  };
-
+        'brandId': brandId,
+        'itemId': itemId,
+        'owner': owner,
+        'rarity': rarity.name,
+        'level': level,
+        'remainingBattery': remainingBattery,
+        'gene': gene,
+        'isUpgrading': isUpgrading,
+        'lastBlock': lastBlock,
+        'availablePoints': availablePoints,
+        'baseAbility': baseAbility.toJson(),
+        'currentAbility': currentAbility.toJson(),
+        'deviceKey': deviceKey,
+      };
 }
 
 class VFEAbility {
@@ -64,12 +82,11 @@ class VFEAbility {
         durable = json['durable'] ?? 0;
 
   Map<String, dynamic> toJson() => {
-    'efficiency': efficiency,
-    'skill': skill,
-    'luck': luck,
-    'durable': durable,
-  };
-
+        'efficiency': efficiency,
+        'skill': skill,
+        'luck': luck,
+        'durable': durable,
+      };
 }
 
 enum VFERarity {

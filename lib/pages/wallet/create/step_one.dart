@@ -180,7 +180,7 @@ class _NewWalletStepOneState extends State<NewWalletStepOne> {
     });
 
     if (key.isEmpty && addressInfo.mnemonic != null) {
-      widget.plugin.store?.account.setNewAccountKey(addressInfo.mnemonic!);
+      widget.plugin.store.account.setNewAccountKey(addressInfo.mnemonic!);
     }
   }
 }

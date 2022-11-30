@@ -20,7 +20,18 @@ async function getVFEBrandsAll(api: ApiPromise) {
     return brands.map(([_, d]) => d.toJSON());
 }
 
+/**
+ * query all producers
+ * @param api ApiPromise
+ * @returns Producer
+ */
+async function getProducerAll(api: ApiPromise) {
+    const producers = await api.query.vfe.producers.entries<any>();
+    return producers.map(([_, d]) => d.toJSON());
+}
+
 export default {
     getVFEDetailsByAddress,
     getVFEBrandsAll,
+    getProducerAll,
 };

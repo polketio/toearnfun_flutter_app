@@ -8,6 +8,7 @@ import 'package:toearnfun_flutter_app/pages/root.dart';
 import 'package:toearnfun_flutter_app/pages/start/start.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
+import 'package:toearnfun_flutter_app/store/plugin_store.dart';
 
 const get_storage_container = 'configuration';
 const log_tag = 'ToEarnFun';
@@ -29,8 +30,10 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
 
       LogUtil.init(tag: log_tag, isDebug: true);
 
+      final store = PluginStore();
+      await store.init();
 
-      final network = PluginPolket();
+      final network = PluginPolket(store);
       _keyring = Keyring();
       await _keyring!.init([network.basic.ss58 ?? 0]);
       setState(() {

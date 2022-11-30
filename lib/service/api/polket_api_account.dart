@@ -27,7 +27,7 @@ class PolketApiAccount {
     String derivePath = '',
     bool isFromCreatePage = false,
   }) async {
-    final acc = plugin.store?.account.newAccount ?? AccountCreate();
+    final acc = plugin.store.account.newAccount ?? AccountCreate();
     if (isFromCreatePage &&
         (acc.name == null ||
             acc.name.isEmpty ||
@@ -54,7 +54,7 @@ class PolketApiAccount {
     String derivePath = '',
     bool isFromCreatePage = false,
   }) async {
-    final acc = plugin.store?.account.newAccount ?? AccountCreate();
+    final acc = plugin.store.account.newAccount ?? AccountCreate();
     if (isFromCreatePage &&
         (acc.name == null ||
             acc.name.isEmpty ||
@@ -72,7 +72,7 @@ class PolketApiAccount {
   }
 
   void setBiometricEnabled(String pubKey) {
-    plugin.store?.storage.write(
+    plugin.store.storage.write(
         '$_biometricEnabledKey$pubKey', DateTime.now().millisecondsSinceEpoch);
   }
 
@@ -83,12 +83,12 @@ class PolketApiAccount {
 
   // Actively turn off the function and will not be automatically unlocked again
   void closeBiometricDisabled(String pubKey) {
-    plugin.store?.storage.write('$_biometricEnabledKey$pubKey', 0);
+    plugin.store.storage.write('$_biometricEnabledKey$pubKey', 0);
   }
 
   bool isCloseBiometricDisabled(String pubKey) {
     final timestamp =
-        plugin.store?.storage.read('$_biometricEnabledKey$pubKey');
+        plugin.store.storage.read('$_biometricEnabledKey$pubKey');
     if (timestamp == null || timestamp == 0) {
       return true;
     }
@@ -97,7 +97,7 @@ class PolketApiAccount {
 
   bool getBiometricEnabled(String pubKey) {
     final timestamp =
-        plugin.store?.storage.read('$_biometricEnabledKey$pubKey');
+        plugin.store.storage.read('$_biometricEnabledKey$pubKey');
     // we cache user's password with biometric for 7 days.
     if (timestamp != null &&
         timestamp + SECONDS_OF_DAY * 7000 >
@@ -196,7 +196,7 @@ class PolketApiAccount {
 
     final icons =
         await plugin.sdk.api.account.getAddressIcons(addresses);
-    plugin.store?.account.setAddressIconsMap(icons!);
+    plugin.store.account.setAddressIconsMap(icons!);
   }
 
   Future<RecoveryInfo> queryRecoverable(String address) async {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get_storage/get_storage.dart';
 import 'package:mobx/mobx.dart';
 import 'package:toearnfun_flutter_app/types/vfe_brand.dart';
@@ -17,7 +19,7 @@ abstract class _VFEStore with Store {
   final String userCurrentVFEKey = 'user_current_vfe';
 
   @observable
-  VFEDetail? current;
+  VFEDetail current = VFEDetail();
 
   @observable
   ObservableList<VFEDetail> userVFEList = ObservableList<VFEDetail>();
@@ -43,13 +45,19 @@ abstract class _VFEStore with Store {
   @action
   void loadUserCurrent(String? pubKey) {
     final key = '${userCurrentVFEKey}_$pubKey';
-    current = storage.read(key);
+    final jsonString = storage.read(key);
+    if (jsonString != null) {
+      Map<String, dynamic> data = jsonDecode(jsonString);
+      current = VFEDetail.fromJson(data);
+    } else {
+      current = VFEDetail();
+    }
   }
 
   @action
   Future<void> setUserCurrent(String? pubKey, VFEDetail vfe) async {
     current = vfe;
     final key = '${userCurrentVFEKey}_$pubKey';
-    await storage.write(key, vfe);
+    await storage.write(key, jsonEncode(vfe));
   }
 }

@@ -31,7 +31,7 @@ class _NewWalletStepTwoState extends State<NewWalletStepTwo> {
   @override
   void initState() {
     super.initState();
-    final mnemonics = widget.plugin.store?.account.newAccount.key ?? '';
+    final mnemonics = widget.plugin.store.account.newAccount.key ?? '';
     _wordsSelected = <String>[];
     _wordsLeft = mnemonics.split(' ');
   }

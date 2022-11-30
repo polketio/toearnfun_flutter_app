@@ -12,13 +12,13 @@ mixin _$VFEStore on _VFEStore, Store {
   late final _$currentAtom = Atom(name: '_VFEStore.current', context: context);
 
   @override
-  VFEDetail? get current {
+  VFEDetail get current {
     _$currentAtom.reportRead();
     return super.current;
   }
 
   @override
-  set current(VFEDetail? value) {
+  set current(VFEDetail value) {
     _$currentAtom.reportWrite(value, super.current, () {
       super.current = value;
     });
