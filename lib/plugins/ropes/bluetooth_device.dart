@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/services.dart';
 import 'package:toearnfun_flutter_app/store/devices.dart';
+import 'package:toearnfun_flutter_app/store/plugin_store.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/utils/crypto.dart';
@@ -41,7 +42,7 @@ class BluetoothDeviceConnector {
   static List<BluetoothDeviceObserver> observers = [];
   static BluetoothDevice? connectedDevice;
   static Timer? _timer;
-  static DevicesStore? _store;
+  static PluginStore? _store;
   static bool autoConnect = false;
   static String targetDeviceKey = "";
 
@@ -52,7 +53,7 @@ class BluetoothDeviceConnector {
   static const EventChannel _eventChannel =
       EventChannel("BluetoothFlutterPluginEvent");
 
-  static void init(DevicesStore store) {
+  static void init(PluginStore store) {
     if (_initialized) {
       return;
     }
@@ -61,16 +62,25 @@ class BluetoothDeviceConnector {
     _eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onError);
   }
 
-  static autoScanAndConnect(String deviceKey) {
+  static bool autoScanAndConnect(String deviceKey) {
     targetDeviceKey = deviceKey;
     LogUtil.d("targetDeviceKey = $targetDeviceKey");
-    if (_timer != null) {
-      return;
+
+    //check if targetDevice exist connectedDevices of store
+    final existed = _store!.devices.connectedDevices
+        .any((e) => e.pubKey == targetDeviceKey);
+    if (!existed) {
+      return false;
     }
+
+    if (_timer != null) {
+      return true;
+    }
+
     // define a timer 5s
     _timer = Timer.periodic(Duration(seconds: 5), (t) {
       // load Connected devices
-      final connectedDevices = _store!.connectedDevices;
+      final connectedDevices = _store!.devices.connectedDevices;
       if (connectedDevice == null && connectedDevices.isNotEmpty) {
         LogUtil.d("autoScanAndConnect");
         scanDevice();
@@ -78,6 +88,8 @@ class BluetoothDeviceConnector {
         LogUtil.d("device is connected");
       }
     });
+
+    return true;
   }
 
   static void addObserver(BluetoothDeviceObserver o) {
@@ -105,7 +117,7 @@ class BluetoothDeviceConnector {
     if (connect) {
       await registerCustomDataRxCallback();
       connectedDevice = device;
-      _store?.updateCurrentConnected(device);
+      _store!.devices.updateCurrentConnected(device);
 
       for (var o in observers) {
         o.onConnectSuccess(device);
@@ -126,7 +138,7 @@ class BluetoothDeviceConnector {
     if (!connect) {
       targetDeviceKey = "";
       unregisterCustomDataRxCallback();
-      _store?.disconnectDevice();
+      _store!.devices.disconnectDevice();
     }
     return connect;
   }
@@ -183,8 +195,8 @@ class BluetoothDeviceConnector {
   //绑定设备
   static Future<String> sigBindDevice(String accountId, int deviceNonce) async {
     final hash = Hash.ripemd160(accountId);
-    final signature = await _channel
-        .invokeMethod("writeSkipBondDev", {'nonce': deviceNonce, 'address': hash});
+    final signature = await _channel.invokeMethod(
+        "writeSkipBondDev", {'nonce': deviceNonce, 'address': hash});
     return signature;
   }
 
@@ -193,7 +205,7 @@ class BluetoothDeviceConnector {
     if (_timer == null) {
       return;
     }
-    final connectedDevices = _store?.connectedDevices;
+    final connectedDevices = _store!.devices.connectedDevices;
     if (connectedDevices != null && connectedDevices.isNotEmpty) {
       for (var d in connectedDevices) {
         if (d.mac == device.mac) {
@@ -232,7 +244,7 @@ class BluetoothDeviceConnector {
           o.onDisConnected(device);
         }
         connectedDevice = null;
-        _store?.disconnectDevice();
+        _store!.devices.disconnectDevice();
         break;
       case BlueEventMessageType.skipDisplayData:
         final res = SkipDisplayData.fromJson(content);
@@ -242,15 +254,19 @@ class BluetoothDeviceConnector {
         break;
       case BlueEventMessageType.skipResultData:
         final res = SkipResultData.fromJson(content);
+        res.deviceKey = targetDeviceKey;
         for (var o in observers) {
           o.onReceiveSkipRealTimeResultData(res);
         }
+        _store!.report.addTrainingReport(res);
         break;
       case BlueEventMessageType.skipHistoryData:
         final res = SkipResultData.fromJson(content);
+        res.deviceKey = targetDeviceKey;
         for (var o in observers) {
           o.onReceiveSkipHistoryResultData(res);
         }
+        _store!.report.addTrainingReport(res);
         break;
       case BlueEventMessageType.onScanFinished:
         for (var o in observers) {

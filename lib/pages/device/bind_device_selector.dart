@@ -16,7 +16,7 @@ class BindDeviceSelector {
     return list;
   }
 
-  static Future<void> showDeviceTypesSelector(BuildContext context) async {
+  static Future<void> showDeviceTypesSelector(BuildContext context, int? itemIdOfVFE) async {
     final deviceTypes = await getDeviceType();
     List<BrnCommonActionSheetItem> actions = deviceTypes
         .map((e) => BrnCommonActionSheetItem(
@@ -41,7 +41,9 @@ class BindDeviceSelector {
               // Navigator.of(ctx).pop();
               Future.delayed(Duration.zero, () {
                 Navigator.of(ctx)
-                    .pushNamed(BindDeviceTips.route);
+                    .pushNamed(BindDeviceTips.route, arguments: {
+                  "itemIdOfVFE": itemIdOfVFE,
+                });
               });
             },
           );

@@ -64,6 +64,10 @@ class _BindDeviceTipsState extends State<BindDeviceTips> {
   }
 
   Widget buttonView(BuildContext context) {
+
+    final data = ModalRoute.of(context)?.settings.arguments as Map;
+    final itemIdOfVFE = data["itemIdOfVFE"];
+
     return Container(
         height: 50.h,
         width: double.infinity,
@@ -71,7 +75,9 @@ class _BindDeviceTipsState extends State<BindDeviceTips> {
         child: ElevatedButton(
           onPressed: () {
             Navigator.of(context)
-                .pushNamed(BindDeviceScanner.route);
+                .pushNamed(BindDeviceScanner.route, arguments: {
+              "itemIdOfVFE": itemIdOfVFE,
+            });
           },
           child: const Text('Next', style: TextStyle(fontSize: 24)),
           style: ButtonStyle(

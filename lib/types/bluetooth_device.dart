@@ -30,7 +30,7 @@ class BluetoothDevice {
         status = json['status'] ?? "",
         nonce = json['nonce'] ?? 0,
         timestamp = json['timestamp'] ?? 0,
-        mintCost = json['mintCost'];
+        mintCost = json['mintCost'] != null ? MintCost.fromJson(json['mintCost']) : null;
 
   Map<String, dynamic> toJson() => {
         'name': name,
@@ -43,7 +43,7 @@ class BluetoothDevice {
         'status': status,
         'nonce': nonce,
         'timestamp': timestamp,
-        'mintCost': mintCost,
+        'mintCost': mintCost?.toJson(),
       };
 }
 

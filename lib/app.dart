@@ -1,9 +1,12 @@
 import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
+import 'package:polkawallet_sdk/utils/i18n.dart';
+import 'package:toearnfun_flutter_app/common/consts.dart';
 import 'package:toearnfun_flutter_app/pages/root.dart';
 import 'package:toearnfun_flutter_app/pages/start/start.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
@@ -14,20 +17,22 @@ const get_storage_container = 'configuration';
 const log_tag = 'ToEarnFun';
 
 class ToEarnFunApp extends StatefulWidget {
-  const ToEarnFunApp({Key? key}) : super(key: key);
+  ToEarnFunApp(BuildTargets buildTarget) {
+    ToEarnFunApp.buildTarget = buildTarget;
+  }
+
+  static BuildTargets buildTarget = BuildTargets.apk;
 
   @override
   State<ToEarnFunApp> createState() => _ToEarnFunAppState();
 }
 
 class _ToEarnFunAppState extends State<ToEarnFunApp> {
-
   PluginPolket? _network;
   Keyring? _keyring;
 
   Future<int> _initApp() async {
     if (_keyring == null) {
-
       LogUtil.init(tag: log_tag, isDebug: true);
 
       final store = PluginStore();
@@ -35,7 +40,7 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
 
       final network = PluginPolket(store);
       _keyring = Keyring();
-      await _keyring!.init([network.basic.ss58 ?? 0]);
+      await _keyring!.init([network.basic.ss58!]);
       setState(() {
         _network = network;
       });
@@ -45,7 +50,7 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
       await _network?.start(_keyring!);
       await _network?.updateNetworkState();
 
-      BluetoothDeviceConnector.init(network.store!.devices);
+      BluetoothDeviceConnector.init(network.store!);
     }
 
     return 1;
@@ -88,6 +93,16 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
         theme: new ThemeData(
           primaryColor: Colors.white,
         ),
+        localizationsDelegates: const [
+          AppLocalizationsDelegate(Locale('en', '')),
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en', ''),
+          Locale('zh', ''),
+        ],
         initialRoute: StartView.route,
         onGenerateRoute: (settings) {
           if (routes[settings.name] != null) {

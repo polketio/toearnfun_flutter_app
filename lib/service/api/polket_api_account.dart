@@ -8,6 +8,7 @@ import 'package:polkawallet_sdk/api/types/recoveryInfo.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
 import 'package:polkawallet_ui/components/passwordInputDialog.dart';
+import 'package:polkawallet_ui/components/v3/dialog.dart';
 import 'package:toearnfun_flutter_app/common/consts.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/store/account.dart';
@@ -87,8 +88,7 @@ class PolketApiAccount {
   }
 
   bool isCloseBiometricDisabled(String pubKey) {
-    final timestamp =
-        plugin.store.storage.read('$_biometricEnabledKey$pubKey');
+    final timestamp = plugin.store.storage.read('$_biometricEnabledKey$pubKey');
     if (timestamp == null || timestamp == 0) {
       return true;
     }
@@ -96,8 +96,7 @@ class PolketApiAccount {
   }
 
   bool getBiometricEnabled(String pubKey) {
-    final timestamp =
-        plugin.store.storage.read('$_biometricEnabledKey$pubKey');
+    final timestamp = plugin.store.storage.read('$_biometricEnabledKey$pubKey');
     // we cache user's password with biometric for 7 days.
     if (timestamp != null &&
         timestamp + SECONDS_OF_DAY * 7000 >
@@ -124,7 +123,7 @@ class PolketApiAccount {
     );
   }
 
-  Future<String> getPasswordWithBiometricAuth(
+  Future<String?> getPasswordWithBiometricAuth(
       BuildContext context, String pubKey) async {
     final response = await BiometricStorage().canAuthenticate();
 
@@ -149,44 +148,52 @@ class PolketApiAccount {
     } else {
       return "can't";
     }
-    return "";
+    return null;
   }
 
-  Future<String> getPassword(BuildContext context, KeyPairData acc) async {
-    final bioPass = await getPasswordWithBiometricAuth(context, acc.pubKey!);
-    final isClose = isCloseBiometricDisabled(acc.pubKey!);
-    if (bioPass == null && !isClose) {
-      await showCupertinoDialog(
+  Future<String?> getPassword(
+      BuildContext context, KeyPairData acc, [bool needInteract = false]) async {
+    if (needInteract) {
+      final bioPass = await getPasswordWithBiometricAuth(context, acc.pubKey!);
+      final isClose = isCloseBiometricDisabled(acc.pubKey!);
+      if (bioPass == null && !isClose) {
+        await showCupertinoDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return PolkawalletAlertDialog(
+              title: Text('Note'),
+              content: Text(
+                  'Enter the password to activate fingerprint/face ID due to the biometrics has expired.'),
+              actions: <Widget>[
+                PolkawalletActionSheetAction(
+                  child: Text('OK'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            );
+          },
+        );
+      }
+      String? password = await showCupertinoDialog(
         context: context,
-        builder: (BuildContext context) {
-          return CupertinoAlertDialog(
-            title: Text('Note'),
-            content: Text('Enter the password to activate fingerprint/face ID due to the biometrics has expired.'),
-            actions: <Widget>[
-              CupertinoButton(
-                child: Text('OK'),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
+        builder: (_) {
+          return PasswordInputDialog(
+            plugin.sdk.api,
+            title: Text('Unlock Account with Password'),
+            account: acc,
+            userPass: bioPass == "can't" ? null : bioPass,
           );
         },
       );
+      if (bioPass == null && !isClose && password != null) {
+        setBiometricEnabled(acc.pubKey!);
+      }
+      return password;
+    } else {
+      String? password =
+          await plugin.store.account.getUserWalletPassword(acc.pubKey!);
+      return password;
     }
-    final password = await showCupertinoDialog(
-      context: context,
-      builder: (_) {
-        return PasswordInputDialog(
-          plugin.sdk.api,
-          title: Text('Unlock Account with Password'),
-          account: acc,
-          userPass: bioPass == "can't" ? null : bioPass,
-        );
-      },
-    );
-    if (bioPass == null && !isClose && password != null) {
-      setBiometricEnabled(acc.pubKey!);
-    }
-    return password;
   }
 
   Future<void> queryAddressIcons(List addresses) async {
@@ -194,8 +201,7 @@ class PolketApiAccount {
         (e) => !plugin.store!.account.addressIconsMap.containsKey(e));
     if (addresses.length == 0) return;
 
-    final icons =
-        await plugin.sdk.api.account.getAddressIcons(addresses);
+    final icons = await plugin.sdk.api.account.getAddressIcons(addresses);
     plugin.store.account.setAddressIconsMap(icons!);
   }
 

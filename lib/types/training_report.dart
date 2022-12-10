@@ -2,6 +2,12 @@ import "dart:typed_data";
 import 'package:convert/convert.dart';
 import 'package:toearnfun_flutter_app/utils/bytes.dart';
 
+enum ReportStatus {
+  notReported,
+  reported,
+  expired,
+}
+
 class SkipResultData {
   int reportTime = 0; //时间戳
   int trainingDuration = 0; //跳绳总时长
@@ -11,8 +17,10 @@ class SkipResultData {
   int maxJumpRopeCount = 0; //最大连跳次数
   int interruptions = 0; //绊绳次数
   int jumpRopeDuration = 0; //有效跳绳时长
-  int status = 0;
+  ReportStatus status = ReportStatus.notReported;
   String signature = "";
+  String deviceKey = "";
+  TrainingReward? reward;
 
   SkipResultData();
 
@@ -41,7 +49,27 @@ class SkipResultData {
         maxJumpRopeCount = json['consecutiveSkipMaxNum'],
         interruptions = json['skipTripNum'],
         jumpRopeDuration = json['skipValidSec'],
-        signature = json['signature'];
+        status = ReportStatus.values.byName(json['status'] ?? "notReported"),
+        signature = json['signature'],
+        deviceKey = json['deviceKey'] ?? "",
+        reward = json['reward'] != null
+            ? TrainingReward.fromJson(json['reward'])
+            : null;
+
+  Map<String, dynamic> toJson() => {
+        'timestamp': reportTime,
+        'skipSecSum': trainingDuration,
+        'skipCntSum': totalJumpRopeCount,
+        'freqAvg': averageSpeed,
+        'freqMax': maxSpeed,
+        'consecutiveSkipMaxNum': maxJumpRopeCount,
+        'skipTripNum': interruptions,
+        'skipValidSec': jumpRopeDuration,
+        'status': status.name,
+        'signature': signature,
+        'deviceKey': deviceKey,
+        'reward': reward?.toJson(),
+      };
 
   String encodeData() {
     final data = BytesBuilder();
@@ -86,4 +114,33 @@ class SkipDisplayData {
         totalJumpRopeCount = json['skipCntSum'],
         batteryPercent = json['batteryPercent'],
         jumpRopeDuration = json['skipValidSec'];
+
+  Map<String, dynamic> toJson() => {
+        'mode': mode,
+        'setting': setting,
+        'skipSecSum': trainingDuration,
+        'skipCntSum': totalJumpRopeCount,
+        'batteryPercent': batteryPercent,
+        'skipValidSec': jumpRopeDuration,
+      };
+}
+
+class TrainingReward {
+  int energyUsed = 0;
+  int batteryUsed = 0;
+  int rewards = 0;
+  int assetId = 0;
+
+  TrainingReward.fromJson(Map<String, dynamic> json)
+      : energyUsed = json['energyUsed'] ?? 0,
+        batteryUsed = json['batteryUsed'] ?? 0,
+        rewards = json['rewards'] ?? 0,
+        assetId = json['assetId'] ?? 0;
+
+  Map<String, dynamic> toJson() => {
+        'energyUsed': energyUsed,
+        'batteryUsed': batteryUsed,
+        'rewards': rewards,
+        'assetId': assetId,
+      };
 }

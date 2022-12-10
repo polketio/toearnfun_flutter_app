@@ -25,4 +25,13 @@ class MintCost {
   int assetId;
   String cost;
   MintCost(this.assetId, this.cost);
+
+  MintCost.fromJson(Map<String, dynamic> json)
+      : assetId = json['assetId'] ?? 0,
+        cost = json['mac'] ?? "";
+
+  Map<String, dynamic> toJson() => {
+    'assetId': assetId,
+    'cost': cost,
+  };
 }

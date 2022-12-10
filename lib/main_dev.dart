@@ -6,5 +6,5 @@ import 'package:toearnfun_flutter_app/common/consts.dart';
 void main() async {
   await GetStorage.init(get_storage_container);
 
-  runApp(ToEarnFunApp(BuildTargets.apk));
+  runApp(ToEarnFunApp(BuildTargets.dev));
 }

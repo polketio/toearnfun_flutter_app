@@ -168,8 +168,13 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
 
   Future<void> selectDevice(
       BuildContext context, BluetoothDevice device) async {
+
+    final data = ModalRoute.of(context)?.settings.arguments as Map;
+    final itemIdOfVFE = data["itemIdOfVFE"];
+
     Navigator.of(context).pushNamed(BindDeviceComplete.route, arguments: {
       "device": device,
+      "itemIdOfVFE": itemIdOfVFE,
     });
   }
 

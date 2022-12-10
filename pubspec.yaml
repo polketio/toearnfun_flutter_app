@@ -24,7 +24,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.2
   english_words: ^4.0.0
   bruno: ^2.2.0
@@ -47,6 +48,8 @@ dependencies:
   hash: ^1.0.1
   # Downgrade web3dart to 2.3.5 due to issue: `flutter pub run build_runner` failed
   web3dart: 2.3.5
+  flutter_secure_storage: ^6.1.0
+  realm: 0.8.0+rc
 
 dev_dependencies:
   flutter_test:

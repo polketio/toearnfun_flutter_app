@@ -9,6 +9,7 @@ import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_detail.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
+import 'package:toearnfun_flutter_app/utils/time.dart';
 
 class JumpRopeTrainingReportsView extends StatefulWidget {
   JumpRopeTrainingReportsView(this.plugin, this.keyring);
@@ -77,7 +78,7 @@ class _JumpRopeTrainingReportsViewState
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final d = jumpRopeTrainingReportList[index];
-          return new JumpRopeTrainingReportItem(d);
+          return JumpRopeTrainingReportItem(d);
         },
         childCount: jumpRopeTrainingReportList.length,
       ),
@@ -85,12 +86,10 @@ class _JumpRopeTrainingReportsViewState
   }
 
   Future<void> loadJumpRopeTrainingReport() async {
-    List<SkipResultData> list = [];
-    for (int i = 1; i <= 3; i++) {
-      list.add(SkipResultData());
-    }
+
+   widget.plugin.store.report.loadTrainingReportList();
     setState(() {
-      jumpRopeTrainingReportList.addAll(list);
+      jumpRopeTrainingReportList = widget.plugin.store.report.userTrainingReportList;
     });
   }
 }
@@ -123,7 +122,7 @@ class JumpRopeTrainingReportItem extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 //[reportTime, status]
-                                Text('06/12 09:30',
+                                Text(formatTimestamp(timestamp: data.reportTime, date: 'MM/DD hh:mm', toInt: false),
                                     style: TextStyle(
                                         fontSize: 16, color: Colors.black)),
                                 IconText(
@@ -182,7 +181,7 @@ class JumpRopeTrainingReportItem extends StatelessWidget {
                                                     flex: 1,
                                                     child: IconText(
                                                       'assets/images/icon-js.png',
-                                                      '00:12:30',
+                                                      formatDuration(data.trainingDuration),
                                                       style: TextStyle(
                                                           fontSize: 16,
                                                           color: Colors.black),
@@ -205,7 +204,9 @@ class JumpRopeTrainingReportItem extends StatelessWidget {
                               ]))
                     ])),
             onTap: () {
-              Navigator.of(context).pushNamed(JumpRopeTrainingDetailView.route);
+              Navigator.of(context).pushNamed(JumpRopeTrainingDetailView.route, arguments: {
+                "trainingReport": data,
+              });
             }));
   }
 }

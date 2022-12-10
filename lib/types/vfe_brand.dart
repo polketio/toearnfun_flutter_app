@@ -14,8 +14,8 @@ class VFEBrand {
 
   Map<String, dynamic> toJson() => {
         'brandId': brandId,
-        'sportType': sportType,
-        'rarity': rarity,
+        'sportType': sportType?.name,
+        'rarity': rarity?.name,
         'uri': uri,
       };
 }

@@ -14,6 +14,7 @@ import 'package:toearnfun_flutter_app/pages/profile/profile.dart';
 import 'package:toearnfun_flutter_app/pages/root.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_detail.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
+import 'package:toearnfun_flutter_app/pages/vfe/vfe_detail.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_one.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_three.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_two.dart';
@@ -96,6 +97,7 @@ class PluginPolket extends PolkawalletPlugin {
       BindDeviceTips.route: (_) => BindDeviceTips(this, keyring),
       BindDeviceScanner.route: (_) => BindDeviceScanner(this, keyring),
       BindDeviceComplete.route: (_) => BindDeviceComplete(this, keyring),
+      VFEDetailView.route: (_) => VFEDetailView(this, keyring),
     };
   }
 
@@ -111,18 +113,13 @@ class PluginPolket extends PolkawalletPlugin {
     final brands = await _api.vfe.getVFEBrandsAll();
     if (brands.isNotEmpty) {
       store.vfe.allVFEBrands.addAll(brands);
-      var currentVFE = store.vfe.current;
       for (var b in brands) {
         final details =
             await _api.vfe.getVFEDetailsByAddress(user, b.brandId ?? 0);
         for (var d in details) {
           d.setBrandInfo(b);
-          store.vfe.userVFEList.add(d);
-          if (currentVFE == null) {
-            currentVFE = d;
-            await store.vfe.setUserCurrent(user, d);
-          }
         }
+        await store.vfe.addUserVFEList(user, details);
       }
     }
   }

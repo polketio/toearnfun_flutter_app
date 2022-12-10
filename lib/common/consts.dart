@@ -10,3 +10,6 @@ const LOCAL_TX_STORE_KEY = 'local_tx_store';
 
 /// app versions
 enum BuildTargets { apk, playStore, dev }
+
+/// The vfe brand id for test now
+const int VFE_BRAND_ID = 1;

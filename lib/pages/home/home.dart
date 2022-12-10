@@ -10,6 +10,7 @@ import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/pages/device/bind_device_selector.dart';
 import 'package:toearnfun_flutter_app/pages/device/device_connect.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
+import 'package:toearnfun_flutter_app/pages/vfe/vfe_detail.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
@@ -89,14 +90,19 @@ class _HomeViewState extends State<HomeView>
   Widget vfeCardView(BuildContext context) {
     return Container(
       child: Observer(builder: (_) {
-        var itemId = "N/A";
-        var battery = 0;
-        var vfeImage = "assets/images/img-Unbound.png";
+        String deviceKey = "";
+        String itemId = "N/A";
+        int battery = 0;
+        String vfeImage = "assets/images/img-Unbound.png";
+        int itemIdOfVFE = 0;
         final userSelectedVFE = widget.plugin.store.vfe.current;
         if (userSelectedVFE.itemId != null) {
           vfeImage = "assets/images/img-Bound.png";
           itemId = "#${userSelectedVFE.itemId.toString().padLeft(4, '0')}";
           battery = userSelectedVFE.remainingBattery;
+          deviceKey = userSelectedVFE.deviceKey.replaceFirst("0x", "");
+          itemIdOfVFE = userSelectedVFE.itemId ?? 0;
+          LogUtil.d("user current vfe is updated");
         }
 
         return Stack(children: <Widget>[
@@ -122,7 +128,15 @@ class _HomeViewState extends State<HomeView>
                         return;
                       }
 
-                      BindDeviceSelector.showDeviceTypesSelector(context);
+                      if (itemIdOfVFE != 0) {
+                        Navigator.of(context)
+                            .pushNamed(VFEDetailView.route, arguments: {
+                          "vfeDetail": userSelectedVFE,
+                        });
+                      } else {
+                        BindDeviceSelector.showDeviceTypesSelector(
+                            context, itemIdOfVFE);
+                      }
                     },
                     child: Image.asset(vfeImage))),
             Padding(
@@ -166,18 +180,27 @@ class _HomeViewState extends State<HomeView>
                               ],
                             ),
                             onTap: () {
-                              if (userSelectedVFE == null) {
+                              if (deviceKey.isEmpty) {
                                 BrnToast.show(
                                     'Please bind the device first', context);
                                 return;
                               }
-                              setState(() {
-                                connectedStatus = "connecting...";
-                              });
-                              const deviceKey =
-                                  "0339d3e6e837d675ce77e85d708caf89ddcdbf53c8e510775c9cb9ec06282475a0";
-                              BluetoothDeviceConnector.autoScanAndConnect(
-                                  deviceKey);
+
+                              final existed =
+                                  BluetoothDeviceConnector.autoScanAndConnect(
+                                      deviceKey);
+                              if (existed) {
+                                setState(() {
+                                  connectedStatus = "connecting...";
+                                });
+                              } else {
+                                setState(() {
+                                  connectedStatus = "disconnected";
+                                });
+                                BrnToast.show('Device is not existed', context);
+                                BindDeviceSelector.showDeviceTypesSelector(
+                                    context, itemIdOfVFE);
+                              }
                             })),
                     Expanded(
                         flex: 1,

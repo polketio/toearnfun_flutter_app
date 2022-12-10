@@ -36,13 +36,16 @@ abstract class _DevicesStore with Store {
     }
 
     for (var d in _connectedDevices) {
-      if (d.mac == device.mac) {
+      if (d.pubKey == device.pubKey) {
         return;
       }
     }
 
     _connectedDevices.add(device);
-    await storage.write(connectedDevicesKey, _connectedDevices);
+
+    List<Map<String, dynamic>> rawData =
+    _connectedDevices.map((e) => e.toJson()).toList();
+    await storage.write(connectedDevicesKey, rawData);
   }
 
   void loadConnectedDevices() async {

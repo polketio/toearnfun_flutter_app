@@ -56,21 +56,22 @@ mixin _$VFEStore on _VFEStore, Store {
     });
   }
 
-  late final _$addUserVFEAsyncAction =
-      AsyncAction('_VFEStore.addUserVFE', context: context);
+  late final _$updateUserCurrentAsyncAction =
+      AsyncAction('_VFEStore.updateUserCurrent', context: context);
 
   @override
-  Future<void> addUserVFE(VFEDetail vfe) {
-    return _$addUserVFEAsyncAction.run(() => super.addUserVFE(vfe));
+  Future<void> updateUserCurrent(String? pubKey, VFEDetail vfe) {
+    return _$updateUserCurrentAsyncAction
+        .run(() => super.updateUserCurrent(pubKey, vfe));
   }
 
-  late final _$setUserCurrentAsyncAction =
-      AsyncAction('_VFEStore.setUserCurrent', context: context);
+  late final _$addUserVFEListAsyncAction =
+      AsyncAction('_VFEStore.addUserVFEList', context: context);
 
   @override
-  Future<void> setUserCurrent(String? pubKey, VFEDetail vfe) {
-    return _$setUserCurrentAsyncAction
-        .run(() => super.setUserCurrent(pubKey, vfe));
+  Future<void> addUserVFEList(String? pubKey, List<VFEDetail> vfeList) {
+    return _$addUserVFEListAsyncAction
+        .run(() => super.addUserVFEList(pubKey, vfeList));
   }
 
   late final _$_VFEStoreActionController =

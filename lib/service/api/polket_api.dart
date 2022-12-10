@@ -1,3 +1,5 @@
+import 'package:polkawallet_sdk/api/types/txInfoData.dart';
+import 'package:polkawallet_sdk/polkawallet_sdk.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api_account.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api_assets.dart';
@@ -13,11 +15,41 @@ class PolketApi {
   final PolketApiAssets assets;
   final PolketApiAccount account;
   final PolketApiVFE vfe;
+
+
+  static Future<DispatchResult> call(
+      Keyring keyring,
+      WalletSDK sdk,
+      String module,
+      String method,
+      List params,
+      String? password, {
+        Function(String)? onStatusChange,
+        String? rawParam,
+      }) async {
+    final sender = TxSenderData(
+      keyring.current.address,
+      keyring.current.pubKey,
+    );
+    final txInfo = TxInfoData(module, method, sender);
+    try {
+      final result = await sdk.api.tx.signAndSend(
+        txInfo,
+        params,
+        password ?? "",
+        onStatusChange: onStatusChange,
+        rawParam: rawParam,
+      );
+      return DispatchResult.fromJson(result);
+    } catch (err) {
+      return DispatchResult.fail(err);
+    }
+  }
 }
 
 class DispatchResult {
   String txId = "";
-  String blockHash= "";
+  String blockHash = "";
   String error = "";
   bool success = false;
 
@@ -35,6 +67,5 @@ class DispatchResult {
     data.error = error.toString();
     return data;
   }
-
-
 }
+

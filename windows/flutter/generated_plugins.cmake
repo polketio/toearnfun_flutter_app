@@ -3,6 +3,8 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  flutter_secure_storage_windows
+  realm
   url_launcher_windows
 )
 
