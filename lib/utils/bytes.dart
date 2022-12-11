@@ -22,8 +22,8 @@ class Hex {
 
   /// hex decode
   static List<int> decode(String hex) {
-    if (hex.contains("0x", 0)) {
-      hex = hex.replaceFirst("0x", "", 0);
+    if (hex.contains('0x', 0)) {
+      hex = hex.replaceFirst('0x', '', 0);
     }
     var bytes = <int>[];
     var len = hex.length ~/ 2;

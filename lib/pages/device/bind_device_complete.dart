@@ -148,10 +148,10 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
   Future<void> connectDeviceToBind() async {
     int status = connectedStatus;
     final data = ModalRoute.of(context)?.settings.arguments as Map;
-    BluetoothDevice device = data["device"];
-    itemIdOfVFE = data["itemIdOfVFE"];
-    LogUtil.d("device: ${device.name}(${device.mac})");
-    LogUtil.d("itemIdOfVFE: $itemIdOfVFE");
+    BluetoothDevice device = data['device'];
+    itemIdOfVFE = data['itemIdOfVFE'];
+    LogUtil.d('device: ${device.name}(${device.mac})');
+    LogUtil.d('itemIdOfVFE: $itemIdOfVFE');
     final connected = await BluetoothDeviceConnector.connect(device);
     if (connected) {
       deviceToBind = device;
@@ -171,7 +171,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
     if (accountId == null) {
       BluetoothDeviceConnector.stopConnect();
       if (!mounted) return;
-      BrnToast.show("Please create a wallet first", context);
+      BrnToast.show('Please create a wallet first', context);
       BrnLoadingDialog.dismiss(context);
       return;
     }
@@ -186,7 +186,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
         if (deviceExisted.status == DeviceStatus.Voided.name) {
           BluetoothDeviceConnector.stopConnect();
           if (!mounted) return;
-          BrnToast.show("This device is voided", context);
+          BrnToast.show('This device is voided', context);
           BrnLoadingDialog.dismiss(context);
           return;
         }
@@ -195,9 +195,9 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
         if (deviceExisted.itemId != itemIdOfVFE) {
           if (deviceExisted.itemId != 0) {
             BluetoothDeviceConnector.stopConnect();
-            LogUtil.d("itemIdOfVFE: $itemIdOfVFE");
+            LogUtil.d('itemIdOfVFE: $itemIdOfVFE');
             if (!mounted) return;
-            BrnToast.show("This device is bond", context);
+            BrnToast.show('This device is bond', context);
             BrnLoadingDialog.dismiss(context);
             return;
           }
@@ -206,7 +206,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
           final nonce = deviceExisted.nonce + 1;
           final signature =
               await BluetoothDeviceConnector.sigBindDevice(accountId, nonce);
-          // LogUtil.d("signature: $signature");
+          // LogUtil.d('signature: $signature');
           if (!mounted) return;
           final password = await widget.plugin.api.account
               .getPassword(context, widget.keyring.current);
@@ -231,13 +231,13 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
 
         if (!mounted) return;
         BrnLoadingDialog.dismiss(context);
-        BrnToast.show("Bind device successfully", context);
+        BrnToast.show('Bind device successfully', context);
         popToRootView();
       } else {
         BluetoothDeviceConnector.stopConnect();
         if (!mounted) return;
         BrnLoadingDialog.dismiss(context);
-        BrnToast.show("Device is not registered", context);
+        BrnToast.show('Device is not registered', context);
       }
     }
   }
@@ -246,7 +246,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
     final user = widget.keyring.current.address;
     var producerId = 0;
     if (user == null) {
-      BrnToast.show("Please create a wallet first", context);
+      BrnToast.show('Please create a wallet first', context);
       BrnLoadingDialog.dismiss(context);
       return;
     }
@@ -267,7 +267,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
       if (!result.success) {
         BrnToast.show(result.error, context);
       } else {
-        BrnToast.show("Register producer successfully", context);
+        BrnToast.show('Register producer successfully', context);
       }
     } else {
       //generate new keypair for device
@@ -283,7 +283,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
       if (!result.success) {
         BrnToast.show(result.error, context);
       } else {
-        BrnToast.show("Register device successfully", context);
+        BrnToast.show('Register device successfully', context);
       }
     }
 

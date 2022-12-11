@@ -2,6 +2,7 @@ import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
@@ -9,6 +10,7 @@ import 'package:polkawallet_sdk/utils/i18n.dart';
 import 'package:toearnfun_flutter_app/common/consts.dart';
 import 'package:toearnfun_flutter_app/pages/root.dart';
 import 'package:toearnfun_flutter_app/pages/start/start.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/create/welcome.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/store/plugin_store.dart';
@@ -31,7 +33,7 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
   PluginPolket? _network;
   Keyring? _keyring;
 
-  Future<int> _initApp() async {
+  Future<int> _initApp(BuildContext context) async {
     if (_keyring == null) {
       LogUtil.init(tag: log_tag, isDebug: true);
 
@@ -53,7 +55,11 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
       BluetoothDeviceConnector.init(network.store!);
     }
 
-    return 1;
+    final accountCreated =
+        _network?.store?.account?.accountCreated ?? false;
+    // final accounts = accountCreated ? 1:0;
+    final accounts = _keyring?.allAccounts.length ?? 0;
+    return accounts;
   }
 
   @override
@@ -74,9 +80,26 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
       ...pluginPages,
 
       StartView.route: (_) {
-        _initApp();
+        _initApp(context);
         return StartView();
       },
+
+      RootView.route: (_) => Observer(builder: (BuildContext context) {
+            final accountCreated =
+                _network?.store?.account?.accountCreated ?? false;
+            return FutureBuilder<int>(
+              future: _initApp(context),
+              builder: (_, AsyncSnapshot<int> snapshot) {
+                if (snapshot.hasData && _network != null) {
+                  return snapshot.data! > 0
+                      ? RootView(_network!, _keyring!)
+                      : NewWalletWelcomeView(_network!, _keyring!);
+                } else {
+                  return Container(color: Theme.of(context).hoverColor);
+                }
+              },
+            );
+          }),
     };
   }
 

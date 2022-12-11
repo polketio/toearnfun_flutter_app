@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:get_storage/get_storage.dart';
 import 'package:mobx/mobx.dart';
+import 'package:toearnfun_flutter_app/types/user.dart';
 import 'package:toearnfun_flutter_app/types/vfe_brand.dart';
 import 'package:toearnfun_flutter_app/types/vfe_detail.dart';
 
@@ -18,6 +19,10 @@ abstract class _VFEStore with Store {
 
   final String userCurrentVFEKey = 'user_current_vfe';
   final String userVFEListKey = 'user_vfe_list';
+  final String userStateKey = 'user_state';
+
+  @observable
+  User userState = User();
 
   @observable
   VFEDetail current = VFEDetail();
@@ -34,7 +39,7 @@ abstract class _VFEStore with Store {
   }
 
   @action
-  void loadUserCurrent(String? pubKey) {
+  void loadCurrentVFE(String? pubKey) {
     final key = '${userCurrentVFEKey}_$pubKey';
     final data = storage.read(key);
     if (data != null) {
@@ -67,5 +72,23 @@ abstract class _VFEStore with Store {
 
     final key = '${userVFEListKey}_$pubKey';
     await storage.write(key, rawData);
+  }
+
+  @action
+  void loadUserState() {
+    final key = userStateKey;
+    final data = storage.read(key);
+    if (data != null) {
+      userState = User.fromJson(data);
+    } else {
+      userState = User();
+    }
+  }
+
+  @action
+  Future<void> updateUserState(User state) async {
+    userState = state;
+    final key = userStateKey;
+    await storage.write(key, state.toJson());
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:polkawallet_sdk/api/types/networkParams.dart';
 import 'package:polkawallet_sdk/plugin/homeNavItem.dart';
 import 'package:polkawallet_sdk/plugin/index.dart';
@@ -24,7 +25,6 @@ import 'package:toearnfun_flutter_app/service/api/polket_api.dart';
 import 'package:toearnfun_flutter_app/store/plugin_store.dart';
 
 class PluginPolket extends PolkawalletPlugin {
-
   PluginPolket(this.store);
 
   // store cache
@@ -82,7 +82,7 @@ class PluginPolket extends PolkawalletPlugin {
   Map<String, WidgetBuilder> getRoutes(Keyring keyring) {
     LogUtil.d('plugin.getRoutes');
     return {
-      RootView.route: (_) => RootView(this, keyring),
+      // RootView.route: (_) => RootView(this, keyring),
       WalletView.route: (_) => WalletView(this, keyring),
       JumpRopeTrainingReportsView.route: (_) =>
           JumpRopeTrainingReportsView(this, keyring),
@@ -106,7 +106,8 @@ class PluginPolket extends PolkawalletPlugin {
     balances.setExtraTokens([]);
 
     store.assets.loadCache(acc.pubKey);
-    store.vfe.loadUserCurrent(acc.pubKey);
+    store.vfe.loadCurrentVFE(acc.pubKey);
+    store.vfe.loadUserState();
   }
 
   Future<void> loadUserVFEs(String user) async {
@@ -131,6 +132,12 @@ class PluginPolket extends PolkawalletPlugin {
     });
   }
 
+  Future<void> _subscribeUserState(String address) async {
+    _api.vfe.subscribeUserState(address, (data) {
+      store.vfe.updateUserState(data);
+    });
+  }
+
   @override
   Future<void> onWillStart(Keyring keyring) async {
     _api = PolketApi(this, keyring);
@@ -146,8 +153,14 @@ class PluginPolket extends PolkawalletPlugin {
     if (keyring.current.address != null) {
       // subscribe assets balance
       _subscribeTokenBalances(keyring.current.address!);
+      // subscribe user state
+      _subscribeUserState(keyring.current.address!);
       // load user vfe
       loadUserVFEs(keyring.current.pubKey!);
+
+      String? password =
+          await store.account.getUserWalletPassword(keyring.current.pubKey!);
+      _api.vfe.userRestore(password);
     }
     LogUtil.d('plugin.onStarted');
   }
@@ -158,7 +171,10 @@ class PluginPolket extends PolkawalletPlugin {
 
     if (_connected && acc.address != null) {
       _api.assets.unsubscribeTokenBalances(acc.address!);
+      _api.vfe.unsubscribeUserState(acc.address!);
+
       _subscribeTokenBalances(acc.address!);
+      _subscribeUserState(acc.address!);
     }
   }
 }

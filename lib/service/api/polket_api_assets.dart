@@ -61,7 +61,7 @@ class PolketApiAssets {
         channel,
         (data) {
           final symbol = e.symbol!;
-          final balance = data != null ? data['balance'].toString() : "0";
+          final balance = data != null ? data['balance'].toString() : '0';
           var ab = _assetBalances[symbol];
           if (ab == null) {
             return;

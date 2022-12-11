@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
+import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/pages/device/bind_device_selector.dart';
 import 'package:toearnfun_flutter_app/pages/device/device_connect.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
@@ -15,6 +16,7 @@ import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/types/training_report.dart';
+import 'package:toearnfun_flutter_app/types/user.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
 class HomeView extends StatefulWidget {
@@ -32,7 +34,7 @@ class _HomeViewState extends State<HomeView>
     with TickerProviderStateMixin
     implements BluetoothDeviceObserver {
   bool _refreshing = false;
-  String connectedStatus = "disconnect";
+  String connectedStatus = 'disconnect';
   late AnimationController _animationController;
 
   @override
@@ -43,9 +45,6 @@ class _HomeViewState extends State<HomeView>
     _animationController.forward();
     BluetoothDeviceConnector.addObserver(this);
 
-    // Future.delayed(Duration(seconds: 5), () {
-    //   _loadUserVFEs();
-    // });
   }
 
   @override
@@ -53,26 +52,6 @@ class _HomeViewState extends State<HomeView>
     _animationController.dispose();
     BluetoothDeviceConnector.removeObserver(this);
     super.dispose();
-  }
-
-  Future<void> _loadUserVFEs() async {
-    if (!widget.plugin.connected) {
-      // TODO: service is disconnected
-      return;
-    }
-
-    setState(() {
-      _refreshing = true;
-    });
-    final userAddr = widget.keyring.current?.address ?? "";
-    final vfes =
-        await widget.plugin.api.vfe.getVFEDetailsByAddress(userAddr, 1);
-    vfes?.forEach((e) {
-      LogUtil.d("vfe detail: $e}");
-    });
-    setState(() {
-      _refreshing = false;
-    });
   }
 
   @override
@@ -90,19 +69,19 @@ class _HomeViewState extends State<HomeView>
   Widget vfeCardView(BuildContext context) {
     return Container(
       child: Observer(builder: (_) {
-        String deviceKey = "";
-        String itemId = "N/A";
+        String deviceKey = '';
+        String itemId = 'N/A';
         int battery = 0;
-        String vfeImage = "assets/images/img-Unbound.png";
+        String vfeImage = 'assets/images/img-Unbound.png';
         int itemIdOfVFE = 0;
         final userSelectedVFE = widget.plugin.store.vfe.current;
         if (userSelectedVFE.itemId != null) {
-          vfeImage = "assets/images/img-Bound.png";
-          itemId = "#${userSelectedVFE.itemId.toString().padLeft(4, '0')}";
+          vfeImage = 'assets/images/img-Bound.png';
+          itemId = '#${userSelectedVFE.itemId.toString().padLeft(4, '0')}';
           battery = userSelectedVFE.remainingBattery;
-          deviceKey = userSelectedVFE.deviceKey.replaceFirst("0x", "");
+          deviceKey = userSelectedVFE.deviceKey.replaceFirst('0x', '');
           itemIdOfVFE = userSelectedVFE.itemId ?? 0;
-          LogUtil.d("user current vfe is updated");
+          LogUtil.d('user current vfe is updated');
         }
 
         return Stack(children: <Widget>[
@@ -110,7 +89,7 @@ class _HomeViewState extends State<HomeView>
           Container(
             margin: EdgeInsets.fromLTRB(8.w, 0.h, 8.w, 0.h),
             child: Image.asset(
-              "assets/images/home_bg.png",
+              'assets/images/home_bg.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -124,14 +103,14 @@ class _HomeViewState extends State<HomeView>
                       //todo: check if user have any VFEs
                       final accountId = widget.keyring.current.pubKey;
                       if (accountId == null) {
-                        BrnToast.show("Please create a wallet first", context);
+                        BrnToast.show('Please create a wallet first', context);
                         return;
                       }
 
                       if (itemIdOfVFE != 0) {
                         Navigator.of(context)
                             .pushNamed(VFEDetailView.route, arguments: {
-                          "vfeDetail": userSelectedVFE,
+                          'vfeDetail': userSelectedVFE,
                         });
                       } else {
                         BindDeviceSelector.showDeviceTypesSelector(
@@ -191,11 +170,11 @@ class _HomeViewState extends State<HomeView>
                                       deviceKey);
                               if (existed) {
                                 setState(() {
-                                  connectedStatus = "connecting...";
+                                  connectedStatus = 'connecting...';
                                 });
                               } else {
                                 setState(() {
-                                  connectedStatus = "disconnected";
+                                  connectedStatus = 'disconnected';
                                 });
                                 BrnToast.show('Device is not existed', context);
                                 BindDeviceSelector.showDeviceTypesSelector(
@@ -234,35 +213,41 @@ class _HomeViewState extends State<HomeView>
   }
 
   Widget myTrainingView(BuildContext context) {
-    return Flexible(
-        child: Container(
-      // height: 300,
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      margin: EdgeInsets.fromLTRB(0.w, 8.h, 0.w, 0.h),
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          //[title, arrow]
-          trainingTitleView(context),
-          //Row: [daily training, training chart]
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                  flex: 1,
-                  //col: [earn fun, training time]
-                  child: dailyTrainingView(context)),
-              Expanded(
-                  flex: 1, child: trainingCircularProgressIndicator(context)),
-            ],
-          )
-        ],
-      ),
-    ));
+    return Observer(builder: (_) {
+      final userState = widget.plugin.store.vfe.userState;
+
+      return Flexible(
+          child: Container(
+        // height: 300,
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        margin: EdgeInsets.fromLTRB(0.w, 8.h, 0.w, 0.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            //[title, arrow]
+            trainingTitleView(context),
+            //Row: [daily training, training chart]
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                    flex: 1,
+                    //col: [earn fun, training time]
+                    child: dailyTrainingView(context, userState)),
+                Expanded(
+                    flex: 1,
+                    child:
+                        trainingCircularProgressIndicator(context, userState)),
+              ],
+            )
+          ],
+        ),
+      ));
+    });
   }
 
   Widget trainingTitleView(BuildContext context) {
@@ -295,97 +280,116 @@ class _HomeViewState extends State<HomeView>
   }
 
   // daily training data
-  Widget dailyTrainingView(BuildContext context) {
-    return Padding(
-        padding: EdgeInsets.only(left: 8.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextButton.icon(
-                    onPressed: () {},
-                    style: ButtonStyle(
-                      splashFactory: NoSplash.splashFactory,
-                      //disable click effect
-                      overlayColor: MaterialStateProperty.all(
-                          Colors.transparent), //disable click effect
+  Widget dailyTrainingView(BuildContext context, User userState) {
+    return Observer(builder: (_) {
+      final userState = widget.plugin.store.vfe.userState;
+      const decimals = 12;
+      const symbol = 'FUN';
+      final earningCap = userState.earningCap;
+      final earned = userState.earned;
+      final trainingTimeCap = 0.5 * userState.energyTotal;
+      final trainingTime = 0.5 * (userState.energyTotal - userState.energy);
+
+      return Padding(
+          padding: EdgeInsets.only(left: 8.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () {},
+                      style: ButtonStyle(
+                        splashFactory: NoSplash.splashFactory,
+                        //disable click effect
+                        overlayColor: MaterialStateProperty.all(
+                            Colors.transparent), //disable click effect
+                      ),
+                      icon: Image.asset('assets/images/icon-Rope.png'),
+                      label: Text('Earn FUN',
+                          style: TextStyle(color: Colors.black, fontSize: 16)),
                     ),
-                    icon: Image.asset('assets/images/icon-Rope.png'),
-                    label: Text('Earn FUN',
-                        style: TextStyle(color: Colors.black, fontSize: 16)),
-                  ),
-                  Padding(
-                      padding: EdgeInsets.only(left: 8.w),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text('0', style: TextStyle(fontSize: 32)),
-                            Padding(
-                                padding: EdgeInsets.only(bottom: 6.w),
-                                child: Text(' / 200 FUN',
-                                    style: TextStyle(
-                                        color: Colors.grey, fontSize: 16))),
-                          ]))
-                ]),
-            Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextButton.icon(
-                    onPressed: () {},
-                    style: ButtonStyle(
-                      splashFactory: NoSplash.splashFactory,
-                      //disable click effect
-                      overlayColor: MaterialStateProperty.all(
-                          Colors.transparent), //disable click effect
+                    Padding(
+                        padding: EdgeInsets.only(left: 8.w),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(Fmt.balance(earned, decimals),
+                                  style: const TextStyle(fontSize: 32)),
+                              Padding(
+                                  padding: EdgeInsets.only(bottom: 6.w),
+                                  child: Text(
+                                      ' / ${Fmt.balance(earningCap, decimals)} $symbol',
+                                      style: const TextStyle(
+                                          color: Colors.grey, fontSize: 16))),
+                            ]))
+                  ]),
+              Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () {},
+                      style: ButtonStyle(
+                        splashFactory: NoSplash.splashFactory,
+                        //disable click effect
+                        overlayColor: MaterialStateProperty.all(
+                            Colors.transparent), //disable click effect
+                      ),
+                      icon: Image.asset('assets/images/icon-Time.png'),
+                      label: Text('Training Time',
+                          style: TextStyle(color: Colors.black, fontSize: 16)),
                     ),
-                    icon: Image.asset('assets/images/icon-Time.png'),
-                    label: Text('Training Time',
-                        style: TextStyle(color: Colors.black, fontSize: 16)),
-                  ),
-                  Padding(
-                      padding: EdgeInsets.only(left: 8.w),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text('0', style: TextStyle(fontSize: 32)),
-                            Padding(
-                                padding: EdgeInsets.only(bottom: 6.w),
-                                child: Text(' / 10 minute',
-                                    style: TextStyle(
-                                        color: Colors.grey, fontSize: 16))),
-                          ]))
-                ]),
-          ],
-        ));
+                    Padding(
+                        padding: EdgeInsets.only(left: 8.w),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text('$trainingTime',
+                                  style: TextStyle(fontSize: 32)),
+                              Padding(
+                                  padding: EdgeInsets.only(bottom: 6.w),
+                                  child: Text(' / $trainingTimeCap minute',
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 16))),
+                            ]))
+                  ]),
+            ],
+          ));
+    });
   }
 
   // daily training chart
-  Widget trainingCircularProgressIndicator(BuildContext context) {
+  Widget trainingCircularProgressIndicator(
+      BuildContext context, User userState) {
+    double earnRatio =
+        double.parse(userState.earned) / double.parse(userState.earningCap);
+    double trainingTimeRatio =
+        (userState.energyTotal - userState.energy) / userState.energyTotal;
+
     return Padding(
         padding: EdgeInsets.only(top: 16.h),
         child: Stack(alignment: Alignment.center, children: [
           LayoutBuilder(builder: (context, constraints) {
-            // LogUtil.d('constraints: $constraints');
+            // LogUtil.d('Circular 1 maxWidth: ${constraints.maxWidth}');
+            // LogUtil.d('constraints maxHeight: ${constraints.maxHeight}');
             return GradientCircularProgressIndicator(
               backgroundColor: HexColor('#f5f5f5'),
               colors: [HexColor('#6cd1fe'), HexColor('#6cd1fe')],
               radius: constraints.maxWidth * 0.38,
               stokeWidth: 11.0,
               strokeCapRound: true,
-              value: CurvedAnimation(
-                      parent: _animationController, curve: Curves.decelerate)
-                  .value,
+              value: earnRatio,
             );
           }),
           LayoutBuilder(builder: (context, constraints) {
+            // LogUtil.d('Circular 2 maxWidth: ${constraints.maxWidth}');
             child:
             return GradientCircularProgressIndicator(
               backgroundColor: HexColor('#f5f5f5'),
@@ -393,9 +397,7 @@ class _HomeViewState extends State<HomeView>
               radius: constraints.maxWidth * 0.30,
               stokeWidth: 11.0,
               strokeCapRound: true,
-              value: CurvedAnimation(
-                      parent: _animationController, curve: Curves.decelerate)
-                  .value,
+              value: trainingTimeRatio,
             );
           }),
           IconButton(
@@ -407,14 +409,14 @@ class _HomeViewState extends State<HomeView>
   @override
   void onConnectSuccess(BluetoothDevice bleDevice) {
     setState(() {
-      connectedStatus = "connected";
+      connectedStatus = 'connected';
     });
   }
 
   @override
   void onDisConnected(BluetoothDevice bleDevice) {
     setState(() {
-      connectedStatus = "disconnect";
+      connectedStatus = 'disconnect';
     });
   }
 
@@ -426,21 +428,21 @@ class _HomeViewState extends State<HomeView>
 
   @override
   void onReceiveSkipRealTimeResultData(SkipResultData result) {
-    LogUtil.d("training data encode: ${result.encodeData()}");
-    LogUtil.d("training signature: ${result.signature}");
+    LogUtil.d('training data encode: ${result.encodeData()}');
+    LogUtil.d('training signature: ${result.signature}');
     LogUtil.d(
-        "device pubkey: ${BluetoothDeviceConnector.connectedDevice?.pubKey ?? ""}");
+        'device pubkey: ${BluetoothDeviceConnector.connectedDevice?.pubKey ?? ''}');
   }
 
   @override
   void onScanFinished() {
-    LogUtil.d("onScanFinished");
+    LogUtil.d('onScanFinished');
   }
 
   @override
   void onScanning(BluetoothDevice bleDevice) {
     setState(() {
-      connectedStatus = "connecting...";
+      connectedStatus = 'connecting...';
     });
   }
 }

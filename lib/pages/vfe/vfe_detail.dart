@@ -34,7 +34,7 @@ class _VFEDetailViewState extends State<VFEDetailView> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final data = ModalRoute.of(context)?.settings.arguments as Map;
       setState(() {
-        vfeDetail = data["vfeDetail"];
+        vfeDetail = data['vfeDetail'];
       });
     });
   }
@@ -95,10 +95,10 @@ class _VFEDetailViewState extends State<VFEDetailView> {
   }
 
   Widget getBottomToolBarView(BuildContext context) {
-    final isBond = (vfeDetail?.deviceKey ?? "").isEmpty ? false : true;
+    final isBond = (vfeDetail?.deviceKey ?? '').isEmpty ? false : true;
     final brandId = vfeDetail?.brandId ?? 0;
     final itemId = vfeDetail?.itemId ?? 0;
-    String bindButton = isBond ? "Unbind" : "Bind";
+    String bindButton = isBond ? 'Unbind' : 'Bind';
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -141,7 +141,7 @@ class _VFEDetailViewState extends State<VFEDetailView> {
                     final res = widget.plugin.api.vfe
                         .unbindDevice(brandId, itemId, password);
                     if (!mounted) return;
-                    BrnToast.show("Unbind device successfully", context);
+                    BrnToast.show('Unbind device successfully', context);
                   }
                 } else {
                   //bind

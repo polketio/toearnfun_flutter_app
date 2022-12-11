@@ -11,12 +11,12 @@ import 'package:toearnfun_flutter_app/utils/crypto.dart';
 
 // messageType = 0：扫描蓝牙设备，1: 实时跳绳数据，2：实时跳绳结果，3：历史跳绳结果
 class BlueEventMessageType {
-  static const String scanning = "0";
-  static const String skipDisplayData = "1";
-  static const String skipResultData = "2";
-  static const String skipHistoryData = "3";
-  static const String onScanFinished = "4";
-  static const String onDisConnected = "5";
+  static const String scanning = '0';
+  static const String skipDisplayData = '1';
+  static const String skipResultData = '2';
+  static const String skipHistoryData = '3';
+  static const String onScanFinished = '4';
+  static const String onDisConnected = '5';
 }
 
 abstract class BluetoothDeviceObserver {
@@ -44,14 +44,14 @@ class BluetoothDeviceConnector {
   static Timer? _timer;
   static PluginStore? _store;
   static bool autoConnect = false;
-  static String targetDeviceKey = "";
+  static String targetDeviceKey = '';
 
   //注意，这里的名称需要和Android原生中定义的一样
-  static const MethodChannel _channel = MethodChannel("BluetoothFlutterPlugin");
+  static const MethodChannel _channel = MethodChannel('BluetoothFlutterPlugin');
 
   //The native Android actively calls the flutter-side event channel
   static const EventChannel _eventChannel =
-      EventChannel("BluetoothFlutterPluginEvent");
+      EventChannel('BluetoothFlutterPluginEvent');
 
   static void init(PluginStore store) {
     if (_initialized) {
@@ -64,7 +64,7 @@ class BluetoothDeviceConnector {
 
   static bool autoScanAndConnect(String deviceKey) {
     targetDeviceKey = deviceKey;
-    LogUtil.d("targetDeviceKey = $targetDeviceKey");
+    LogUtil.d('targetDeviceKey = $targetDeviceKey');
 
     //check if targetDevice exist connectedDevices of store
     final existed = _store!.devices.connectedDevices
@@ -82,10 +82,10 @@ class BluetoothDeviceConnector {
       // load Connected devices
       final connectedDevices = _store!.devices.connectedDevices;
       if (connectedDevice == null && connectedDevices.isNotEmpty) {
-        LogUtil.d("autoScanAndConnect");
+        LogUtil.d('autoScanAndConnect');
         scanDevice();
       } else {
-        LogUtil.d("device is connected");
+        LogUtil.d('device is connected');
       }
     });
 
@@ -101,11 +101,11 @@ class BluetoothDeviceConnector {
   }
 
   static Future<bool> checkBluetoothIsOpen() async {
-    return await _channel.invokeMethod("checkBluetoothIsOpen");
+    return await _channel.invokeMethod('checkBluetoothIsOpen');
   }
 
   static Future<void> scanDevice() async {
-    return await _channel.invokeMethod("scanDevice");
+    return await _channel.invokeMethod('scanDevice');
   }
 
   static Future<bool> connect(BluetoothDevice device) async {
@@ -113,7 +113,7 @@ class BluetoothDeviceConnector {
     if (isConnected) {
       return true;
     }
-    final connect = await _channel.invokeMethod("connect", device.mac);
+    final connect = await _channel.invokeMethod('connect', device.mac);
     if (connect) {
       await registerCustomDataRxCallback();
       connectedDevice = device;
@@ -134,9 +134,9 @@ class BluetoothDeviceConnector {
 
     _timer?.cancel();
     _timer = null;
-    final connect = await _channel.invokeMethod("stopConnect");
+    final connect = await _channel.invokeMethod('stopConnect');
     if (!connect) {
-      targetDeviceKey = "";
+      targetDeviceKey = '';
       unregisterCustomDataRxCallback();
       _store!.devices.disconnectDevice();
     }
@@ -144,59 +144,59 @@ class BluetoothDeviceConnector {
   }
 
   static Future<bool> registerCustomDataRxCallback() async {
-    return await _channel.invokeMethod("registerCustomDataRxCallback");
+    return await _channel.invokeMethod('registerCustomDataRxCallback');
   }
 
   static Future<bool> unregisterCustomDataRxCallback() async {
-    return await _channel.invokeMethod("unregisterCustomDataRxCallback");
+    return await _channel.invokeMethod('unregisterCustomDataRxCallback');
   }
 
   //检查蓝牙是否连接
   static Future<bool> checkStateOn() async {
     var param = false;
-    return await _channel.invokeMethod("checkStateOn", param);
+    return await _channel.invokeMethod('checkStateOn', param);
   }
 
   //设置跳绳模式
   static Future<String> setSkipMode() async {
-    return await _channel.invokeMethod("setSkipMode");
+    return await _channel.invokeMethod('setSkipMode');
   }
 
   //设备恢复出厂
   static Future<String> devRevert() async {
-    return await _channel.invokeMethod("devRevert");
+    return await _channel.invokeMethod('devRevert');
   }
 
   //获取设备公钥
   static Future<String> getPublicKey() async {
-    return await _channel.invokeMethod("writeSkipGetPublicKey");
+    return await _channel.invokeMethod('writeSkipGetPublicKey');
   }
 
   //设备复位
   static Future<String> devReset() async {
-    return await _channel.invokeMethod("devReset");
+    return await _channel.invokeMethod('devReset');
   }
 
 //同步设备时间
   static Future<String> syncDeviceTime() async {
-    return await _channel.invokeMethod("syncDeviceTime");
+    return await _channel.invokeMethod('syncDeviceTime');
   }
 
   //停止跳绳
   static Future<String> stopSkip() async {
-    return await _channel.invokeMethod("stopSkip");
+    return await _channel.invokeMethod('stopSkip');
   }
 
   //创建设备ECC公钥
   static Future<String> generateNewKeypair() async {
-    return await _channel.invokeMethod("writeSkipGenerateECCKey");
+    return await _channel.invokeMethod('writeSkipGenerateECCKey');
   }
 
   //绑定设备
   static Future<String> sigBindDevice(String accountId, int deviceNonce) async {
     final hash = Hash.ripemd160(accountId);
     final signature = await _channel.invokeMethod(
-        "writeSkipBondDev", {'nonce': deviceNonce, 'address': hash});
+        'writeSkipBondDev', {'nonce': deviceNonce, 'address': hash});
     return signature;
   }
 
@@ -227,8 +227,8 @@ class BluetoothDeviceConnector {
     LogUtil.d('onEvent: ${object.toString()}', tag: classType.toString());
 
     Map<String, dynamic> data = jsonDecode(object);
-    String msgType = data["messageType"];
-    dynamic content = data["messageContext"];
+    String msgType = data['messageType'];
+    dynamic content = data['messageContext'];
     switch (msgType) {
       case BlueEventMessageType.scanning:
         final device = BluetoothDevice.fromJson(content);

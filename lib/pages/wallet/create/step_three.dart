@@ -7,6 +7,7 @@ import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/common/horizontal_steps.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
+import 'package:toearnfun_flutter_app/utils/format.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
 class NewWalletStepThree extends StatefulWidget {
@@ -64,7 +65,7 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
                                     stepsView(),
                                     inputsView(),
                                   ]))),
-                          Expanded(flex: 0, child: buttonView()),
+                          Expanded(flex: 0, child: buttonView(context)),
                         ])))));
   }
 
@@ -76,8 +77,7 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
       backgroundColor: _backgroundColor,
       leading: MyBackButton(),
       centerTitle: true,
-      title: const Text('Set Password',
-          style: TextStyle(color: Colors.white)),
+      title: const Text('Set Password', style: TextStyle(color: Colors.white)),
     );
   }
 
@@ -115,20 +115,26 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
                   child: const Text('Account Name',
                       style: TextStyle(color: Colors.black, fontSize: 18))),
               TextFormField(
-                  maxLines: 1,
-                  minLines: 1,
-                  decoration: InputDecoration(
-                    hintText: "Your nickname is also the wallet name",
-                    focusedBorder: focusedBorder(),
-                    enabledBorder: inputBorder(),
-                    filled: true,
-                    fillColor: HexColor('fbf7f7'),
-                  ),
-                  controller: _nameCtrl,
-                  style: const TextStyle(color: Colors.black),
-                  inputFormatters: [
-                    LengthLimitingTextInputFormatter(20),
-                  ]),
+                maxLines: 1,
+                minLines: 1,
+                decoration: InputDecoration(
+                  hintText: 'Your nickname is also the wallet name',
+                  focusedBorder: focusedBorder(),
+                  enabledBorder: inputBorder(),
+                  filled: true,
+                  fillColor: HexColor('fbf7f7'),
+                ),
+                controller: _nameCtrl,
+                style: const TextStyle(color: Colors.black),
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(20),
+                ],
+                validator: (v) {
+                  return (v?.trim().isNotEmpty ?? false)
+                      ? null
+                      : 'name is empty';
+                },
+              ),
               Container(
                   alignment: Alignment.centerLeft,
                   margin: EdgeInsets.only(top: 16.h, bottom: 16.h),
@@ -140,7 +146,7 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
                   minLines: 1,
                   obscureText: true,
                   decoration: InputDecoration(
-                    hintText: "Set wallet unlock password",
+                    hintText: 'Set wallet unlock password',
                     focusedBorder: focusedBorder(),
                     enabledBorder: inputBorder(),
                     filled: true,
@@ -153,9 +159,11 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
                   ],
                   //verify password
                   validator: (v) {
-                    return v!.trim().length > 6
-                        ? null
-                        : "Password less than 6 characters";
+                    if (!AppFmt.checkPassword(v!.trim())) {
+                      return '6 to 18 digits and contains numbers and letters';
+                    }
+
+                    return null;
                   }),
               Container(
                   alignment: Alignment.centerLeft,
@@ -168,7 +176,7 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
                   minLines: 1,
                   obscureText: true,
                   decoration: InputDecoration(
-                    hintText: "Enter wallet password again",
+                    hintText: 'Enter wallet password again',
                     focusedBorder: focusedBorder(),
                     enabledBorder: inputBorder(),
                     filled: true,
@@ -181,9 +189,9 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
                   ],
                   //verify password
                   validator: (v) {
-                    return v!.trim().length > 6
-                        ? null
-                        : "Password less than 6 characters";
+                    return _passCtrl.text != v
+                        ? 'Passwords do not match'
+                        : null;
                   }),
             ])));
   }
@@ -200,13 +208,15 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
         borderSide: BorderSide(color: _backgroundColor, width: 1.0));
   }
 
-  Widget buttonView() {
+  Widget buttonView(BuildContext context) {
     return Container(
         margin: EdgeInsets.only(bottom: 28.h),
         height: _buttonHeight,
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: () async {
+            await _onSubmit(context);
+          },
           child: const Text('Continue', style: TextStyle(fontSize: 24)),
           style: ButtonStyle(
             elevation: MaterialStateProperty.all(0),
@@ -216,5 +226,45 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
             alignment: Alignment.center,
           ),
         ));
+  }
+
+  Future<void> _onSubmit(BuildContext context) async {
+    if (_formKey.currentState!.validate()) {
+      BrnLoadingDialog.show(context,
+          content: 'Creating', barrierDismissible: false);
+      widget.plugin.store.account.setNewAccount(_nameCtrl.text, _passCtrl.text);
+      final json = await _importAccount(context);
+      if (json != null) {
+        final pubKey = json['pubKey'] ?? '';
+        await widget.plugin.store.account
+            .saveUserWalletPassword(pubKey, _passCtrl.text);
+        widget.plugin.store.account.resetNewAccount();
+        widget.plugin.store.account.setAccountCreated();
+        if (!mounted) return;
+        BrnLoadingDialog.dismiss(context);
+        Navigator.popUntil(context, ModalRoute.withName('/toearnfun/root'));
+      } else {
+        if (!mounted) return;
+        BrnLoadingDialog.dismiss(context);
+      }
+    }
+
+  }
+
+  Future<Map?> _importAccount(BuildContext context) async {
+    try {
+      final json = await widget.plugin.api.account.importAccount(
+        isFromCreatePage: true,
+      );
+      await widget.plugin.api.account.addAccount(
+        json: json,
+        isFromCreatePage: true,
+      );
+
+      return json;
+    } catch (err) {
+      BrnToast.show(err.toString(), context);
+      return null;
+    }
   }
 }

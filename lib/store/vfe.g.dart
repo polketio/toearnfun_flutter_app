@@ -9,6 +9,22 @@ part of 'vfe.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$VFEStore on _VFEStore, Store {
+  late final _$userStateAtom =
+      Atom(name: '_VFEStore.userState', context: context);
+
+  @override
+  User get userState {
+    _$userStateAtom.reportRead();
+    return super.userState;
+  }
+
+  @override
+  set userState(User value) {
+    _$userStateAtom.reportWrite(value, super.userState, () {
+      super.userState = value;
+    });
+  }
+
   late final _$currentAtom = Atom(name: '_VFEStore.current', context: context);
 
   @override
@@ -74,6 +90,14 @@ mixin _$VFEStore on _VFEStore, Store {
         .run(() => super.addUserVFEList(pubKey, vfeList));
   }
 
+  late final _$updateUserStateAsyncAction =
+      AsyncAction('_VFEStore.updateUserState', context: context);
+
+  @override
+  Future<void> updateUserState(User state) {
+    return _$updateUserStateAsyncAction.run(() => super.updateUserState(state));
+  }
+
   late final _$_VFEStoreActionController =
       ActionController(name: '_VFEStore', context: context);
 
@@ -89,11 +113,22 @@ mixin _$VFEStore on _VFEStore, Store {
   }
 
   @override
-  void loadUserCurrent(String? pubKey) {
+  void loadCurrentVFE(String? pubKey) {
     final _$actionInfo = _$_VFEStoreActionController.startAction(
-        name: '_VFEStore.loadUserCurrent');
+        name: '_VFEStore.loadCurrentVFE');
     try {
-      return super.loadUserCurrent(pubKey);
+      return super.loadCurrentVFE(pubKey);
+    } finally {
+      _$_VFEStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void loadUserState() {
+    final _$actionInfo = _$_VFEStoreActionController.startAction(
+        name: '_VFEStore.loadUserState');
+    try {
+      return super.loadUserState();
     } finally {
       _$_VFEStoreActionController.endAction(_$actionInfo);
     }
@@ -102,6 +137,7 @@ mixin _$VFEStore on _VFEStore, Store {
   @override
   String toString() {
     return '''
+userState: ${userState},
 current: ${current},
 userVFEList: ${userVFEList},
 allVFEBrands: ${allVFEBrands}

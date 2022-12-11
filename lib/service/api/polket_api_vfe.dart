@@ -17,6 +17,8 @@ class PolketApiVFE {
 
   final module = 'vfe';
 
+  final userStateChannel = 'userState';
+
   Future<BluetoothDevice?> queryDevice(String deviceKey) async {
     final res = await plugin.sdk.api.service.webView
         ?.evalJavascript('api.query.$module.devices("0x$deviceKey")');
@@ -30,24 +32,24 @@ class PolketApiVFE {
   Future<DispatchResult> bindDevice(String pubKey, String signature, int nonce,
       int? itemId, String? password) async {
     final params = [
-      "0x$pubKey",
-      "0x$signature",
+      '0x$pubKey',
+      '0x$signature',
       nonce,
       itemId,
     ];
     return PolketApi.call(
-        keyring, plugin.sdk, module, "bindDevice", params, password);
+        keyring, plugin.sdk, module, 'bindDevice', params, password);
   }
 
   Future<DispatchResult> registerDevice(
       String pubKey, int producerId, int brandId, String? password) async {
     final params = [
-      "0x$pubKey",
+      '0x$pubKey',
       producerId,
       brandId,
     ];
     return PolketApi.call(
-        keyring, plugin.sdk, module, "registerDevice", params, password);
+        keyring, plugin.sdk, module, 'registerDevice', params, password);
   }
 
   Future<List<VFEBrand>> getVFEBrandsAll() async {
@@ -78,33 +80,54 @@ class PolketApiVFE {
   Future<DispatchResult> producerRegister(String? password) async {
     final params = [];
     return PolketApi.call(
-        keyring, plugin.sdk, module, "producerRegister", params, password);
+        keyring, plugin.sdk, module, 'producerRegister', params, password);
   }
 
   Future<DispatchResult> unbindDevice(
       int brandId, int itemId, String? password) async {
     final params = [brandId, itemId];
     return PolketApi.call(
-        keyring, plugin.sdk, module, "unbindDevice", params, password);
+        keyring, plugin.sdk, module, 'unbindDevice', params, password);
   }
 
   Future<DispatchResult> uploadTrainingReport(
       String deviceKey, String signature, String reportData, String? password,
       {Function(String)? onStatusChange}) async {
-    final params = ["0x$deviceKey", "0x$signature", "0x$reportData"];
+    final params = ['0x$deviceKey', '0x$signature', '0x$reportData'];
     return PolketApi.call(
-        keyring, plugin.sdk, module, "uploadTrainingReport", params, password,
+        keyring, plugin.sdk, module, 'uploadTrainingReport', params, password,
         onStatusChange: onStatusChange);
   }
 
-  Future<User> getUserState(
-      String address) async {
+  Future<User> getUserState(String address) async {
     final res = await plugin.sdk.api.service.webView
         ?.evalJavascript('api.query.$module.users("$address")');
     if (res != null) {
       return User.fromJson(res);
     } else {
-      return User(address);
+      return User(owner: address);
     }
+  }
+
+  void unsubscribeUserState(String address) async {
+    plugin.sdk.api.unsubscribeMessage(userStateChannel);
+  }
+
+  Future<void> subscribeUserState(
+      String address, Function(User) callback) async {
+    plugin.sdk.api.subscribeMessage(
+      'api.query.$module.users',
+      [address],
+      userStateChannel,
+      (data) {
+        callback(User.fromJson(data));
+      },
+    );
+  }
+
+  Future<DispatchResult> userRestore(String? password) async {
+    final params = [];
+    return PolketApi.call(
+        keyring, plugin.sdk, module, 'userRestore', params, password);
   }
 }

@@ -205,7 +205,7 @@ class JumpRopeTrainingReportItem extends StatelessWidget {
                     ])),
             onTap: () {
               Navigator.of(context).pushNamed(JumpRopeTrainingDetailView.route, arguments: {
-                "trainingReport": data,
+                'trainingReport': data,
               });
             }));
   }

@@ -41,8 +41,8 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
   @override
   Widget build(BuildContext context) {
     final data = ModalRoute.of(context)?.settings.arguments as Map;
-    report = data["trainingReport"] ?? SkipResultData();
-    LogUtil.d("report: $report");
+    report = data['trainingReport'] ?? SkipResultData();
+    LogUtil.d('report: $report');
 
     return Scaffold(
         resizeToAvoidBottomInset: false,
@@ -307,7 +307,7 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
       //todo: update report state
       BrnToast.show(result.error, context);
     } else {
-      BrnToast.show("Upload report successfully", context);
+      BrnToast.show('Upload report successfully', context);
       //todo: save the reward info and update state
     }
 

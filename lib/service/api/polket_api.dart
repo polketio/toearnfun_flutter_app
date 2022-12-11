@@ -36,7 +36,7 @@ class PolketApi {
       final result = await sdk.api.tx.signAndSend(
         txInfo,
         params,
-        password ?? "",
+        password ?? '',
         onStatusChange: onStatusChange,
         rawParam: rawParam,
       );
@@ -48,15 +48,15 @@ class PolketApi {
 }
 
 class DispatchResult {
-  String txId = "";
-  String blockHash = "";
-  String error = "";
+  String txId = '';
+  String blockHash = '';
+  String error = '';
   bool success = false;
 
   static DispatchResult fromJson(dynamic json) {
     final data = DispatchResult();
-    data.txId = json['hash'] ?? "";
-    data.blockHash = json['blockHash'] ?? "";
+    data.txId = json['hash'] ?? '';
+    data.blockHash = json['blockHash'] ?? '';
     data.success = true;
     return data;
   }

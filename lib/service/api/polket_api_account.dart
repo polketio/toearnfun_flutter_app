@@ -206,7 +206,7 @@ class PolketApiAccount {
   }
 
   Future<RecoveryInfo> queryRecoverable(String address) async {
-//    address = "J4sW13h2HNerfxTzPGpLT66B3HVvuU32S6upxwSeFJQnAzg";
+//    address = 'J4sW13h2HNerfxTzPGpLT66B3HVvuU32S6upxwSeFJQnAzg';
     final res = await plugin.sdk.api.recovery.queryRecoverable(address);
     plugin.store!.account.setAccountRecoveryInfo(res!);
 

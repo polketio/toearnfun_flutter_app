@@ -12,7 +12,7 @@ class DeviceType {
 class BindDeviceSelector {
   static Future<List<DeviceType>> getDeviceType() async {
     List<DeviceType> list = [];
-    list.add(DeviceType("11-11-11", "Smart Jump Rope J2"));
+    list.add(DeviceType('11-11-11', 'Smart Jump Rope J2'));
     return list;
   }
 
@@ -32,17 +32,17 @@ class BindDeviceSelector {
         backgroundColor: Colors.transparent,
         builder: (BuildContext ctx) {
           return BrnCommonActionSheet(
-            title: "Choose binding device",
+            title: 'Choose binding device',
             actions: actions,
-            cancelTitle: "Cancel",
+            cancelTitle: 'Cancel',
             clickCallBack: (int index, BrnCommonActionSheetItem actionEle) {
               // String? title = actionEle.title;
-              // BrnToast.show("title: $title, index: $index", ctx);
+              // BrnToast.show('title: $title, index: $index', ctx);
               // Navigator.of(ctx).pop();
               Future.delayed(Duration.zero, () {
                 Navigator.of(ctx)
                     .pushNamed(BindDeviceTips.route, arguments: {
-                  "itemIdOfVFE": itemIdOfVFE,
+                  'itemIdOfVFE': itemIdOfVFE,
                 });
               });
             },

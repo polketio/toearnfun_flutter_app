@@ -20,6 +20,8 @@ class NewWalletWelcomeView extends StatefulWidget {
 }
 
 class _CreateWalletWelcomeViewState extends State<NewWalletWelcomeView> {
+  bool firstStart = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,7 +82,7 @@ class _CreateWalletWelcomeViewState extends State<NewWalletWelcomeView> {
       bottomOpacity: 0,
       elevation: 0,
       backgroundColor: HexColor('#956DFD'),
-      leading: MyBackButton(),
+      leading: firstStart ? null : MyBackButton(),
     );
   }
 

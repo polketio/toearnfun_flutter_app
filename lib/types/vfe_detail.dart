@@ -15,7 +15,7 @@ class VFEDetail {
   bool isUpgrading = false;
   int lastBlock = 0;
   int availablePoints = 0;
-  String deviceKey = "";
+  String deviceKey = '';
 
   VFEBrand? _brandInfo;
 
@@ -38,17 +38,17 @@ class VFEDetail {
   VFEDetail.fromJson(Map<String, dynamic> json)
       : brandId = json['brandId'] ?? 0,
         itemId = json['itemId'] ?? 0,
-        owner = json['owner'] ?? "",
-        rarity = VFERarity.values.byName(json['rarity'] ?? "Common"),
+        owner = json['owner'] ?? '',
+        rarity = VFERarity.values.byName(json['rarity'] ?? 'Common'),
         level = json['level'] ?? 0,
         remainingBattery = json['remainingBattery'] ?? 0,
-        gene = json['gene'] ?? "",
+        gene = json['gene'] ?? '',
         isUpgrading = json['isUpgrading'] ?? false,
         lastBlock = json['lastBlock'] ?? 0,
         availablePoints = json['availablePoints'] ?? 0,
         baseAbility = VFEAbility.fromJson(json['baseAbility']),
         currentAbility = VFEAbility.fromJson(json['currentAbility']),
-        deviceKey = json['deviceKey'] ?? "";
+        deviceKey = json['deviceKey'] ?? '';
 
   Map<String, dynamic> toJson() => {
         'brandId': brandId,

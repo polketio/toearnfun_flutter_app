@@ -135,7 +135,7 @@ sdk.api.keyring.accountList'''),
       bottomOpacity: 0,
       showDefaultBottom: false,
       backgroundColor: Colors.green,
-      title: "Wallet",
+      title: 'Wallet',
       actions: <Widget>[
         BrnIconAction(
           iconPressed: () {},
@@ -179,7 +179,7 @@ sdk.api.keyring.accountList'''),
     widget.keyring.setSS58(_ss58);
     final AddressIconDataWithMnemonic seed =
         await widget.sdk.api.keyring.generateMnemonic(_ss58);
-    LogUtil.d("mnemonic: ${seed.mnemonic ?? 'empty'} ");
+    LogUtil.d('mnemonic: ${seed.mnemonic ?? 'empty'} ');
   }
 
   Future<void> _importFromMnemonic() async {
@@ -197,7 +197,7 @@ sdk.api.keyring.accountList'''),
       acc: json!,
       password: _testPass,
     );
-    LogUtil.d("address: ${acc.address ?? 'empty'} ");
+    LogUtil.d('address: ${acc.address ?? 'empty'} ');
     setState(() {
       _testAcc = acc;
     });

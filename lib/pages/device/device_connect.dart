@@ -23,7 +23,7 @@ class DeviceConnectView extends StatefulWidget {
 
 class _DeviceConnectViewState extends State<DeviceConnectView> {
   // static final EventChannel _eventChannel =
-  //     EventChannel("BluetoothFlutterPluginEvent"); //原生平台主动调用flutter端事件通道
+  //     EventChannel('BluetoothFlutterPluginEvent'); //原生平台主动调用flutter端事件通道
 
   @override
   void initState() {
@@ -39,34 +39,34 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
     /*
       messageType = 0：扫描蓝牙设备，1: 实时跳绳数据，2：实时跳绳结果，3：历史跳绳结果
       {
-          "messageType": "2",
-          "messageContext": {
-              "SkipSecSum": "4",  //跳绳总时长
-              "SkipCntSum": "18", //跳绳总次数
-              "SkipValidSec": "4",
-              "FreqAvg": "270", //平均频次
-              "FreqMax": "270",   //最快频次
-              "ConsecutiveSkipMaxNum": "18",  //最大连跳次数
-              "SkipTripNum": "0", //绊绳次数
-              "signature": ""
+          'messageType': '2',
+          'messageContext': {
+              'SkipSecSum': '4',  //跳绳总时长
+              'SkipCntSum': '18', //跳绳总次数
+              'SkipValidSec': '4',
+              'FreqAvg': '270', //平均频次
+              'FreqMax': '270',   //最快频次
+              'ConsecutiveSkipMaxNum': '18',  //最大连跳次数
+              'SkipTripNum': '0', //绊绳次数
+              'signature': ''
           }
       }
 
       {
-          "messageType": "0",
-          "messageContext": {
-              "name": "JC-2A",  //device name
-              "mac": "FF:FF:FF:FF:FF:FF", //device mac
-              "Rssi": "-40"
+          'messageType': '0',
+          'messageContext': {
+              'name': 'JC-2A',  //device name
+              'mac': 'FF:FF:FF:FF:FF:FF', //device mac
+              'Rssi': '-40'
           }
       }
      */
 
-    print(object.toString() + "-------------从原生主动传递过来的值");
+    print(object.toString() + '-------------从原生主动传递过来的值');
   }
 
   void _onError(Object object) {
-    print(object.toString() + "-------------从原生主动传递过来的值");
+    print(object.toString() + '-------------从原生主动传递过来的值');
   }
 
   @override
@@ -99,10 +99,10 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                       }),
                       mainButton('Connect Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        // String mac="22:22:22:22:22:22";
-                        String mac = "FF:FF:FF:FF:FF:FF";
+                        // String mac='22:22:22:22:22:22';
+                        String mac = 'FF:FF:FF:FF:FF:FF';
                         bool connect =
-                            await BluetoothDeviceConnector.connect(BluetoothDevice("demo", mac));
+                            await BluetoothDeviceConnector.connect(BluetoothDevice('demo', mac));
                         LogUtil.d('connect: $connect');
                       }),
                       mainButton('stop Connect Device', 20, Colors.black,
@@ -139,7 +139,7 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                           Size(double.infinity, 44.h), () async {
                         int nonce = 123;
                         String address =
-                            "184f0bc2046b560ad6b6b6180726d023a2ff3987";
+                            '184f0bc2046b560ad6b6b6180726d023a2ff3987';
                         String key =
                             await BluetoothDeviceConnector.sigBindDevice(
                               address, nonce);

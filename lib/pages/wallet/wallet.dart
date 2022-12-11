@@ -184,7 +184,7 @@ class _WalletViewState extends State<WalletView> {
                       widgetHeight: 34.w,
                       direction: Direction.right,
                       name:
-                          Fmt.address(_currentAccount?.address ?? "No Account"),
+                          Fmt.address(_currentAccount?.address ?? 'No Account'),
                       iconWidget: Image.asset('assets/images/icon-Connect.png'),
                       iconHeight: 28.w,
                       iconWidth: 28.w,
@@ -194,7 +194,7 @@ class _WalletViewState extends State<WalletView> {
                       onTap: () async {
                         Clipboard.setData(
                             ClipboardData(text: _currentAccount?.address));
-                        BrnToast.show("Copied", context);
+                        BrnToast.show('Copied', context);
                       },
                     ))),
           ],
@@ -251,7 +251,7 @@ class _WalletViewState extends State<WalletView> {
           'Import a wallet using seed Phrase',
           'Exit',
         ],
-        title: "Create Wallet", indexedActionClickCallback: (index) {
+        title: 'Create Wallet', indexedActionClickCallback: (index) {
       Navigator.of(context).pop();
       if (index == 0) {
         _generateAccount();
@@ -274,7 +274,7 @@ class _WalletViewState extends State<WalletView> {
         .generateMnemonic(widget.plugin.basic.ss58 ?? DEFAULT_SS58, key: key);
     LogUtil.d('mnemonic: ${addressInfo.mnemonic}');
     if (key.isEmpty && addressInfo.mnemonic != null) {
-      const password = "1234qwer";
+      const password = '1234qwer';
       widget.plugin.store.account.setNewAccountKey(addressInfo.mnemonic!);
       widget.plugin.store.account.setNewAccount('tester', password);
 
@@ -286,7 +286,7 @@ class _WalletViewState extends State<WalletView> {
           json: json,
           isFromCreatePage: true,
         );
-        final pubKey = json['pubKey'] ?? "";
+        final pubKey = json['pubKey'] ?? '';
         await widget.plugin.store.account.saveUserWalletPassword(pubKey, password);
         widget.plugin.store.account.setAccountCreated();
 
@@ -327,7 +327,7 @@ class _WalletViewState extends State<WalletView> {
           // params.amount
           500000000000
         ],
-        "1234qwer",
+        '1234qwer',
         onStatusChange: (status) {
           LogUtil.d(status);
           // setState(() {
