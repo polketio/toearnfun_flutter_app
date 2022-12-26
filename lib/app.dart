@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_sdk/utils/i18n.dart';
 import 'package:toearnfun_flutter_app/common/consts.dart';
@@ -13,6 +14,7 @@ import 'package:toearnfun_flutter_app/pages/start/start.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/welcome.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
+import 'package:toearnfun_flutter_app/service/webViewRunner.dart';
 import 'package:toearnfun_flutter_app/store/plugin_store.dart';
 
 const get_storage_container = 'configuration';
@@ -46,9 +48,9 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
       setState(() {
         _network = network;
       });
-      LogUtil.d('_initApp.setState');
+      // LogUtil.d('_initApp.setState');
       // service connecting
-      await _network?.beforeStart(_keyring!);
+      await _network?.beforeStart(_keyring!, webView: WebViewRunnerOverrider());
       await _network?.start(_keyring!);
       await _network?.updateNetworkState();
 
@@ -105,16 +107,18 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
 
   @override
   Widget build(BuildContext context) {
-    LogUtil.d('app.build');
+    // LogUtil.d('app.build');
     final routes = _getRoutes();
-
+    // var baseTheme = ThemeData(brightness: Brightness.light);
     return ScreenUtilInit(
       designSize: Size(390, 844),
       builder: (_, __) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'ToEarnFun',
-        theme: new ThemeData(
+        theme: ThemeData(
           primaryColor: Colors.white,
+          // textTheme: GoogleFonts.secularOneTextTheme(baseTheme.textTheme),
+          // textTheme: GoogleFonts.ibmPlexSansTextTheme(baseTheme.textTheme),
         ),
         localizationsDelegates: const [
           AppLocalizationsDelegate(Locale('en', '')),

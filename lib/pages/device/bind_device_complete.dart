@@ -30,7 +30,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
 
   int connectedStatus = 0; //0: page loading, 1: connected, 2: disconnected
   BluetoothDevice? deviceToBind;
-  int? itemIdOfVFE;
+  int itemIdOfVFE = 0;
 
   @override
   void initState() {
@@ -62,7 +62,15 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
       bottomOpacity: 0,
       elevation: 0,
       backgroundColor: _backgroundColor,
-      leading: MyBackButton(),
+      leading: MyBackButton(onBack: () async {
+        BrnLoadingDialog.show(context,
+            content: 'Disconnecting', barrierDismissible: false);
+        await BluetoothDeviceConnector.stopConnect();
+        await Future.delayed(const Duration(seconds: 2));
+        if (!mounted) return;
+        BrnLoadingDialog.dismiss(context);
+        Navigator.of(context).pop();
+      }),
       centerTitle: true,
       title: Text('Bind Device', style: TextStyle(color: Colors.white)),
     );
@@ -83,12 +91,21 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
   }
 
   Widget deviceView() {
+    String vfeImage = '';
+    if (itemIdOfVFE != 0) {
+      vfeImage = 'assets/images/vfe-card.png';
+    } else {
+      vfeImage = 'assets/images/blindbox.png';
+    }
     return Container(
       child: Column(
         children: [
-          Text('Device'),
-          Text('+'),
-          Text('VFE'),
+          Padding(padding: EdgeInsets.only(top: 32.h)),
+          Image.asset('assets/images/device-bind-success.png'),
+          Padding(padding: EdgeInsets.only(top: 32.h)),
+          Image.asset('assets/images/icon-bond.png'),
+          Padding(padding: EdgeInsets.only(top: 32.h)),
+          Image.asset(vfeImage),
         ],
       ),
     );
@@ -149,9 +166,9 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
     int status = connectedStatus;
     final data = ModalRoute.of(context)?.settings.arguments as Map;
     BluetoothDevice device = data['device'];
-    itemIdOfVFE = data['itemIdOfVFE'];
+    itemIdOfVFE = data['itemIdOfVFE'] ?? 0;
     LogUtil.d('device: ${device.name}(${device.mac})');
-    LogUtil.d('itemIdOfVFE: $itemIdOfVFE');
+    // LogUtil.d('itemIdOfVFE: $itemIdOfVFE');
     final connected = await BluetoothDeviceConnector.connect(device);
     if (connected) {
       deviceToBind = device;
@@ -167,9 +184,9 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
 
   Future<void> bindDeviceOnChain(BuildContext context) async {
     final accountId = widget.keyring.current.pubKey;
+    final address = widget.keyring.current.address ?? '';
 
     if (accountId == null) {
-      BluetoothDeviceConnector.stopConnect();
       if (!mounted) return;
       BrnToast.show('Please create a wallet first', context);
       BrnLoadingDialog.dismiss(context);
@@ -181,21 +198,19 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
       deviceToBind!.pubKey = pubKey;
 
       //check if device bond
-      final deviceExisted = await widget.plugin.api.vfe.queryDevice(pubKey);
+      final deviceExisted = await widget.plugin.api.vfe.getDevice(pubKey);
       if (deviceExisted != null) {
         if (deviceExisted.status == DeviceStatus.Voided.name) {
-          BluetoothDeviceConnector.stopConnect();
           if (!mounted) return;
           BrnToast.show('This device is voided', context);
           BrnLoadingDialog.dismiss(context);
           return;
         }
 
-        //todo: check if device brandId and itemId is same as the VFE
-        if (deviceExisted.itemId != itemIdOfVFE) {
+        // check if device brandId and itemId is same as the VFE
+        if (deviceExisted.itemId != itemIdOfVFE || itemIdOfVFE == 0) {
           if (deviceExisted.itemId != 0) {
-            BluetoothDeviceConnector.stopConnect();
-            LogUtil.d('itemIdOfVFE: $itemIdOfVFE');
+            // LogUtil.d('itemIdOfVFE: $itemIdOfVFE');
             if (!mounted) return;
             BrnToast.show('This device is bond', context);
             BrnLoadingDialog.dismiss(context);
@@ -210,10 +225,9 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
           if (!mounted) return;
           final password = await widget.plugin.api.account
               .getPassword(context, widget.keyring.current);
-          final result = await widget.plugin.api.vfe
-              .bindDevice(pubKey, signature, nonce, itemIdOfVFE, password);
+          final result = await widget.plugin.api.vfe.bindDevice(address, pubKey,
+              signature, nonce, itemIdOfVFE > 0 ? itemIdOfVFE : null, password);
           if (!result.success) {
-            BluetoothDeviceConnector.stopConnect();
             if (!mounted) return;
             BrnToast.show(result.error, context);
             BrnLoadingDialog.dismiss(context);
@@ -234,7 +248,6 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
         BrnToast.show('Bind device successfully', context);
         popToRootView();
       } else {
-        BluetoothDeviceConnector.stopConnect();
         if (!mounted) return;
         BrnLoadingDialog.dismiss(context);
         BrnToast.show('Device is not registered', context);
@@ -262,7 +275,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
       if (!mounted) return;
       final password = await widget.plugin.api.account
           .getPassword(context, widget.keyring.current);
-      final result = await widget.plugin.api.vfe.producerRegister(password);
+      final result = await widget.plugin.api.vfe.producerRegister(user, password);
       if (!mounted) return;
       if (!result.success) {
         BrnToast.show(result.error, context);

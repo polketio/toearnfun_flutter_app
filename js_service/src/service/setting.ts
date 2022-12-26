@@ -48,6 +48,11 @@ export async function getNetworkConst(api: ApiPromise) {
       proposalBond: api.consts.treasury?.proposalBond,
       spendPeriod: api.consts.treasury?.spendPeriod,
     },
+    vfe: {
+      reportValidityPeriod: api.consts.vfe?.reportValidityPeriod,
+      energyRecoveryDuration: api.consts.vfe?.energyRecoveryDuration,
+      dailyEarnedResetDuration: api.consts.vfe?.dailyEarnedResetDuration,
+    }
   };
 }
 

@@ -22,12 +22,12 @@ abstract class _AssetsStore with Store {
   @action
   void setTokenBalanceMap(List<TokenBalanceData> list) {
     final data = Map<String, TokenBalanceData>();
-    list.forEach((e) {
+    for (var e in list) {
       if (e.symbol == null) {
         throw Exception('asset symbol is empty');
       }
       data[e.symbol!] = e;
-    });
+    }
     assetBalanceMap = data;
   }
 
@@ -58,5 +58,14 @@ abstract class _AssetsStore with Store {
     // } else {
     //   txs = ObservableList<TransferData>();
     // }
+  }
+
+  TokenBalanceData? getTokenByAssetId(int assetId) {
+    for (var value in assetBalanceMap.values) {
+      if (value.id == assetId.toString()) {
+        return value;
+      }
+    }
+    return null;
   }
 }

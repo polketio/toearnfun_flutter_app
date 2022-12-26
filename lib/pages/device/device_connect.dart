@@ -85,13 +85,13 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                           Size(double.infinity, 44.h), () async {
                         bool isOpen = await BluetoothDeviceConnector
                             .checkBluetoothIsOpen();
-                        LogUtil.d('bluetooth is open: ${isOpen.toString()}');
+                        // LogUtil.d('bluetooth is open: ${isOpen.toString()}');
                       }),
                       mainButton('check connect', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         bool isconnect =
                             await BluetoothDeviceConnector.checkStateOn();
-                        LogUtil.d('isconnect: ${isconnect.toString()}');
+                        // LogUtil.d('isconnect: ${isconnect.toString()}');
                       }),
                       mainButton('Scan Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
@@ -103,37 +103,37 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                         String mac = 'FF:FF:FF:FF:FF:FF';
                         bool connect =
                             await BluetoothDeviceConnector.connect(BluetoothDevice('demo', mac));
-                        LogUtil.d('connect: $connect');
+                        // LogUtil.d('connect: $connect');
                       }),
                       mainButton('stop Connect Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         bool connect =
                             await BluetoothDeviceConnector.stopConnect();
-                        LogUtil.d('connect: $connect');
+                        // LogUtil.d('connect: $connect');
                       }),
                       mainButton('Register', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         await BluetoothDeviceConnector
                             .registerCustomDataRxCallback();
-                        LogUtil.d('registerCustomDataRxCallback');
+                        // LogUtil.d('registerCustomDataRxCallback');
                       }),
                       mainButton('unregister', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         await BluetoothDeviceConnector
                             .unregisterCustomDataRxCallback();
-                        LogUtil.d('unregisterCustomDataRxCallback');
+                        // LogUtil.d('unregisterCustomDataRxCallback');
                       }),
                       mainButton('Get PublicKey', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         String result = await BluetoothDeviceConnector
                             .getPublicKey();
-                        LogUtil.d('PublicKey: $result');
+                        // LogUtil.d('PublicKey: $result');
                       }),
                       mainButton('Generate ECC Key', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         String key = await BluetoothDeviceConnector
                             .generateNewKeypair();
-                        LogUtil.d('key: $key');
+                        // LogUtil.d('key: $key');
                       }),
                       mainButton('BondDev', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
@@ -143,7 +143,7 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                         String key =
                             await BluetoothDeviceConnector.sigBindDevice(
                               address, nonce);
-                        LogUtil.d('key: $key');
+                        // LogUtil.d('key: $key');
                       }),
                     ]))));
   }

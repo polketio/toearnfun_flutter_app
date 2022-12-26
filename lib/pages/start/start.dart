@@ -62,7 +62,7 @@ class _StartViewState extends State<StartView>
           height: double.infinity,
           color: Colors.white,
           child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 16),
+              margin: EdgeInsets.symmetric(horizontal: 8),
               child: RiveAnimation.asset(
                 'assets/images/toearnfun.riv',
                 animations: const ['idle'],

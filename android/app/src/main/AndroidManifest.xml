@@ -12,7 +12,7 @@
     <uses-feature android:name="android.hardware.bluetooth" android:required="true"/>
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
    <application
-        android:label="toearnfun_flutter_app"
+        android:label="ToEarnFun"
         android:name="${applicationName}"
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">

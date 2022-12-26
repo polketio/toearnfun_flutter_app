@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
+import 'package:polkawallet_ui/utils/format.dart';
+import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/pages/home/home.dart';
 import 'package:toearnfun_flutter_app/pages/profile/profile.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/wallet.dart';
@@ -30,61 +33,44 @@ class _RootViewState extends State<RootView> {
       body: HomeView(widget.plugin, widget.keyring),
     );
   }
-}
 
-PreferredSizeWidget getAppBarView(BuildContext context) {
-  return AppBar(
-    leading: IconButton(
-      icon: Image.asset(
-        'assets/images/home_icon_tl.png',
-      ),
-      onPressed: (){
-        Navigator.of(context).pushNamed(ProfileView.route);
-      },
-      alignment: Alignment.centerLeft,
-    ),
-    toolbarOpacity: 1,
-    bottomOpacity: 0,
-    elevation: 0,
-    backgroundColor: HexColor('#956DFD'),
-    title: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-      TextButton.icon(
+  PreferredSizeWidget getAppBarView(BuildContext context) {
+    return AppBar(
+      leading: IconButton(
+        icon: Image.asset(
+          'assets/images/home_icon_tl.png',
+        ),
         onPressed: () {
-          Navigator.of(context).pushNamed(WalletView.route);
+          Navigator.of(context).pushNamed(ProfileView.route);
         },
-        icon: Image.asset('assets/images/Coin_FUN.png'),
-        label: Text('0.0', style: TextStyle(color: Colors.white, fontSize: 16)),
+        alignment: Alignment.centerLeft,
       ),
-      TextButton.icon(
-        onPressed: () {
-          Navigator.of(context).pushNamed(WalletView.route);
-        },
-        icon: Image.asset('assets/images/Coin_PNT.png'),
-        label: Text('0.0', style: TextStyle(color: Colors.white, fontSize: 16)),
-      ),
-    ]),
-  );
-}
+      toolbarOpacity: 1,
+      bottomOpacity: 0,
+      elevation: 0,
+      backgroundColor: HexColor('#956DFD'),
+      title: AppBarTittleView(widget.plugin),
+    );
+  }
 
-Widget getBottomTabBarView() {
-  return BottomAppBar(
-      // elevation: 3.0,
-      color: Colors.white,
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            IconButton(
-              icon: Image.asset('assets/images/icon_AtTabBar_home-off.png'),
-              onPressed: null,
-            ),
-            IconButton(
-              icon:
-                  Image.asset('assets/images/icon_AtTabBar_storehouse-off.png'),
-              onPressed: null,
-            ),
-            IconButton(
-              icon: Image.asset('assets/images/icon_AtTabBar_market-off.png'),
-              onPressed: null,
-            ),
-          ]));
+  Widget getBottomTabBarView() {
+    return BottomAppBar(
+        // elevation: 3.0,
+        color: Colors.white,
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: <
+            Widget>[
+          IconButton(
+            icon: Image.asset('assets/images/icon_AtTabBar_home-off.png'),
+            onPressed: null,
+          ),
+          IconButton(
+            icon: Image.asset('assets/images/icon_AtTabBar_storehouse-off.png'),
+            onPressed: null,
+          ),
+          IconButton(
+            icon: Image.asset('assets/images/icon_AtTabBar_market-off.png'),
+            onPressed: null,
+          ),
+        ]));
+  }
 }

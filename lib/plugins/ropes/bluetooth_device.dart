@@ -7,6 +7,7 @@ import 'package:toearnfun_flutter_app/store/devices.dart';
 import 'package:toearnfun_flutter_app/store/plugin_store.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/types/training_report.dart';
+import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/utils/crypto.dart';
 
 // messageType = 0：扫描蓝牙设备，1: 实时跳绳数据，2：实时跳绳结果，3：历史跳绳结果
@@ -24,11 +25,11 @@ abstract class BluetoothDeviceObserver {
 
   void onScanFinished();
 
-  void onReceiveDisplayData(SkipDisplayData display);
+  void onReceiveDisplayData(TrainingDisplay display);
 
-  void onReceiveSkipRealTimeResultData(SkipResultData result);
+  void onReceiveSkipRealTimeResultData(TrainingReport result);
 
-  void onReceiveSkipHistoryResultData(SkipResultData result);
+  void onReceiveSkipHistoryResultData(TrainingReport result);
 
   void onConnectSuccess(BluetoothDevice bleDevice);
 
@@ -84,8 +85,6 @@ class BluetoothDeviceConnector {
       if (connectedDevice == null && connectedDevices.isNotEmpty) {
         LogUtil.d('autoScanAndConnect');
         scanDevice();
-      } else {
-        LogUtil.d('device is connected');
       }
     });
 
@@ -122,6 +121,7 @@ class BluetoothDeviceConnector {
       for (var o in observers) {
         o.onConnectSuccess(device);
       }
+      LogUtil.d('device is connected');
     }
     return connect;
   }
@@ -247,13 +247,13 @@ class BluetoothDeviceConnector {
         _store!.devices.disconnectDevice();
         break;
       case BlueEventMessageType.skipDisplayData:
-        final res = SkipDisplayData.fromJson(content);
+        final res = TrainingDisplay.fromJson(content);
         for (var o in observers) {
           o.onReceiveDisplayData(res);
         }
         break;
       case BlueEventMessageType.skipResultData:
-        final res = SkipResultData.fromJson(content);
+        final res = newTrainingReportFromJson(content);
         res.deviceKey = targetDeviceKey;
         for (var o in observers) {
           o.onReceiveSkipRealTimeResultData(res);
@@ -261,7 +261,7 @@ class BluetoothDeviceConnector {
         _store!.report.addTrainingReport(res);
         break;
       case BlueEventMessageType.skipHistoryData:
-        final res = SkipResultData.fromJson(content);
+        final res = newTrainingReportFromJson(content);
         res.deviceKey = targetDeviceKey;
         for (var o in observers) {
           o.onReceiveSkipHistoryResultData(res);

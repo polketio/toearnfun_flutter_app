@@ -72,6 +72,22 @@ mixin _$VFEStore on _VFEStore, Store {
     });
   }
 
+  late final _$lastEnergyRecoveryAtom =
+      Atom(name: '_VFEStore.lastEnergyRecovery', context: context);
+
+  @override
+  int get lastEnergyRecovery {
+    _$lastEnergyRecoveryAtom.reportRead();
+    return super.lastEnergyRecovery;
+  }
+
+  @override
+  set lastEnergyRecovery(int value) {
+    _$lastEnergyRecoveryAtom.reportWrite(value, super.lastEnergyRecovery, () {
+      super.lastEnergyRecovery = value;
+    });
+  }
+
   late final _$updateUserCurrentAsyncAction =
       AsyncAction('_VFEStore.updateUserCurrent', context: context);
 
@@ -96,6 +112,15 @@ mixin _$VFEStore on _VFEStore, Store {
   @override
   Future<void> updateUserState(User state) {
     return _$updateUserStateAsyncAction.run(() => super.updateUserState(state));
+  }
+
+  late final _$updateLastEnergyRecoveryAsyncAction =
+      AsyncAction('_VFEStore.updateLastEnergyRecovery', context: context);
+
+  @override
+  Future<void> updateLastEnergyRecovery(int value) {
+    return _$updateLastEnergyRecoveryAsyncAction
+        .run(() => super.updateLastEnergyRecovery(value));
   }
 
   late final _$_VFEStoreActionController =
@@ -140,7 +165,8 @@ mixin _$VFEStore on _VFEStore, Store {
 userState: ${userState},
 current: ${current},
 userVFEList: ${userVFEList},
-allVFEBrands: ${allVFEBrands}
+allVFEBrands: ${allVFEBrands},
+lastEnergyRecovery: ${lastEnergyRecovery}
     ''';
   }
 }

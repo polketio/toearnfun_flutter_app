@@ -48,23 +48,28 @@ class _BindDeviceTipsState extends State<BindDeviceTips> {
       backgroundColor: _backgroundColor,
       leading: MyBackButton(),
       centerTitle: true,
-      title: Text('Bind Device', style: TextStyle(color: Colors.white)),
+      title: Text('Wake Up Device', style: TextStyle(color: Colors.white)),
     );
   }
 
   Widget tipsDescView() {
-    return Container(
-      child: Column(
-        children: [
-          Text('How to bind?'),
-          Text('Touch the power button to wake up the screen.'),
-        ],
-      ),
+    return Column(
+      children: [
+        Padding(
+            padding: EdgeInsets.only(top: 60.h, bottom: 60.h),
+            child: Image.asset('assets/images/WakeUpDevice-img.png')),
+        Text(
+          'How to do?',
+          style: TextStyle(fontSize: 28),
+        ),
+        Padding(padding: EdgeInsets.only(top: 28.h)),
+        Text('Touch the power button to wake up the screen.',
+            style: TextStyle(fontSize: 14, color: Colors.grey)),
+      ],
     );
   }
 
   Widget buttonView(BuildContext context) {
-
     final data = ModalRoute.of(context)?.settings.arguments as Map;
     final itemIdOfVFE = data['itemIdOfVFE'];
 

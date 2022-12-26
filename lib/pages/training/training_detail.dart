@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:bruno/bruno.dart';
 import 'package:flustars/flustars.dart';
@@ -5,10 +7,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
+import 'package:polkawallet_ui/utils/format.dart';
+import 'package:realm/realm.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
+import 'package:toearnfun_flutter_app/utils/sport.dart';
 import 'package:toearnfun_flutter_app/utils/time.dart';
 
 class JumpRopeTrainingDetailView extends StatefulWidget {
@@ -31,7 +36,7 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
   final _backgroundColor = HexColor('#956DFD');
   final _roundColor = HexColor('#f9f7f7');
 
-  SkipResultData report = SkipResultData();
+  late TrainingReport report;
 
   @override
   void initState() {
@@ -41,8 +46,8 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
   @override
   Widget build(BuildContext context) {
     final data = ModalRoute.of(context)?.settings.arguments as Map;
-    report = data['trainingReport'] ?? SkipResultData();
-    LogUtil.d('report: $report');
+    report = data['trainingReport'];
+    // LogUtil.d('report: $report');
 
     return Scaffold(
         resizeToAvoidBottomInset: false,
@@ -82,13 +87,16 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
   }
 
   Widget topView() {
+    final kcal = calCalBurnedForJumpRope(
+        report?.jumpRopeDuration ?? 0, report?.totalJumpRopeCount ?? 0, 0);
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           itemView('assets/images/icon-time_big.png', 'Training Time',
               formatDuration(report.jumpRopeDuration)),
-          itemView('assets/images/icon-calories.png', 'Fat burning', '90 KCal'),
+          itemView('assets/images/icon-calories.png', 'Fat burning',
+              '${Fmt.priceCeil(kcal, lengthMax: 2)} KCal'),
           itemView('assets/images/icon-bangsheng.png', 'Rope Breaks',
               '${report.interruptions} Time'),
         ],
@@ -152,6 +160,12 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
 
   Widget centerForegroundView(
       BuildContext context, BoxConstraints constraints) {
+    Widget rewardView;
+    if (report.reward != null) {
+      rewardView = earnFUNView(report.reward!);
+    } else {
+      rewardView = blindBoxView();
+    }
     return Container(
         height: constraints.maxWidth * 2 / 3,
         child: Stack(alignment: Alignment.bottomLeft, children: [
@@ -196,8 +210,7 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        // child: Image.asset('assets/images/icon-baoxiang.png'),
-                        child: earnFUNView(90, 2),
+                        child: rewardView,
                       )
                     ]);
                   })))
@@ -205,15 +218,33 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
   }
 
   Widget buttonView(BuildContext context) {
+    final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
+    final status = report.reportStatus(now);
+    String btnStr = '';
+    switch (status) {
+      case ReportStatus.notReported:
+        btnStr = 'Report Now';
+        break;
+      case ReportStatus.reported:
+        btnStr = 'Reported';
+        break;
+      case ReportStatus.expired:
+        btnStr = 'Expired';
+        break;
+      case ReportStatus.failed:
+        btnStr = report.error;
+        break;
+    }
     return Container(
         height: 50.h,
         width: double.infinity,
         margin: EdgeInsets.only(top: 44.h),
         child: ElevatedButton(
           onPressed: () async {
-            await uploadTrainingReport(context, report);
+            if (status == ReportStatus.notReported) {
+              await uploadTrainingReport(context, report);
+            }
           },
-          child: const Text('Reported', style: TextStyle(fontSize: 24)),
           style: ButtonStyle(
             elevation: MaterialStateProperty.all(0),
             shape: MaterialStateProperty.all(
@@ -221,6 +252,7 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
             backgroundColor: MaterialStateProperty.all(_backgroundColor),
             alignment: Alignment.center,
           ),
+          child: Text(btnStr, style: const TextStyle(fontSize: 24)),
         ));
   }
 
@@ -263,7 +295,12 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
     );
   }
 
-  Widget earnFUNView(double fun, int energy) {
+  Widget earnFUNView(TrainingReward reward) {
+    final asset = widget.plugin.store.assets.getTokenByAssetId(reward.assetId);
+    final amount = reward.rewards;
+    final energyUsed = reward.energyUsed;
+    final decimals = asset?.decimals ?? 0;
+
     return Padding(
         padding: EdgeInsets.only(left: 10.w, right: 16.w),
         child: Column(
@@ -272,20 +309,48 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
           children: [
             //[FUN ENERGY]
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Image.asset('assets/images/icon-energy.png'),
-              AutoSizeText('+ $fun',
-                  maxLines: 1, style: TextStyle(fontSize: 20), minFontSize: 10),
+              Image.asset('assets/images/icon-fun-nobg.png'),
+              Flexible(
+                  child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child:
+                          Text('+ ${Fmt.balance(amount.toString(), decimals)}',
+                              maxLines: 1,
+                              style: const TextStyle(
+                                height: 1.0,
+                                textBaseline: TextBaseline.ideographic,
+                                package: BrnStrings.flutterPackageName,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 22,
+                                fontFamily: 'Bebas',
+                              )))),
             ]),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Image.asset('assets/images/icon-energy.png'),
-              AutoSizeText('- $energy',
-                  maxLines: 1, style: TextStyle(fontSize: 20), minFontSize: 10),
+              Flexible(
+                  child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('- $energyUsed',
+                          maxLines: 1,
+                          style: const TextStyle(
+                            height: 1.0,
+                            textBaseline: TextBaseline.ideographic,
+                            package: BrnStrings.flutterPackageName,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 22,
+                            fontFamily: 'Bebas',
+                          )))),
             ]),
           ],
         ));
   }
 
-  uploadTrainingReport(BuildContext context, SkipResultData report) async {
+  Widget blindBoxView() {
+    return Image.asset('assets/images/icon-baoxiang.png');
+  }
+
+  // upload training report and get FUN
+  uploadTrainingReport(BuildContext context, TrainingReport report) async {
     BrnLoadingDialog.show(context,
         content: 'Uploading', barrierDismissible: false);
     final signature = report.signature;
@@ -295,22 +360,62 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
       context,
       widget.keyring.current,
     );
-    final result = await widget.plugin.api.vfe.uploadTrainingReport(
-        deviceKey, signature, reportData, password, onStatusChange: (status) {
-      LogUtil.d(status);
-      // setState(() {
-      //   _status = status;
-      // });
-    });
+    final result = await widget.plugin.api.vfe
+        .uploadTrainingReport(deviceKey, signature, reportData, password);
+    final realm = widget.plugin.store.report.realm;
+
     if (!mounted) return;
+    BrnLoadingDialog.dismiss(context);
+
     if (!result.success) {
-      //todo: update report state
+      // update report state
       BrnToast.show(result.error, context);
+
+      realm.write(() {
+        report.error = result.error;
+        // report.status = ReportStatus.failed.name;
+      });
     } else {
       BrnToast.show('Upload report successfully', context);
-      //todo: save the reward info and update state
+      // save the reward info and update state
+      final events = result.events;
+      for (var event in events) {
+        if (event.title == 'vfe.TrainingReportsAndRewards') {
+          // TrainingReportsAndRewards {
+          //   owner: T::AccountId,
+          //   brand_id: T::CollectionId,
+          //   item_id: T::ItemId,
+          //   sport_type: SportType,
+          //   training_time: u32,
+          //   training_duration: u16,
+          //   training_count: u16,
+          //   energy_used: u16,
+          //   asset_id: AssetIdOf<T>,
+          //   rewards: BalanceOf<T>,
+          // },
+          int energyUsed = event.message[7] ?? 0;
+          int assetId = event.message[8] ?? 0;
+          String rewards = event.message[9].toString() ?? '0';
+
+          realm.write(() {
+            final reward = TrainingReward(ObjectId(),
+                energyUsed: energyUsed,
+                batteryUsed: energyUsed,
+                assetId: assetId,
+                rewards: rewards);
+            report.reward = reward;
+            report.status = ReportStatus.reported.name;
+          });
+
+          final currentVFE = widget.plugin.store.vfe.current;
+          currentVFE.remainingBattery =
+              currentVFE.remainingBattery - energyUsed;
+          await widget.plugin.store.vfe
+              .updateUserCurrent(widget.keyring.current.pubKey, currentVFE);
+        }
+      }
     }
 
-    BrnLoadingDialog.dismiss(context);
+    setState(() {});
   }
 }

@@ -18,6 +18,7 @@ import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/types/user.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
+import 'package:toearnfun_flutter_app/utils/time.dart';
 
 class HomeView extends StatefulWidget {
   HomeView(this.plugin, this.keyring);
@@ -44,7 +45,6 @@ class _HomeViewState extends State<HomeView>
         AnimationController(vsync: this, duration: Duration(seconds: 3));
     _animationController.forward();
     BluetoothDeviceConnector.addObserver(this);
-
   }
 
   @override
@@ -76,7 +76,7 @@ class _HomeViewState extends State<HomeView>
         int itemIdOfVFE = 0;
         final userSelectedVFE = widget.plugin.store.vfe.current;
         if (userSelectedVFE.itemId != null) {
-          vfeImage = 'assets/images/img-Bound.png';
+          vfeImage = 'assets/images/vfe-card.png';
           itemId = '#${userSelectedVFE.itemId.toString().padLeft(4, '0')}';
           battery = userSelectedVFE.remainingBattery;
           deviceKey = userSelectedVFE.deviceKey.replaceFirst('0x', '');
@@ -368,42 +368,61 @@ class _HomeViewState extends State<HomeView>
   // daily training chart
   Widget trainingCircularProgressIndicator(
       BuildContext context, User userState) {
-    double earnRatio =
-        double.parse(userState.earned) / double.parse(userState.earningCap);
-    double trainingTimeRatio =
-        (userState.energyTotal - userState.energy) / userState.energyTotal;
+    return Observer(builder: (_) {
+      double earnRatio =
+          double.parse(userState.earned) / double.parse(userState.earningCap);
+      double trainingTimeRatio =
+          (userState.energyTotal - userState.energy) / userState.energyTotal;
 
-    return Padding(
-        padding: EdgeInsets.only(top: 16.h),
-        child: Stack(alignment: Alignment.center, children: [
-          LayoutBuilder(builder: (context, constraints) {
-            // LogUtil.d('Circular 1 maxWidth: ${constraints.maxWidth}');
-            // LogUtil.d('constraints maxHeight: ${constraints.maxHeight}');
-            return GradientCircularProgressIndicator(
-              backgroundColor: HexColor('#f5f5f5'),
-              colors: [HexColor('#6cd1fe'), HexColor('#6cd1fe')],
-              radius: constraints.maxWidth * 0.38,
-              stokeWidth: 11.0,
-              strokeCapRound: true,
-              value: earnRatio,
-            );
-          }),
-          LayoutBuilder(builder: (context, constraints) {
-            // LogUtil.d('Circular 2 maxWidth: ${constraints.maxWidth}');
-            child:
-            return GradientCircularProgressIndicator(
-              backgroundColor: HexColor('#f5f5f5'),
-              colors: [HexColor('#956dfd'), HexColor('#956dfd')],
-              radius: constraints.maxWidth * 0.30,
-              stokeWidth: 11.0,
-              strokeCapRound: true,
-              value: trainingTimeRatio,
-            );
-          }),
-          IconButton(
-              onPressed: null,
-              icon: Image.asset('assets/images/icon-Exchange-fun.png'))
-        ]));
+      final lastEnergyRecovery = widget.plugin.store.vfe.lastEnergyRecovery;
+      final energyRecoveryDuration =
+          widget.plugin.api.vfe.energyRecoveryDuration;
+      final nextEnergyRecovery = lastEnergyRecovery + energyRecoveryDuration;
+      final currentHeight = widget.plugin.store.system.currentBlockNumber;
+      final expectedBlockTime =
+          widget.plugin.api.system.expectedBlockTime / 1000;
+      final remainingSeconds =
+          (nextEnergyRecovery - currentHeight) * expectedBlockTime.round();
+      final remainingTime = formatDurationText(remainingSeconds);
+      // LogUtil.d('lastEnergyRecovery: $lastEnergyRecovery');
+      // LogUtil.d('nextEnergyRecovery: $nextEnergyRecovery');
+      // LogUtil.d('remainingSeconds: $remainingSeconds');
+      // LogUtil.d('remaining time: $remainingTime');
+
+      return Padding(
+          padding: EdgeInsets.only(top: 16.h),
+          child: Stack(alignment: Alignment.center, children: [
+            LayoutBuilder(builder: (context, constraints) {
+              // LogUtil.d('Circular 1 maxWidth: ${constraints.maxWidth}');
+              // LogUtil.d('constraints maxHeight: ${constraints.maxHeight}');
+              return GradientCircularProgressIndicator(
+                backgroundColor: HexColor('#f5f5f5'),
+                colors: [HexColor('#6cd1fe'), HexColor('#6cd1fe')],
+                radius: constraints.maxWidth * 0.38,
+                stokeWidth: 11.0,
+                strokeCapRound: true,
+                value: earnRatio,
+              );
+            }),
+            LayoutBuilder(builder: (context, constraints) {
+              // LogUtil.d('Circular 2 maxWidth: ${constraints.maxWidth}');
+              child:
+              return GradientCircularProgressIndicator(
+                backgroundColor: HexColor('#f5f5f5'),
+                colors: [HexColor('#956dfd'), HexColor('#956dfd')],
+                radius: constraints.maxWidth * 0.30,
+                stokeWidth: 11.0,
+                strokeCapRound: true,
+                value: trainingTimeRatio,
+              );
+            }),
+            Column(children: [
+              Text('Refill in', style: TextStyle(fontSize: 14)),
+              Text(remainingTime, style: TextStyle(fontSize: 14, color: HexColor('#956dfd'))),
+            ],)
+            
+          ]));
+    });
   }
 
   @override
@@ -421,22 +440,22 @@ class _HomeViewState extends State<HomeView>
   }
 
   @override
-  void onReceiveDisplayData(SkipDisplayData display) {}
+  void onReceiveDisplayData(TrainingDisplay display) {}
 
   @override
-  void onReceiveSkipHistoryResultData(SkipResultData result) {}
+  void onReceiveSkipHistoryResultData(TrainingReport result) {}
 
   @override
-  void onReceiveSkipRealTimeResultData(SkipResultData result) {
-    LogUtil.d('training data encode: ${result.encodeData()}');
-    LogUtil.d('training signature: ${result.signature}');
-    LogUtil.d(
-        'device pubkey: ${BluetoothDeviceConnector.connectedDevice?.pubKey ?? ''}');
+  void onReceiveSkipRealTimeResultData(TrainingReport result) {
+    // LogUtil.d('training data encode: ${result.encodeData()}');
+    // LogUtil.d('training signature: ${result.signature}');
+    // LogUtil.d(
+    //     'device pubkey: ${BluetoothDeviceConnector.connectedDevice?.pubKey ?? ''}');
   }
 
   @override
   void onScanFinished() {
-    LogUtil.d('onScanFinished');
+    // LogUtil.d('onScanFinished');
   }
 
   @override

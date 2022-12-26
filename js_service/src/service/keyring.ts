@@ -188,7 +188,7 @@ function _extractEvents(api: ApiPromise, result: SubmittableResult) {
 
   let success = false;
   let error: string;
-  result.events
+  let events = result.events
     .filter((event) => !!event.event)
     .map(({ event: { data, method, section } }) => {
       if (section === "system" && method === "ExtrinsicFailed") {
@@ -208,8 +208,12 @@ function _extractEvents(api: ApiPromise, result: SubmittableResult) {
           success = true;
         }
       }
+      return {
+        title: `${section}.${method}`,
+        message: data.toJSON(),
+      };
     });
-  return { success, error };
+  return { success, error, events };
 }
 
 export function _getDispatchError(dispatchError: DispatchError): string {
@@ -248,9 +252,9 @@ function sendTx(api: ApiPromise, txInfo: any, paramList: any[], password: string
     let unsub = () => {};
     const onStatusChange = (result: SubmittableResult) => {
       if (result.status.isInBlock || result.status.isFinalized) {
-        const { success, error } = _extractEvents(api, result);
+        const { success, error, events } = _extractEvents(api, result);
         if (success) {
-          resolve({ hash: tx.hash.toString(), blockHash: (result.status.asInBlock || result.status.asFinalized).toHex() });
+          resolve({ hash: tx.hash.toString(), blockHash: (result.status.asInBlock || result.status.asFinalized).toHex(), events: events});
         }
         if (error) {
           resolve({ error });
@@ -401,9 +405,9 @@ function addSignatureAndSend(api: ApiPromise, address: string, signed: string) {
       let unsub = () => {};
       const onStatusChange = (result: SubmittableResult) => {
         if (result.status.isInBlock || result.status.isFinalized) {
-          const { success, error } = _extractEvents(api, result);
+          const { success, error, events } = _extractEvents(api, result);
           if (success) {
-            resolve({ hash: tx.hash.toString(), blockHash: (result.status.asInBlock || result.status.asFinalized).toHex() });
+            resolve({ hash: tx.hash.toString(), blockHash: (result.status.asInBlock || result.status.asFinalized).toHex(), events: events });
           }
           if (error) {
             resolve({ error });

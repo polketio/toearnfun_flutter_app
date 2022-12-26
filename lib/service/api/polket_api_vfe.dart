@@ -18,8 +18,9 @@ class PolketApiVFE {
   final module = 'vfe';
 
   final userStateChannel = 'userState';
+  final lastEnergyRecoveryChannel = 'lastEnergyRecovery';
 
-  Future<BluetoothDevice?> queryDevice(String deviceKey) async {
+  Future<BluetoothDevice?> getDevice(String deviceKey) async {
     final res = await plugin.sdk.api.service.webView
         ?.evalJavascript('api.query.$module.devices("0x$deviceKey")');
     if (res != null) {
@@ -29,16 +30,18 @@ class PolketApiVFE {
     }
   }
 
-  Future<DispatchResult> bindDevice(String pubKey, String signature, int nonce,
-      int? itemId, String? password) async {
+  Future<DispatchResult> bindDevice(String from, String pubKey,
+      String signature, int nonce, int? itemId, String? password) async {
     final params = [
+      from,
       '0x$pubKey',
       '0x$signature',
       nonce,
       itemId,
     ];
     return PolketApi.call(
-        keyring, plugin.sdk, module, 'bindDevice', params, password);
+        keyring, plugin.sdk, module, 'bindDevice', params, password,
+        isUnsigned: true);
   }
 
   Future<DispatchResult> registerDevice(
@@ -77,8 +80,8 @@ class PolketApiVFE {
     return list;
   }
 
-  Future<DispatchResult> producerRegister(String? password) async {
-    final params = [];
+  Future<DispatchResult> producerRegister(String who, String? password) async {
+    final params = [who];
     return PolketApi.call(
         keyring, plugin.sdk, module, 'producerRegister', params, password);
   }
@@ -96,7 +99,7 @@ class PolketApiVFE {
     final params = ['0x$deviceKey', '0x$signature', '0x$reportData'];
     return PolketApi.call(
         keyring, plugin.sdk, module, 'uploadTrainingReport', params, password,
-        onStatusChange: onStatusChange);
+        onStatusChange: onStatusChange, isUnsigned: true);
   }
 
   Future<User> getUserState(String address) async {
@@ -129,5 +132,44 @@ class PolketApiVFE {
     final params = [];
     return PolketApi.call(
         keyring, plugin.sdk, module, 'userRestore', params, password);
+  }
+
+  void unsubscribeLastEnergyRecovery() async {
+    plugin.sdk.api.unsubscribeMessage(lastEnergyRecoveryChannel);
+  }
+
+  Future<void> subscribeLastEnergyRecovery(Function(int) callback) async {
+    plugin.sdk.api.subscribeMessage(
+      'api.query.$module.lastEnergyRecovery',
+      [],
+      lastEnergyRecoveryChannel,
+      (data) {
+        callback(int.parse(data));
+      },
+    );
+  }
+
+  int get reportValidityPeriod  {
+    if (plugin.networkConst.isNotEmpty) {
+      return int.parse(plugin.networkConst[module]['reportValidityPeriod']);
+    } else {
+      return 0;
+    }
+  }
+
+  int get energyRecoveryDuration  {
+    if (plugin.networkConst.isNotEmpty) {
+      return int.parse(plugin.networkConst[module]['energyRecoveryDuration']);
+    } else {
+      return 0;
+    }
+  }
+
+  int get dailyEarnedResetDuration  {
+    if (plugin.networkConst.isNotEmpty) {
+      return int.parse(plugin.networkConst[module]['dailyEarnedResetDuration']);
+    } else {
+      return 0;
+    }
   }
 }

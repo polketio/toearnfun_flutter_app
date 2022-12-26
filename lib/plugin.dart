@@ -57,6 +57,7 @@ class PluginPolket extends PolkawalletPlugin {
         'name': 'Polket Testnet',
         'ss58': 42,
         'endpoint': 'wss://testnet-node.polket.io',
+        // 'endpoint': 'ws://127.0.0.1:9944',
       },
     ].map((e) => NetworkParams.fromJson(e)).toList();
   }
@@ -138,6 +139,18 @@ class PluginPolket extends PolkawalletPlugin {
     });
   }
 
+  Future<void> _subscribeLastEnergyRecovery() async {
+    _api.vfe.subscribeLastEnergyRecovery((data) {
+      store.vfe.updateLastEnergyRecovery(data);
+    });
+  }
+
+  Future<void> _subscribeBlockNumber() async {
+    _api.system.subscribeBlockNumber((data) {
+      store.system.updateCurrentBlockNumber(data);
+    });
+  }
+
   @override
   Future<void> onWillStart(Keyring keyring) async {
     _api = PolketApi(this, keyring);
@@ -155,6 +168,10 @@ class PluginPolket extends PolkawalletPlugin {
       _subscribeTokenBalances(keyring.current.address!);
       // subscribe user state
       _subscribeUserState(keyring.current.address!);
+      // subscribe last energy recovery
+      _subscribeLastEnergyRecovery();
+      // subscribe new block number
+      _subscribeBlockNumber();
       // load user vfe
       loadUserVFEs(keyring.current.pubKey!);
 
@@ -172,9 +189,13 @@ class PluginPolket extends PolkawalletPlugin {
     if (_connected && acc.address != null) {
       _api.assets.unsubscribeTokenBalances(acc.address!);
       _api.vfe.unsubscribeUserState(acc.address!);
+      _api.vfe.unsubscribeLastEnergyRecovery();
+      _api.system.unsubscribeBlockNumber();
 
       _subscribeTokenBalances(acc.address!);
       _subscribeUserState(acc.address!);
+      _subscribeLastEnergyRecovery();
+      _subscribeBlockNumber();
     }
   }
 }

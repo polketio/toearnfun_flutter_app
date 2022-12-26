@@ -25,3 +25,17 @@ enum SportType {
   Run,
   Bicycle,
 }
+
+extension SportTypeExtension on SportType {
+
+  String get display {
+    switch (this) {
+      case SportType.JumpRope:
+        return 'Jump Rope';
+      case SportType.Run:
+        return 'Sneaker';
+      case SportType.Bicycle:
+        return 'Bicycle';
+    }
+  }
+}

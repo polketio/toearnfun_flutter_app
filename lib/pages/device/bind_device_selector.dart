@@ -12,11 +12,11 @@ class DeviceType {
 class BindDeviceSelector {
   static Future<List<DeviceType>> getDeviceType() async {
     List<DeviceType> list = [];
-    list.add(DeviceType('11-11-11', 'Smart Jump Rope J2'));
+    list.add(DeviceType('1', 'Smart Jump Rope J2'));
     return list;
   }
 
-  static Future<void> showDeviceTypesSelector(BuildContext context, int? itemIdOfVFE) async {
+  static Future<void> showDeviceTypesSelector<T>(BuildContext context, int itemIdOfVFE) async {
     final deviceTypes = await getDeviceType();
     List<BrnCommonActionSheetItem> actions = deviceTypes
         .map((e) => BrnCommonActionSheetItem(
@@ -27,7 +27,7 @@ class BindDeviceSelector {
         .toList();
 
     // 展示actionSheet
-    showModalBottomSheet(
+    showModalBottomSheet<T>(
         context: context,
         backgroundColor: Colors.transparent,
         builder: (BuildContext ctx) {
@@ -36,9 +36,6 @@ class BindDeviceSelector {
             actions: actions,
             cancelTitle: 'Cancel',
             clickCallBack: (int index, BrnCommonActionSheetItem actionEle) {
-              // String? title = actionEle.title;
-              // BrnToast.show('title: $title, index: $index', ctx);
-              // Navigator.of(ctx).pop();
               Future.delayed(Duration.zero, () {
                 Navigator.of(ctx)
                     .pushNamed(BindDeviceTips.route, arguments: {

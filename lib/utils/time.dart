@@ -1,4 +1,3 @@
-
 /// format timestamp
 String formatTimestamp({
   int? timestamp, // 为空则显示当前时间
@@ -36,7 +35,8 @@ String formatTimestamp({
     return time_str;
   }
 
-  date = date.replaceAll('YY', YY)
+  date = date
+      .replaceAll('YY', YY)
       .replaceAll('MM', MM)
       .replaceAll('DD', DD)
       .replaceAll('hh', hh)
@@ -53,4 +53,13 @@ String formatDuration(int s) {
   String minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
   String seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
   return '$hours:$minutes:$seconds';
+}
+
+/// String formatDurationText(int s) {
+String formatDurationText(int s) {
+  final duration = Duration(seconds: s);
+  String hours = duration.inHours.toString().padLeft(2, '');
+  String minutes =
+      (duration.inMinutes.remainder(60) + 1).toString().padLeft(2, '');
+  return '${hours}h${minutes}min';
 }

@@ -3,24 +3,25 @@ import 'dart:convert';
 import 'package:flustars/flustars.dart';
 import 'package:mobx/mobx.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:realm/realm.dart';
+import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/types/training_report.dart';
 
 part 'training_report.g.dart';
 
-class TrainingReportStore extends _TrainingReportStore with _$TrainingReportStore {
-  TrainingReportStore(GetStorage storage) : super(storage);
+class TrainingReportStore extends _TrainingReportStore
+    with _$TrainingReportStore {
+  TrainingReportStore(GetStorage storage, Realm realm) : super(storage, realm);
 }
 
 abstract class _TrainingReportStore with Store {
-  _TrainingReportStore(this.storage);
+  _TrainingReportStore(this.storage, this.realm);
 
   final GetStorage storage;
+  final Realm realm;
 
   final String userTrainingReportKey = 'user_training_report_list';
   final String userLastReportTimeKey = 'user_last_report_time';
-
-  @observable
-  List<SkipResultData> userTrainingReportList =[];
 
   int lastReportTime = 0;
 
@@ -32,27 +33,21 @@ abstract class _TrainingReportStore with Store {
     return storage.read(userLastReportTimeKey);
   }
 
-  @action
-  Future<void> addTrainingReport(SkipResultData report) async {
-    //todo: this is a bug which will clear the local cache
-    userTrainingReportList.add(report);
-    List<Map<String, dynamic>> rawData =
-    userTrainingReportList.map((e) => e.toJson()).toList();
-    await storage.write(userTrainingReportKey, rawData);
+  List<TrainingReport> loadTrainingReportList() {
+    final list = realm.query<TrainingReport>(
+        'TRUEPREDICATE SORT(reportTime DESC)');
+    return list.toList();
   }
 
-  @action
-  void loadTrainingReportList() {
-    List? cache = storage.read(userTrainingReportKey);
-    if (cache!=null) {
-      LogUtil.d('SkipResultData cache: $cache');
-      userTrainingReportList = cache.map((i) {
-        return SkipResultData.fromJson(i);
-      }).toList();
-    } else {
-      userTrainingReportList = [];
-    }
-
+  void addTrainingReport(TrainingReport data, [bool update = false]) {
+    realm.write(() {
+      realm.add(data, update: update);
+    });
   }
 
+  void addTrainingReward(TrainingReward data, [bool update = false]) {
+    realm.write(() {
+      realm.add(data, update: update);
+    });
+  }
 }

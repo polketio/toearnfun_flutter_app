@@ -33,6 +33,9 @@ abstract class _VFEStore with Store {
   @observable
   ObservableList<VFEBrand> allVFEBrands = ObservableList<VFEBrand>();
 
+  @observable
+  int lastEnergyRecovery = 0;
+
   @action
   void clearUserVFE() {
     userVFEList.clear();
@@ -90,5 +93,10 @@ abstract class _VFEStore with Store {
     userState = state;
     final key = userStateKey;
     await storage.write(key, state.toJson());
+  }
+
+  @action
+  Future<void> updateLastEnergyRecovery(int value) async {
+    lastEnergyRecovery = value;
   }
 }

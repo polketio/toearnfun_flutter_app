@@ -39,17 +39,9 @@ class _WalletViewState extends State<WalletView> {
   @override
   void initState() {
     super.initState();
-    // [check] Has a wallet been created? load assets:show dialog
     LogUtil.d('allAccounts: ${widget.keyring.allAccounts.length}');
-    if (widget.keyring.allAccounts.length == 0) {
-      Future.delayed(Duration.zero, () {
-        showCreateWalletDialog();
-      });
-    } else {
-      // show current account
-      _currentAccount = widget.keyring.current;
-      LogUtil.d('current address: ${_currentAccount!.address}');
-    }
+    _currentAccount = widget.keyring.current;
+    LogUtil.d('_currentAccount: ${_currentAccount?.address}');
   }
 
   PreferredSizeWidget getAppBarView() {
@@ -63,9 +55,7 @@ class _WalletViewState extends State<WalletView> {
       title: Text('Wallet', style: TextStyle(color: Colors.white)),
       actions: <Widget>[
         IconButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed(NewWalletWelcomeView.route);
-            },
+            onPressed: null,
             icon: Image.asset('assets/images/icon-more.png'),
             iconSize: 36.w),
       ],
@@ -229,8 +219,8 @@ class _WalletViewState extends State<WalletView> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.w)),
                 child: ListTile(
-                    // leading: Image.asset('assets/images/icon-${d.symbol}.png'),
-                    leading: Image.asset('assets/images/icon-PNT.png'),
+                    leading: Image.asset('assets/images/icon-${d.symbol}.png'),
+                    // leading: Image.asset('assets/images/icon-PNT.png'),
                     title: Text('${d.symbol}', style: TextStyle(fontSize: 18)),
                     subtitle: Text('${d.name}', style: TextStyle(fontSize: 12)),
                     trailing: Text('${Fmt.balance(d.amount, d.decimals ?? nativeDecimals)}',
@@ -307,7 +297,7 @@ class _WalletViewState extends State<WalletView> {
     widget.plugin.balances.setTokens(tokens);
   }
 
-  Future<void> _sendTx() async {
+  Future<void> _sendTx(String address, String amount) async {
     if (widget.keyring.keyPairs.length == 0) {
       return;
     }
@@ -323,9 +313,9 @@ class _WalletViewState extends State<WalletView> {
         [
           // params.to
           // _testAddressGav,
-          '5D88MBhvGEuEooNV7BYGXJsvrc1zo9X3rrGAeoSWMgSc9kGs',
+          address,
           // params.amount
-          500000000000
+          amount
         ],
         '1234qwer',
         onStatusChange: (status) {

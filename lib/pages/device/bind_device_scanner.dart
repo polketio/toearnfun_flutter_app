@@ -83,7 +83,7 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
       backgroundColor: _backgroundColor,
       leading: MyBackButton(),
       centerTitle: true,
-      title: Text('Bind Device', style: TextStyle(color: Colors.white)),
+      title: Text('Scan Device', style: TextStyle(color: Colors.white)),
     );
   }
 
@@ -92,8 +92,16 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
       alignment: Alignment.center,
       child: Column(
         children: [
-          Text('Scanning...'),
-          Text('Please keep your phone close to the device.'),
+          Padding(
+              padding: EdgeInsets.only(top: 60.h, bottom: 60.h),
+              child: Image.asset('assets/images/SearchingFor-img.png')),
+          Text(
+            'Scanning...',
+            style: TextStyle(fontSize: 28),
+          ),
+          Padding(padding: EdgeInsets.only(top: 28.h)),
+          Text('Please keep your phone close to the device.',
+              style: TextStyle(fontSize: 14, color: Colors.grey)),
         ],
       ),
     );
@@ -115,7 +123,7 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
                 return Column(
                   children: [
                     ListTile(
-                        title: Text(name, style: TextStyle(fontSize: 14)),
+                        title: Text(name, style: TextStyle(fontSize: 16)),
                         onTap: () async {
                           await selectDevice(context, d);
                         },
@@ -193,13 +201,13 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
   }
 
   @override
-  void onReceiveDisplayData(SkipDisplayData display) {}
+  void onReceiveDisplayData(TrainingDisplay display) {}
 
   @override
-  void onReceiveSkipHistoryResultData(SkipResultData result) {}
+  void onReceiveSkipHistoryResultData(TrainingReport result) {}
 
   @override
-  void onReceiveSkipRealTimeResultData(SkipResultData result) {}
+  void onReceiveSkipRealTimeResultData(TrainingReport result) {}
 
   @override
   void onDisConnected(BluetoothDevice bleDevice) {}
