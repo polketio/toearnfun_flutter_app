@@ -5,8 +5,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/pages/device/bind_device_complete.dart';
+import 'package:toearnfun_flutter_app/pages/device/bind_device_selector.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
+import 'package:toearnfun_flutter_app/plugins/ropes/simulated_device.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
@@ -24,24 +26,34 @@ class BindDeviceScanner extends StatefulWidget {
 }
 
 class _BindDeviceScannerState extends State<BindDeviceScanner>
-    implements BluetoothDeviceObserver {
+    implements JumpRopeDeviceObserver {
   final _backgroundColor = HexColor('#956DFD');
   final _roundColor = HexColor('#f9f7f7');
 
   bool showRescanButton = false;
+  DeviceType? deviceType;
+  late JumpRopeDeviceConnector connector;
 
   @override
   void initState() {
     super.initState();
-    BluetoothDeviceConnector.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final data = ModalRoute.of(context)?.settings.arguments as Map;
+      deviceType = data['deviceType'];
+      final simulated = deviceType?.simulated ?? false;
+      if (simulated) {
+        connector = SimulatedDeviceConnector();
+      } else {
+        connector = BluetoothDeviceConnector();
+      }
+      connector.addObserver(this);
       await scanDevices();
     });
   }
 
   @override
   void dispose() {
-    BluetoothDeviceConnector.removeObserver(this);
+    connector.removeObserver(this);
     super.dispose();
   }
 
@@ -109,7 +121,7 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
 
   // show currencies info
   Widget scannedDeviceListView(
-      BuildContext context, List<BluetoothDevice> devices) {
+      BuildContext context, List<FitnessDevice> devices) {
     return CustomScrollView(
         physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics()),
@@ -127,7 +139,8 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
                         onTap: () async {
                           await selectDevice(context, d);
                         },
-                        trailing: Image.asset('assets/images/icon-Connect.png')),
+                        trailing:
+                            Image.asset('assets/images/icon-Connect.png')),
                     const Divider(
                       height: 0.0,
                       indent: 0.0,
@@ -163,31 +176,30 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
   }
 
   Future<void> scanDevices() async {
-    final connected = await BluetoothDeviceConnector.stopConnect();
+    final connected = await connector.stopConnect();
     if (!connected) {
       setState(() {
         showRescanButton = false;
       });
 
       await widget.plugin.store.devices.clearScannedDevices();
-      await BluetoothDeviceConnector.scanDevice();
+      await connector.scanDevice();
     }
   }
 
-  Future<void> selectDevice(
-      BuildContext context, BluetoothDevice device) async {
-
+  Future<void> selectDevice(BuildContext context, FitnessDevice device) async {
     final data = ModalRoute.of(context)?.settings.arguments as Map;
     final itemIdOfVFE = data['itemIdOfVFE'];
 
     Navigator.of(context).pushNamed(BindDeviceComplete.route, arguments: {
       'device': device,
       'itemIdOfVFE': itemIdOfVFE,
+      'deviceType': deviceType,
     });
   }
 
   @override
-  void onScanning(BluetoothDevice bleDevice) {
+  void onScanning(FitnessDevice bleDevice) {
     setState(() {
       widget.plugin.store.devices.addScannedDevice(bleDevice);
     });
@@ -210,8 +222,8 @@ class _BindDeviceScannerState extends State<BindDeviceScanner>
   void onReceiveSkipRealTimeResultData(TrainingReport result) {}
 
   @override
-  void onDisConnected(BluetoothDevice bleDevice) {}
+  void onDisConnected(FitnessDevice bleDevice) {}
 
   @override
-  void onConnectSuccess(BluetoothDevice bleDevice) {}
+  void onConnectSuccess(FitnessDevice bleDevice) {}
 }

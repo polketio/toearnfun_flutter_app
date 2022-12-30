@@ -25,10 +25,12 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
   // static final EventChannel _eventChannel =
   //     EventChannel('BluetoothFlutterPluginEvent'); //原生平台主动调用flutter端事件通道
 
+  BluetoothDeviceConnector connector = BluetoothDeviceConnector();
+
   @override
   void initState() {
     super.initState();
-    // BluetoothDeviceConnector.init();
+    // connector.init();
     // _eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onError);
   }
 
@@ -83,55 +85,55 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                     children: [
                       mainButton('check bluetooth is open', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        bool isOpen = await BluetoothDeviceConnector
+                        bool isOpen = await connector
                             .checkBluetoothIsOpen();
                         // LogUtil.d('bluetooth is open: ${isOpen.toString()}');
                       }),
                       mainButton('check connect', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         bool isconnect =
-                            await BluetoothDeviceConnector.checkStateOn();
+                            await connector.checkStateOn();
                         // LogUtil.d('isconnect: ${isconnect.toString()}');
                       }),
                       mainButton('Scan Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        BluetoothDeviceConnector.scanDevice();
+                        connector.scanDevice();
                       }),
                       mainButton('Connect Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         // String mac='22:22:22:22:22:22';
                         String mac = 'FF:FF:FF:FF:FF:FF';
                         bool connect =
-                            await BluetoothDeviceConnector.connect(BluetoothDevice('demo', mac));
+                            await connector.connect(FitnessDevice('demo', mac));
                         // LogUtil.d('connect: $connect');
                       }),
                       mainButton('stop Connect Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
                         bool connect =
-                            await BluetoothDeviceConnector.stopConnect();
+                            await connector.stopConnect();
                         // LogUtil.d('connect: $connect');
                       }),
                       mainButton('Register', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        await BluetoothDeviceConnector
+                        await connector
                             .registerCustomDataRxCallback();
                         // LogUtil.d('registerCustomDataRxCallback');
                       }),
                       mainButton('unregister', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        await BluetoothDeviceConnector
+                        await connector
                             .unregisterCustomDataRxCallback();
                         // LogUtil.d('unregisterCustomDataRxCallback');
                       }),
                       mainButton('Get PublicKey', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String result = await BluetoothDeviceConnector
+                        String result = await connector
                             .getPublicKey();
                         // LogUtil.d('PublicKey: $result');
                       }),
                       mainButton('Generate ECC Key', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String key = await BluetoothDeviceConnector
+                        String key = await connector
                             .generateNewKeypair();
                         // LogUtil.d('key: $key');
                       }),
@@ -141,7 +143,7 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                         String address =
                             '184f0bc2046b560ad6b6b6180726d023a2ff3987';
                         String key =
-                            await BluetoothDeviceConnector.sigBindDevice(
+                            await connector.sigBindDevice(
                               address, nonce);
                         // LogUtil.d('key: $key');
                       }),

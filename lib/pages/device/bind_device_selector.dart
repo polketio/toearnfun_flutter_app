@@ -3,20 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:toearnfun_flutter_app/pages/device/bind_device_tips.dart';
 
 class DeviceType {
-  DeviceType(this.uuid, this.name);
+  DeviceType(this.uuid, this.name, this.simulated);
 
   final String uuid;
   final String name;
+  final bool simulated;
 }
 
 class BindDeviceSelector {
   static Future<List<DeviceType>> getDeviceType() async {
     List<DeviceType> list = [];
-    list.add(DeviceType('1', 'Smart Jump Rope J2'));
+    list.add(DeviceType('1', 'Simulated Jump Rope', true));
+    list.add(DeviceType('2', 'Smart Jump Rope J2', false));
     return list;
   }
 
-  static Future<void> showDeviceTypesSelector<T>(BuildContext context, int itemIdOfVFE) async {
+  static Future<void> showDeviceTypesSelector<T>(
+      BuildContext context, int itemIdOfVFE) async {
     final deviceTypes = await getDeviceType();
     List<BrnCommonActionSheetItem> actions = deviceTypes
         .map((e) => BrnCommonActionSheetItem(
@@ -37,9 +40,9 @@ class BindDeviceSelector {
             cancelTitle: 'Cancel',
             clickCallBack: (int index, BrnCommonActionSheetItem actionEle) {
               Future.delayed(Duration.zero, () {
-                Navigator.of(ctx)
-                    .pushNamed(BindDeviceTips.route, arguments: {
+                Navigator.of(ctx).pushNamed(BindDeviceTips.route, arguments: {
                   'itemIdOfVFE': itemIdOfVFE,
+                  'deviceType': deviceTypes[index],
                 });
               });
             },

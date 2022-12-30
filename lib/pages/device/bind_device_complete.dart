@@ -6,8 +6,10 @@ import 'package:polkawallet_sdk/api/types/txInfoData.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/common/consts.dart';
+import 'package:toearnfun_flutter_app/pages/device/bind_device_selector.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
+import 'package:toearnfun_flutter_app/plugins/ropes/simulated_device.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/utils/crypto.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
@@ -29,13 +31,24 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
   final _roundColor = HexColor('#f9f7f7');
 
   int connectedStatus = 0; //0: page loading, 1: connected, 2: disconnected
-  BluetoothDevice? deviceToBind;
+  FitnessDevice? deviceToBind;
   int itemIdOfVFE = 0;
+  DeviceType? deviceType;
+  late JumpRopeDeviceConnector connector;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final data = ModalRoute.of(context)?.settings.arguments as Map;
+      deviceType = data['deviceType'];
+      final simulated = deviceType?.simulated ?? false;
+      if (simulated) {
+        connector = SimulatedDeviceConnector();
+      } else {
+        connector = BluetoothDeviceConnector();
+      }
+
       connectDeviceToBind();
     });
   }
@@ -65,7 +78,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
       leading: MyBackButton(onBack: () async {
         BrnLoadingDialog.show(context,
             content: 'Disconnecting', barrierDismissible: false);
-        await BluetoothDeviceConnector.stopConnect();
+        await connector.stopConnect();
         await Future.delayed(const Duration(seconds: 2));
         if (!mounted) return;
         BrnLoadingDialog.dismiss(context);
@@ -102,9 +115,9 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
         children: [
           Padding(padding: EdgeInsets.only(top: 32.h)),
           Image.asset('assets/images/device-bind-success.png'),
-          Padding(padding: EdgeInsets.only(top: 32.h)),
+          Padding(padding: EdgeInsets.only(top: 16.h)),
           Image.asset('assets/images/icon-bond.png'),
-          Padding(padding: EdgeInsets.only(top: 32.h)),
+          Padding(padding: EdgeInsets.only(top: 16.h)),
           Image.asset(vfeImage),
         ],
       ),
@@ -165,11 +178,11 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
   Future<void> connectDeviceToBind() async {
     int status = connectedStatus;
     final data = ModalRoute.of(context)?.settings.arguments as Map;
-    BluetoothDevice device = data['device'];
+    FitnessDevice device = data['device'];
     itemIdOfVFE = data['itemIdOfVFE'] ?? 0;
     LogUtil.d('device: ${device.name}(${device.mac})');
     // LogUtil.d('itemIdOfVFE: $itemIdOfVFE');
-    final connected = await BluetoothDeviceConnector.connect(device);
+    final connected = await connector.connect(device);
     if (connected) {
       deviceToBind = device;
       status = 1;
@@ -194,7 +207,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
     }
 
     if (deviceToBind != null) {
-      final pubKey = await BluetoothDeviceConnector.getPublicKey();
+      final pubKey = await connector.getPublicKey();
       deviceToBind!.pubKey = pubKey;
 
       //check if device bond
@@ -220,7 +233,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
           //the device is not bond, try to bind device
           final nonce = deviceExisted.nonce + 1;
           final signature =
-              await BluetoothDeviceConnector.sigBindDevice(accountId, nonce);
+              await connector.sigBindDevice(accountId, nonce);
           // LogUtil.d('signature: $signature');
           if (!mounted) return;
           final password = await widget.plugin.api.account
@@ -241,7 +254,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
         // add connected device
         await widget.plugin.store.devices.addConnectedDevice(deviceToBind!);
         //auto reconnect device
-        BluetoothDeviceConnector.autoScanAndConnect(pubKey);
+        connector.autoScanAndConnect(pubKey);
 
         if (!mounted) return;
         BrnLoadingDialog.dismiss(context);
@@ -284,7 +297,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
       }
     } else {
       //generate new keypair for device
-      final newPubKey = await BluetoothDeviceConnector.generateNewKeypair();
+      final newPubKey = await connector.generateNewKeypair();
       if (!mounted) return;
       final password = await widget.plugin.api.account.getPassword(
         context,

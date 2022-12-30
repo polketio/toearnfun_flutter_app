@@ -41,6 +41,7 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
 
       final store = PluginStore();
       await store.init();
+      JumpRopeDeviceConnector.init(store);
 
       final network = PluginPolket(store);
       _keyring = Keyring();
@@ -53,12 +54,9 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
       await _network?.beforeStart(_keyring!, webView: WebViewRunnerOverrider());
       await _network?.start(_keyring!);
       await _network?.updateNetworkState();
-
-      BluetoothDeviceConnector.init(network.store!);
     }
 
-    final accountCreated =
-        _network?.store?.account?.accountCreated ?? false;
+    final accountCreated = _network?.store?.account?.accountCreated ?? false;
     // final accounts = accountCreated ? 1:0;
     final accounts = _keyring?.allAccounts.length ?? 0;
     return accounts;

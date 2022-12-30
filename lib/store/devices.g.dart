@@ -13,13 +13,13 @@ mixin _$DevicesStore on _DevicesStore, Store {
       Atom(name: '_DevicesStore.scannedDevices', context: context);
 
   @override
-  ObservableList<BluetoothDevice> get scannedDevices {
+  ObservableList<FitnessDevice> get scannedDevices {
     _$scannedDevicesAtom.reportRead();
     return super.scannedDevices;
   }
 
   @override
-  set scannedDevices(ObservableList<BluetoothDevice> value) {
+  set scannedDevices(ObservableList<FitnessDevice> value) {
     _$scannedDevicesAtom.reportWrite(value, super.scannedDevices, () {
       super.scannedDevices = value;
     });
@@ -29,13 +29,13 @@ mixin _$DevicesStore on _DevicesStore, Store {
       Atom(name: '_DevicesStore.currentConnected', context: context);
 
   @override
-  BluetoothDevice? get currentConnected {
+  FitnessDevice? get currentConnected {
     _$currentConnectedAtom.reportRead();
     return super.currentConnected;
   }
 
   @override
-  set currentConnected(BluetoothDevice? value) {
+  set currentConnected(FitnessDevice? value) {
     _$currentConnectedAtom.reportWrite(value, super.currentConnected, () {
       super.currentConnected = value;
     });
@@ -54,7 +54,7 @@ mixin _$DevicesStore on _DevicesStore, Store {
       AsyncAction('_DevicesStore.addScannedDevice', context: context);
 
   @override
-  Future<void> addScannedDevice(BluetoothDevice device) {
+  Future<void> addScannedDevice(FitnessDevice device) {
     return _$addScannedDeviceAsyncAction
         .run(() => super.addScannedDevice(device));
   }
@@ -63,7 +63,7 @@ mixin _$DevicesStore on _DevicesStore, Store {
       ActionController(name: '_DevicesStore', context: context);
 
   @override
-  void updateCurrentConnected(BluetoothDevice device) {
+  void updateCurrentConnected(FitnessDevice device) {
     final _$actionInfo = _$_DevicesStoreActionController.startAction(
         name: '_DevicesStore.updateCurrentConnected');
     try {

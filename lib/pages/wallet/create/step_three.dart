@@ -25,6 +25,7 @@ class NewWalletStepThree extends StatefulWidget {
 class _NewWalletStepThreeState extends State<NewWalletStepThree> {
   final _backgroundColor = HexColor('#956DFD');
   final _buttonHeight = 50.h;
+  bool isCreate = true;
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameCtrl = new TextEditingController();
@@ -34,6 +35,7 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
   @override
   void initState() {
     super.initState();
+
   }
 
   @override
@@ -82,22 +84,45 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
   }
 
   Widget stepsView() {
+
+    final data = ModalRoute.of(context)?.settings.arguments as Map;
+    isCreate = data['isCreate'] ?? true;
+
+    List<StepView> steps = [];
+    int currentIndex = 0;
+    if (isCreate) {
+      steps = [
+        StepView(
+            doingIcon: Image.asset('assets/images/icon_1_on.png'),
+            normalIcon: Image.asset('assets/images/icon_1_off.png'),
+            stepContentText: 'Backup'),
+        StepView(
+            doingIcon: Image.asset('assets/images/icon_2_on.png'),
+            normalIcon: Image.asset('assets/images/icon_2_off.png'),
+            stepContentText: 'Verify'),
+        StepView(
+            doingIcon: Image.asset('assets/images/icon_3_on.png'),
+            normalIcon: Image.asset('assets/images/icon_3_off.png'),
+            stepContentText: 'Encrypt'),
+      ];
+      currentIndex = 2;
+    } else {
+      steps = [
+        StepView(
+            doingIcon: Image.asset('assets/images/icon_1_on.png'),
+            normalIcon: Image.asset('assets/images/icon_1_off.png'),
+            stepContentText: 'Import'),
+        StepView(
+            doingIcon: Image.asset('assets/images/icon_2_on.png'),
+            normalIcon: Image.asset('assets/images/icon_2_off.png'),
+            stepContentText: 'Encrypt'),
+      ];
+      currentIndex = 1;
+    }
+
     return HorizontalStepsView(
-        steps: [
-          StepView(
-              doingIcon: Image.asset('assets/images/icon_1_on.png'),
-              normalIcon: Image.asset('assets/images/icon_1_off.png'),
-              stepContentText: 'Backup'),
-          StepView(
-              doingIcon: Image.asset('assets/images/icon_2_on.png'),
-              normalIcon: Image.asset('assets/images/icon_2_off.png'),
-              stepContentText: 'Verify'),
-          StepView(
-              doingIcon: Image.asset('assets/images/icon_3_on.png'),
-              normalIcon: Image.asset('assets/images/icon_3_off.png'),
-              stepContentText: 'Encrypt'),
-        ],
-        currentIndex: 2,
+        steps: steps,
+        currentIndex: currentIndex,
         textStyle: TextStyle(fontSize: 14, color: Colors.black));
   }
 
@@ -240,6 +265,7 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
             .saveUserWalletPassword(pubKey, _passCtrl.text);
         widget.plugin.store.account.resetNewAccount();
         widget.plugin.store.account.setAccountCreated();
+        await widget.plugin.changeAccount(widget.keyring.current);
         if (!mounted) return;
         BrnLoadingDialog.dismiss(context);
         Navigator.popUntil(context, ModalRoute.withName('/toearnfun/root'));

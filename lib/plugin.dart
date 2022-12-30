@@ -20,6 +20,7 @@ import 'package:toearnfun_flutter_app/pages/wallet/create/step_one.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_three.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_two.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/welcome.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/import/mnemonic.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/wallet.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api.dart';
 import 'package:toearnfun_flutter_app/store/plugin_store.dart';
@@ -57,7 +58,7 @@ class PluginPolket extends PolkawalletPlugin {
         'name': 'Polket Testnet',
         'ss58': 42,
         'endpoint': 'wss://testnet-node.polket.io',
-        // 'endpoint': 'ws://127.0.0.1:9944',
+        // 'endpoint': 'ws://192.168.31.141:9944',
       },
     ].map((e) => NetworkParams.fromJson(e)).toList();
   }
@@ -99,6 +100,7 @@ class PluginPolket extends PolkawalletPlugin {
       BindDeviceScanner.route: (_) => BindDeviceScanner(this, keyring),
       BindDeviceComplete.route: (_) => BindDeviceComplete(this, keyring),
       VFEDetailView.route: (_) => VFEDetailView(this, keyring),
+      MnemonicRestoreWallet.route: (_) => MnemonicRestoreWallet(this, keyring),
     };
   }
 

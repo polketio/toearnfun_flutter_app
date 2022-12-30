@@ -55,7 +55,9 @@ class _WalletViewState extends State<WalletView> {
       title: Text('Wallet', style: TextStyle(color: Colors.white)),
       actions: <Widget>[
         IconButton(
-            onPressed: null,
+            onPressed: () {
+              Navigator.of(context).pushNamed(NewWalletWelcomeView.route);
+            },
             icon: Image.asset('assets/images/icon-more.png'),
             iconSize: 36.w),
       ],

@@ -20,11 +20,11 @@ class PolketApiVFE {
   final userStateChannel = 'userState';
   final lastEnergyRecoveryChannel = 'lastEnergyRecovery';
 
-  Future<BluetoothDevice?> getDevice(String deviceKey) async {
+  Future<FitnessDevice?> getDevice(String deviceKey) async {
     final res = await plugin.sdk.api.service.webView
         ?.evalJavascript('api.query.$module.devices("0x$deviceKey")');
     if (res != null) {
-      return BluetoothDevice.fromJson(res);
+      return FitnessDevice.fromJson(res);
     } else {
       return null;
     }

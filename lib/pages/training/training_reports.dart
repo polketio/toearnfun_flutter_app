@@ -1,16 +1,16 @@
+import 'package:bruno/bruno.dart';
 import 'package:flukit/flukit.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
+import 'package:toearnfun_flutter_app/plugins/ropes/simulated_device.dart';
 import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_detail.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
-import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 import 'package:toearnfun_flutter_app/utils/sport.dart';
 import 'package:toearnfun_flutter_app/utils/time.dart';
@@ -44,7 +44,7 @@ class _JumpRopeTrainingReportsViewState
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: HexColor('#956DFD'),
-        appBar: getAppBarView(),
+        appBar: getAppBarView(context),
         body: SafeArea(
             child: PullRefreshScope(
                 child: CustomScrollView(
@@ -65,7 +65,7 @@ class _JumpRopeTrainingReportsViewState
         ))));
   }
 
-  PreferredSizeWidget getAppBarView() {
+  PreferredSizeWidget getAppBarView(BuildContext context) {
     return AppBar(
       toolbarOpacity: 1,
       bottomOpacity: 0,
@@ -74,7 +74,31 @@ class _JumpRopeTrainingReportsViewState
       leading: MyBackButton(),
       centerTitle: true,
       title: Text('Training Report', style: TextStyle(color: Colors.white)),
+      actions: <Widget>[
+        IconButton(
+            onPressed: () {
+              generateSimulatedReport(context);
+            },
+            icon: const Icon(Icons.add_chart_rounded),
+            iconSize: 36.w),
+      ],
     );
+  }
+
+  void generateSimulatedReport(BuildContext context) async {
+    final report = SimulatedDeviceConnector().generateRandomReport();
+    if(report == null) {
+      BrnEnhanceOperationDialog enhanceOperationDialog = BrnEnhanceOperationDialog(
+        iconType: BrnDialogConstants.iconAlert,
+        context: context,
+        titleText: "Tips",
+        descText: "Connected device is not simulated.",
+        mainButtonText: "Got it",
+      );
+      enhanceOperationDialog.show();
+      return;
+    }
+    loadJumpRopeTrainingReport();
   }
 
   Widget trainingReportListView() {
@@ -97,8 +121,8 @@ class _JumpRopeTrainingReportsViewState
     setState(() {
       jumpRopeTrainingReportList = list;
     });
-    final reportValidityPeriod = int.parse(
-        widget.plugin.networkConst['vfe']['reportValidityPeriod']);
+    final reportValidityPeriod =
+        int.parse(widget.plugin.networkConst['vfe']['reportValidityPeriod']);
     LogUtil.d('reportValidityPeriod: $reportValidityPeriod');
   }
 }

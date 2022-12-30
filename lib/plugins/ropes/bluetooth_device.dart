@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flustars/flustars.dart';
 import 'package:flutter/services.dart';
+import 'package:toearnfun_flutter_app/plugins/ropes/simulated_device.dart';
 import 'package:toearnfun_flutter_app/store/devices.dart';
 import 'package:toearnfun_flutter_app/store/plugin_store.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
@@ -20,8 +21,8 @@ class BlueEventMessageType {
   static const String onDisConnected = '5';
 }
 
-abstract class BluetoothDeviceObserver {
-  void onScanning(BluetoothDevice bleDevice);
+abstract class JumpRopeDeviceObserver {
+  void onScanning(FitnessDevice bleDevice);
 
   void onScanFinished();
 
@@ -31,30 +32,67 @@ abstract class BluetoothDeviceObserver {
 
   void onReceiveSkipHistoryResultData(TrainingReport result);
 
-  void onConnectSuccess(BluetoothDevice bleDevice);
+  void onConnectSuccess(FitnessDevice bleDevice);
 
-  void onDisConnected(BluetoothDevice bleDevice);
+  void onDisConnected(FitnessDevice bleDevice);
 }
 
-class BluetoothDeviceConnector {
-  static Type classType = BluetoothDeviceConnector;
-
-  static bool _initialized = false;
-  static List<BluetoothDeviceObserver> observers = [];
-  static BluetoothDevice? connectedDevice;
-  static Timer? _timer;
-  static PluginStore? _store;
-  static bool autoConnect = false;
-  static String targetDeviceKey = '';
-
-  //注意，这里的名称需要和Android原生中定义的一样
-  static const MethodChannel _channel = MethodChannel('BluetoothFlutterPlugin');
-
-  //The native Android actively calls the flutter-side event channel
-  static const EventChannel _eventChannel =
-      EventChannel('BluetoothFlutterPluginEvent');
+abstract class JumpRopeDeviceConnector {
 
   static void init(PluginStore store) {
+    SimulatedDeviceConnector().init(store);
+    BluetoothDeviceConnector().init(store);
+  }
+
+  bool autoScanAndConnect(String deviceKey);
+
+  void addObserver(JumpRopeDeviceObserver o);
+
+  void removeObserver(JumpRopeDeviceObserver o);
+
+  Future<void> scanDevice();
+
+  Future<bool> connect(FitnessDevice device);
+
+  Future<bool> stopConnect();
+
+  Future<String> setSkipMode();
+
+  Future<String> getPublicKey();
+
+  Future<String> stopSkip();
+
+  Future<String> generateNewKeypair();
+
+  Future<String> sigBindDevice(String accountId, int deviceNonce);
+}
+
+class BluetoothDeviceConnector implements JumpRopeDeviceConnector {
+  static Type classType = BluetoothDeviceConnector;
+
+  BluetoothDeviceConnector._internal();
+
+  factory BluetoothDeviceConnector() => _instance;
+
+  static final BluetoothDeviceConnector _instance =
+      BluetoothDeviceConnector._internal();
+
+  bool _initialized = false;
+  Set<JumpRopeDeviceObserver> observers = <JumpRopeDeviceObserver>{};
+  FitnessDevice? connectedDevice;
+  Timer? _timer;
+  PluginStore? _store;
+  bool autoConnect = false;
+  String targetDeviceKey = '';
+
+  //注意，这里的名称需要和Android原生中定义的一样
+  final MethodChannel _channel = MethodChannel('BluetoothFlutterPlugin');
+
+  //The native Android actively calls the flutter-side event channel
+  final EventChannel _eventChannel =
+      EventChannel('BluetoothFlutterPluginEvent');
+
+  void init(PluginStore store) {
     if (_initialized) {
       return;
     }
@@ -63,7 +101,7 @@ class BluetoothDeviceConnector {
     _eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onError);
   }
 
-  static bool autoScanAndConnect(String deviceKey) {
+  bool autoScanAndConnect(String deviceKey) {
     targetDeviceKey = deviceKey;
     LogUtil.d('targetDeviceKey = $targetDeviceKey');
 
@@ -91,23 +129,23 @@ class BluetoothDeviceConnector {
     return true;
   }
 
-  static void addObserver(BluetoothDeviceObserver o) {
+  void addObserver(JumpRopeDeviceObserver o) {
     observers.add(o);
   }
 
-  static void removeObserver(BluetoothDeviceObserver o) {
+  void removeObserver(JumpRopeDeviceObserver o) {
     observers.remove(o);
   }
 
-  static Future<bool> checkBluetoothIsOpen() async {
+  Future<bool> checkBluetoothIsOpen() async {
     return await _channel.invokeMethod('checkBluetoothIsOpen');
   }
 
-  static Future<void> scanDevice() async {
+  Future<void> scanDevice() async {
     return await _channel.invokeMethod('scanDevice');
   }
 
-  static Future<bool> connect(BluetoothDevice device) async {
+  Future<bool> connect(FitnessDevice device) async {
     final isConnected = await checkStateOn();
     if (isConnected) {
       return true;
@@ -126,7 +164,7 @@ class BluetoothDeviceConnector {
     return connect;
   }
 
-  static Future<bool> stopConnect() async {
+  Future<bool> stopConnect() async {
     final isConnected = await checkStateOn();
     if (!isConnected) {
       return false;
@@ -143,57 +181,57 @@ class BluetoothDeviceConnector {
     return connect;
   }
 
-  static Future<bool> registerCustomDataRxCallback() async {
+  Future<bool> registerCustomDataRxCallback() async {
     return await _channel.invokeMethod('registerCustomDataRxCallback');
   }
 
-  static Future<bool> unregisterCustomDataRxCallback() async {
+  Future<bool> unregisterCustomDataRxCallback() async {
     return await _channel.invokeMethod('unregisterCustomDataRxCallback');
   }
 
   //检查蓝牙是否连接
-  static Future<bool> checkStateOn() async {
+  Future<bool> checkStateOn() async {
     var param = false;
     return await _channel.invokeMethod('checkStateOn', param);
   }
 
   //设置跳绳模式
-  static Future<String> setSkipMode() async {
+  Future<String> setSkipMode() async {
     return await _channel.invokeMethod('setSkipMode');
   }
 
   //设备恢复出厂
-  static Future<String> devRevert() async {
+  Future<String> devRevert() async {
     return await _channel.invokeMethod('devRevert');
   }
 
   //获取设备公钥
-  static Future<String> getPublicKey() async {
+  Future<String> getPublicKey() async {
     return await _channel.invokeMethod('writeSkipGetPublicKey');
   }
 
   //设备复位
-  static Future<String> devReset() async {
+  Future<String> devReset() async {
     return await _channel.invokeMethod('devReset');
   }
 
 //同步设备时间
-  static Future<String> syncDeviceTime() async {
+  Future<String> syncDeviceTime() async {
     return await _channel.invokeMethod('syncDeviceTime');
   }
 
   //停止跳绳
-  static Future<String> stopSkip() async {
+  Future<String> stopSkip() async {
     return await _channel.invokeMethod('stopSkip');
   }
 
   //创建设备ECC公钥
-  static Future<String> generateNewKeypair() async {
+  Future<String> generateNewKeypair() async {
     return await _channel.invokeMethod('writeSkipGenerateECCKey');
   }
 
   //绑定设备
-  static Future<String> sigBindDevice(String accountId, int deviceNonce) async {
+  Future<String> sigBindDevice(String accountId, int deviceNonce) async {
     final hash = Hash.ripemd160(accountId);
     final signature = await _channel.invokeMethod(
         'writeSkipBondDev', {'nonce': deviceNonce, 'address': hash});
@@ -201,7 +239,7 @@ class BluetoothDeviceConnector {
   }
 
   // 自动连接已连接过的设备
-  static void _autoConnect(BluetoothDevice device) {
+  void _autoConnect(FitnessDevice device) {
     if (_timer == null) {
       return;
     }
@@ -223,7 +261,7 @@ class BluetoothDeviceConnector {
   }
 
   // Listen to the value passed back natively (via eventChannel)
-  static void _onEvent(dynamic object) {
+  void _onEvent(dynamic object) {
     LogUtil.d('onEvent: ${object.toString()}', tag: classType.toString());
 
     Map<String, dynamic> data = jsonDecode(object);
@@ -231,7 +269,7 @@ class BluetoothDeviceConnector {
     dynamic content = data['messageContext'];
     switch (msgType) {
       case BlueEventMessageType.scanning:
-        final device = BluetoothDevice.fromJson(content);
+        final device = FitnessDevice.fromJson(content);
         for (var o in observers) {
           o.onScanning(device);
         }
@@ -239,7 +277,7 @@ class BluetoothDeviceConnector {
         _autoConnect(device);
         break;
       case BlueEventMessageType.onDisConnected:
-        final device = BluetoothDevice.fromJson(content);
+        final device = FitnessDevice.fromJson(content);
         for (var o in observers) {
           o.onDisConnected(device);
         }

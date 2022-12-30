@@ -25,11 +25,11 @@ class VFEDetail {
     _brandInfo = value;
   }
 
-  BluetoothDevice? _deviceBond;
+  FitnessDevice? _deviceBond;
 
-  BluetoothDevice? getDeviceBond() => _deviceBond;
+  FitnessDevice? getDeviceBond() => _deviceBond;
 
-  void setDeviceBond(BluetoothDevice value) {
+  void setDeviceBond(FitnessDevice value) {
     _deviceBond = value;
   }
 

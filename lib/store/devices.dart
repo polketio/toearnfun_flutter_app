@@ -14,9 +14,9 @@ abstract class _DevicesStore with Store {
   final GetStorage storage;
   final String connectedDevicesKey = 'connected_devices';
 
-  List<BluetoothDevice> _connectedDevices = [];
+  List<FitnessDevice> _connectedDevices = [];
 
-  List<BluetoothDevice> get connectedDevices {
+  List<FitnessDevice> get connectedDevices {
     if (_connectedDevices.isEmpty) {
       loadConnectedDevices();
     }
@@ -24,13 +24,13 @@ abstract class _DevicesStore with Store {
   }
 
   @observable
-  ObservableList<BluetoothDevice> scannedDevices =
-      ObservableList<BluetoothDevice>();
+  ObservableList<FitnessDevice> scannedDevices =
+      ObservableList<FitnessDevice>();
 
   @observable
-  BluetoothDevice? currentConnected;
+  FitnessDevice? currentConnected;
 
-  Future<void> addConnectedDevice(BluetoothDevice device) async {
+  Future<void> addConnectedDevice(FitnessDevice device) async {
     if (_connectedDevices.isEmpty) {
       loadConnectedDevices();
     }
@@ -50,7 +50,7 @@ abstract class _DevicesStore with Store {
 
   void loadConnectedDevices() async {
     List cache = storage.read(connectedDevicesKey) ?? [];
-    _connectedDevices = cache.map((e) => BluetoothDevice.fromJson(e)).toList();
+    _connectedDevices = cache.map((e) => FitnessDevice.fromJson(e)).toList();
   }
 
   @action
@@ -59,7 +59,7 @@ abstract class _DevicesStore with Store {
   }
 
   @action
-  Future<void> addScannedDevice(BluetoothDevice device) async {
+  Future<void> addScannedDevice(FitnessDevice device) async {
     for (var d in scannedDevices) {
       if (d.mac == device.mac) {
         return;
@@ -69,12 +69,24 @@ abstract class _DevicesStore with Store {
   }
 
   @action
-  void updateCurrentConnected(BluetoothDevice device) {
+  void updateCurrentConnected(FitnessDevice device) {
     currentConnected = device;
   }
 
   @action
   void disconnectDevice() {
     currentConnected = null;
+  }
+
+  FitnessDevice? getConnectedDevice(String deviceKey) {
+    if(connectedDevices.isEmpty) {
+      loadConnectedDevices();
+    }
+    for (var d in connectedDevices) {
+      if (d.pubKey == deviceKey) {
+        return d;
+      }
+    }
+    return null;
   }
 }

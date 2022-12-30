@@ -9,11 +9,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/pages/device/bind_device_selector.dart';
-import 'package:toearnfun_flutter_app/pages/device/device_connect.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
 import 'package:toearnfun_flutter_app/pages/vfe/vfe_detail.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
+import 'package:toearnfun_flutter_app/plugins/ropes/simulated_device.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/types/user.dart';
@@ -33,7 +33,7 @@ class HomeView extends StatefulWidget {
 // HomeView
 class _HomeViewState extends State<HomeView>
     with TickerProviderStateMixin
-    implements BluetoothDeviceObserver {
+    implements JumpRopeDeviceObserver {
   bool _refreshing = false;
   String connectedStatus = 'disconnect';
   late AnimationController _animationController;
@@ -44,13 +44,11 @@ class _HomeViewState extends State<HomeView>
     _animationController =
         AnimationController(vsync: this, duration: Duration(seconds: 3));
     _animationController.forward();
-    BluetoothDeviceConnector.addObserver(this);
   }
 
   @override
   void dispose() {
     _animationController.dispose();
-    BluetoothDeviceConnector.removeObserver(this);
     super.dispose();
   }
 
@@ -165,9 +163,18 @@ class _HomeViewState extends State<HomeView>
                                 return;
                               }
 
+                              final device = widget.plugin.store.devices
+                                  .getConnectedDevice(deviceKey);
+                              final simulated = device?.simulated ?? false;
+                              JumpRopeDeviceConnector connector;
+                              if (simulated) {
+                                connector = SimulatedDeviceConnector();
+                              } else {
+                                connector = BluetoothDeviceConnector();
+                              }
+                              connector.addObserver(this);
                               final existed =
-                                  BluetoothDeviceConnector.autoScanAndConnect(
-                                      deviceKey);
+                                  connector.autoScanAndConnect(deviceKey);
                               if (existed) {
                                 setState(() {
                                   connectedStatus = 'connecting...';
@@ -369,21 +376,32 @@ class _HomeViewState extends State<HomeView>
   Widget trainingCircularProgressIndicator(
       BuildContext context, User userState) {
     return Observer(builder: (_) {
-      double earnRatio =
-          double.parse(userState.earned) / double.parse(userState.earningCap);
-      double trainingTimeRatio =
-          (userState.energyTotal - userState.energy) / userState.energyTotal;
+      double earnRatio = 0;
+      double trainingTimeRatio = 0;
+      String remainingTime = '';
 
-      final lastEnergyRecovery = widget.plugin.store.vfe.lastEnergyRecovery;
-      final energyRecoveryDuration =
-          widget.plugin.api.vfe.energyRecoveryDuration;
-      final nextEnergyRecovery = lastEnergyRecovery + energyRecoveryDuration;
+      final earningCap = double.parse(userState.earningCap);
+      if (earningCap > 0) {
+        earnRatio = double.parse(userState.earned) / earningCap;
+      }
+      if (userState.energyTotal > 0) {
+        trainingTimeRatio =
+            (userState.energyTotal - userState.energy) / userState.energyTotal;
+      }
+
       final currentHeight = widget.plugin.store.system.currentBlockNumber;
-      final expectedBlockTime =
-          widget.plugin.api.system.expectedBlockTime / 1000;
-      final remainingSeconds =
-          (nextEnergyRecovery - currentHeight) * expectedBlockTime.round();
-      final remainingTime = formatDurationText(remainingSeconds);
+      final lastEnergyRecovery = widget.plugin.store.vfe.lastEnergyRecovery;
+      if (widget.plugin.connected) {
+        final energyRecoveryDuration =
+            widget.plugin.api.vfe.energyRecoveryDuration;
+        final nextEnergyRecovery = lastEnergyRecovery + energyRecoveryDuration;
+        final expectedBlockTime =
+            widget.plugin.api.system.expectedBlockTime / 1000;
+        final remainingSeconds =
+            (nextEnergyRecovery - currentHeight) * expectedBlockTime.round();
+        remainingTime = formatDurationText(remainingSeconds);
+      }
+
       // LogUtil.d('lastEnergyRecovery: $lastEnergyRecovery');
       // LogUtil.d('nextEnergyRecovery: $nextEnergyRecovery');
       // LogUtil.d('remainingSeconds: $remainingSeconds');
@@ -416,24 +434,26 @@ class _HomeViewState extends State<HomeView>
                 value: trainingTimeRatio,
               );
             }),
-            Column(children: [
-              Text('Refill in', style: TextStyle(fontSize: 14)),
-              Text(remainingTime, style: TextStyle(fontSize: 14, color: HexColor('#956dfd'))),
-            ],)
-            
+            Column(
+              children: [
+                Text('Refill in', style: TextStyle(fontSize: 14)),
+                Text(remainingTime,
+                    style: TextStyle(fontSize: 14, color: HexColor('#956dfd'))),
+              ],
+            )
           ]));
     });
   }
 
   @override
-  void onConnectSuccess(BluetoothDevice bleDevice) {
+  void onConnectSuccess(FitnessDevice bleDevice) {
     setState(() {
       connectedStatus = 'connected';
     });
   }
 
   @override
-  void onDisConnected(BluetoothDevice bleDevice) {
+  void onDisConnected(FitnessDevice bleDevice) {
     setState(() {
       connectedStatus = 'disconnect';
     });
@@ -459,7 +479,7 @@ class _HomeViewState extends State<HomeView>
   }
 
   @override
-  void onScanning(BluetoothDevice bleDevice) {
+  void onScanning(FitnessDevice bleDevice) {
     setState(() {
       connectedStatus = 'connecting...';
     });

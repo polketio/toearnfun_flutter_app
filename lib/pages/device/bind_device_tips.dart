@@ -72,7 +72,7 @@ class _BindDeviceTipsState extends State<BindDeviceTips> {
   Widget buttonView(BuildContext context) {
     final data = ModalRoute.of(context)?.settings.arguments as Map;
     final itemIdOfVFE = data['itemIdOfVFE'];
-
+    final deviceType = data['deviceType'];
     return Container(
         height: 50.h,
         width: double.infinity,
@@ -82,6 +82,7 @@ class _BindDeviceTipsState extends State<BindDeviceTips> {
             Navigator.of(context)
                 .pushNamed(BindDeviceScanner.route, arguments: {
               'itemIdOfVFE': itemIdOfVFE,
+              'deviceType': deviceType,
             });
           },
           child: const Text('Next', style: TextStyle(fontSize: 24)),
