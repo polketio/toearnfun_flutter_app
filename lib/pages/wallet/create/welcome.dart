@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_one.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/import/mnemonic.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
@@ -20,6 +21,8 @@ class NewWalletWelcomeView extends StatefulWidget {
 }
 
 class _CreateWalletWelcomeViewState extends State<NewWalletWelcomeView> {
+  bool firstStart = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,7 +57,8 @@ class _CreateWalletWelcomeViewState extends State<NewWalletWelcomeView> {
                                         'Create a new wallet',
                                         20,
                                         Colors.black,
-                                        Size(double.infinity, 70.h), () {
+                                        Size(double.infinity, 70.h),
+                                        onPressed: () {
                                       Navigator.of(context)
                                           .pushNamed(NewWalletStepOne.route);
                                     }),
@@ -69,7 +73,10 @@ class _CreateWalletWelcomeViewState extends State<NewWalletWelcomeView> {
                                         20,
                                         Colors.black,
                                         Size(double.infinity, 70.h),
-                                        null),
+                                        onPressed: () {
+                                      Navigator.of(context).pushNamed(
+                                          MnemonicRestoreWallet.route);
+                                    }),
                                   ])))
                     ]))));
   }
@@ -80,7 +87,7 @@ class _CreateWalletWelcomeViewState extends State<NewWalletWelcomeView> {
       bottomOpacity: 0,
       elevation: 0,
       backgroundColor: HexColor('#956DFD'),
-      leading: MyBackButton(),
+      leading: firstStart ? null : MyBackButton(),
     );
   }
 
@@ -100,7 +107,8 @@ class _CreateWalletWelcomeViewState extends State<NewWalletWelcomeView> {
   }
 
   Widget mainButton(Widget icon, String title, double fontSize, Color textColor,
-      Size buttonSize, VoidCallback? onPressed) {
+      Size buttonSize,
+      {VoidCallback? onPressed}) {
     return SizedBox(
         height: buttonSize.height,
         width: buttonSize.width,

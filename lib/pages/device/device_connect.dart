@@ -6,6 +6,7 @@ import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
+import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
 class DeviceConnectView extends StatefulWidget {
@@ -21,24 +22,53 @@ class DeviceConnectView extends StatefulWidget {
 }
 
 class _DeviceConnectViewState extends State<DeviceConnectView> {
-  static final EventChannel _eventChannel =
-      EventChannel("BluetoothFlutterPluginEvent"); //原生平台主动调用flutter端事件通道
+  // static final EventChannel _eventChannel =
+  //     EventChannel('BluetoothFlutterPluginEvent'); //原生平台主动调用flutter端事件通道
+
+  BluetoothDeviceConnector connector = BluetoothDeviceConnector();
 
   @override
   void initState() {
     super.initState();
-    _eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onError);
+    // connector.init();
+    // _eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onError);
   }
 
   /**
    * 监听原生传递回来的值（通过eventChannel）
    */
   void _onEvent(dynamic object) {
-    print(object.toString() + "-------------从原生主动传递过来的值");
+    /*
+      messageType = 0：扫描蓝牙设备，1: 实时跳绳数据，2：实时跳绳结果，3：历史跳绳结果
+      {
+          'messageType': '2',
+          'messageContext': {
+              'SkipSecSum': '4',  //跳绳总时长
+              'SkipCntSum': '18', //跳绳总次数
+              'SkipValidSec': '4',
+              'FreqAvg': '270', //平均频次
+              'FreqMax': '270',   //最快频次
+              'ConsecutiveSkipMaxNum': '18',  //最大连跳次数
+              'SkipTripNum': '0', //绊绳次数
+              'signature': ''
+          }
+      }
+
+      {
+          'messageType': '0',
+          'messageContext': {
+              'name': 'JC-2A',  //device name
+              'mac': 'FF:FF:FF:FF:FF:FF', //device mac
+              'Rssi': '-40'
+          }
+      }
+     */
+
+    print(object.toString() + '-------------从原生主动传递过来的值');
   }
 
   void _onError(Object object) {
-    print(object.toString() + "-------------从原生主动传递过来的值");
+    print(object.toString() + '-------------从原生主动传递过来的值');
   }
 
   @override
@@ -55,64 +85,67 @@ class _DeviceConnectViewState extends State<DeviceConnectView> {
                     children: [
                       mainButton('check bluetooth is open', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String isOpen =
-                            await bluetooth_device.checkBluetoothIsOpen();
-                        LogUtil.d('bluetooth is open: ${isOpen.toString()}');
+                        bool isOpen = await connector
+                            .checkBluetoothIsOpen();
+                        // LogUtil.d('bluetooth is open: ${isOpen.toString()}');
                       }),
                       mainButton('check connect', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        bool isconnect = await bluetooth_device.checkStateOn();
-                        LogUtil.d('isconnect: ${isconnect.toString()}');
+                        bool isconnect =
+                            await connector.checkStateOn();
+                        // LogUtil.d('isconnect: ${isconnect.toString()}');
                       }),
                       mainButton('Scan Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String devices = await bluetooth_device.scanDevice();
-                        LogUtil.d('devices: $devices');
+                        connector.scanDevice();
                       }),
                       mainButton('Connect Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        // String mac="22:22:22:22:22:22";
-                        String mac = "FF:FF:FF:FF:FF:FF";
-                        String connect = await bluetooth_device.connect(mac);
-                        LogUtil.d('connect: $connect');
+                        // String mac='22:22:22:22:22:22';
+                        String mac = 'FF:FF:FF:FF:FF:FF';
+                        bool connect =
+                            await connector.connect(FitnessDevice('demo', mac));
+                        // LogUtil.d('connect: $connect');
                       }),
                       mainButton('stop Connect Device', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String connect = await bluetooth_device.stopConnect();
-                        LogUtil.d('connect: $connect');
+                        bool connect =
+                            await connector.stopConnect();
+                        // LogUtil.d('connect: $connect');
                       }),
                       mainButton('Register', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String register = await bluetooth_device
+                        await connector
                             .registerCustomDataRxCallback();
-                        LogUtil.d('Register: $register');
+                        // LogUtil.d('registerCustomDataRxCallback');
                       }),
                       mainButton('unregister', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String register = await bluetooth_device
+                        await connector
                             .unregisterCustomDataRxCallback();
-                        LogUtil.d('Register: $register');
+                        // LogUtil.d('unregisterCustomDataRxCallback');
                       }),
                       mainButton('Get PublicKey', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String result =
-                            await bluetooth_device.writeSkipGetPublicKey();
-                        LogUtil.d('PublicKey: $result');
+                        String result = await connector
+                            .getPublicKey();
+                        // LogUtil.d('PublicKey: $result');
                       }),
                       mainButton('Generate ECC Key', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String key =
-                            await bluetooth_device.writeSkipGenerateECCKey();
-                        LogUtil.d('key: $key');
+                        String key = await connector
+                            .generateNewKeypair();
+                        // LogUtil.d('key: $key');
                       }),
                       mainButton('BondDev', 20, Colors.black,
                           Size(double.infinity, 44.h), () async {
-                        String nonce = "100";
+                        int nonce = 123;
                         String address =
-                            "13ca5e29cb83e23796f96fc6e195a70bc7f5e970";
-                        String key = await bluetooth_device.writeSkipBondDev(
-                            nonce, address);
-                        LogUtil.d('key: $key');
+                            '184f0bc2046b560ad6b6b6180726d023a2ff3987';
+                        String key =
+                            await connector.sigBindDevice(
+                              address, nonce);
+                        // LogUtil.d('key: $key');
                       }),
                     ]))));
   }

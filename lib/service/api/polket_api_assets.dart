@@ -9,9 +9,9 @@ class PolketApiAssets {
 
   final PluginPolket plugin;
 
-  final Map _assetBalances = {};
+  final Map<String, TokenBalanceData> _assetBalances = {};
   final assetBalanceChannel = 'assetBalance';
-  final module = 'assetsModule';
+  final module = 'assets';
 
   Future<List<TokenBalanceData>> getAllAssets() async {
     final List res = await plugin.sdk.api.assets.service.getAssetsAll() ?? [];
@@ -49,30 +49,32 @@ class PolketApiAssets {
     final tokens = await getAllAssets();
     _assetBalances.clear();
 
-    tokens.forEach((e) {
+    for (var e in tokens) {
+      if (e.symbol == null) {
+        continue;
+      }
+      _assetBalances[e.symbol!] = e;
       final channel = '$assetBalanceChannel${e.symbol}';
       plugin.sdk.api.subscribeMessage(
         'api.query.$module.account',
         [e.id, address],
         channel,
-        (Map data) {
-          data['symbol'] = e.symbol;
-          data['name'] = e.name;
-          _assetBalances[e.symbol] = data;
-          LogUtil.d('asset update: $data');
+        (data) {
+          final symbol = e.symbol!;
+          final balance = data != null ? data['balance'].toString() : '0';
+          var ab = _assetBalances[symbol];
+          if (ab == null) {
+            return;
+          }
+          ab.amount = balance;
+          _assetBalances[symbol] = ab;
+          // LogUtil.d('asset update: $ab');
           // do not callback if we did not receive enough data.
           if (_assetBalances.keys.length < tokens.length) return;
 
-          callback(_assetBalances.values
-              .map((t) => TokenBalanceData(
-                    name: t['name'],
-                    symbol: t['symbol'],
-                    amount: t['balance'].toString(),
-                    // detailPageRoute: '/assets/token/detail',
-                  ))
-              .toList());
+          callback(_assetBalances.values.toList());
         },
       );
-    });
+    }
   }
 }

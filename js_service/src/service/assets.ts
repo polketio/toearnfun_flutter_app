@@ -4,7 +4,7 @@ import { ApiPromise } from "@polkadot/api";
  * get assets ids of statemine/statemint network.
  */
 async function getAssetsAll(api: ApiPromise) {
-  const entries = await api.query.assetsModule.metadata.entries();
+  const entries = await api.query.assets.metadata.entries();
   return entries
     .map(([{ args: [assetId] }, data]) => ({
       id: assetId.toNumber(),

@@ -1,14 +1,19 @@
+import 'package:bruno/bruno.dart';
 import 'package:flukit/flukit.dart';
+import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
+import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
-import 'package:toearnfun_flutter_app/common/types/training_report.dart';
+import 'package:toearnfun_flutter_app/plugins/ropes/simulated_device.dart';
+import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_detail.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
+import 'package:toearnfun_flutter_app/utils/sport.dart';
+import 'package:toearnfun_flutter_app/utils/time.dart';
 
 class JumpRopeTrainingReportsView extends StatefulWidget {
   JumpRopeTrainingReportsView(this.plugin, this.keyring);
@@ -25,41 +30,42 @@ class JumpRopeTrainingReportsView extends StatefulWidget {
 
 class _JumpRopeTrainingReportsViewState
     extends State<JumpRopeTrainingReportsView> {
-  List<JumpRopeTrainingData> jumpRopeTrainingReportList = [];
+  List<TrainingReport> jumpRopeTrainingReportList = [];
 
   @override
   void initState() {
     super.initState();
-    loadJumpRopeTrainingReport();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      loadJumpRopeTrainingReport();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Observer(builder: (_) {
-      return Scaffold(
-          backgroundColor: HexColor('#956DFD'),
-          appBar: getAppBarView(),
-          body: SafeArea(
-              child: PullRefreshScope(
-                  child: CustomScrollView(
-            physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics()),
-            slivers: [
-              SliverPullRefreshIndicator(
-                refreshTriggerPullDistance: 100.h,
-                refreshIndicatorExtent: 60.h,
-                onRefresh: () async {
-                  await Future<void>.delayed(const Duration(seconds: 2));
-                  loadJumpRopeTrainingReport();
-                },
-              ),
-              trainingReportListView(),
-            ],
-          ))));
-    });
+    return Scaffold(
+        backgroundColor: HexColor('#956DFD'),
+        appBar: getAppBarView(context),
+        body: SafeArea(
+            child: PullRefreshScope(
+                child: CustomScrollView(
+          physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics()),
+          slivers: [
+            SliverPullRefreshIndicator(
+              refreshTriggerPullDistance: 100.h,
+              refreshIndicatorExtent: 60.h,
+              onRefresh: () async {
+                await Future<void>.delayed(const Duration(seconds: 2));
+                // loadJumpRopeTrainingReport();
+                loadJumpRopeTrainingReport();
+              },
+            ),
+            trainingReportListView(),
+          ],
+        ))));
   }
 
-  PreferredSizeWidget getAppBarView() {
+  PreferredSizeWidget getAppBarView(BuildContext context) {
     return AppBar(
       toolbarOpacity: 1,
       bottomOpacity: 0,
@@ -68,7 +74,31 @@ class _JumpRopeTrainingReportsViewState
       leading: MyBackButton(),
       centerTitle: true,
       title: Text('Training Report', style: TextStyle(color: Colors.white)),
+      actions: <Widget>[
+        IconButton(
+            onPressed: () {
+              generateSimulatedReport(context);
+            },
+            icon: const Icon(Icons.add_chart_rounded),
+            iconSize: 36.w),
+      ],
     );
+  }
+
+  void generateSimulatedReport(BuildContext context) async {
+    final report = SimulatedDeviceConnector().generateRandomReport();
+    if(report == null) {
+      BrnEnhanceOperationDialog enhanceOperationDialog = BrnEnhanceOperationDialog(
+        iconType: BrnDialogConstants.iconAlert,
+        context: context,
+        titleText: "Tips",
+        descText: "Connected device is not simulated.",
+        mainButtonText: "Got it",
+      );
+      enhanceOperationDialog.show();
+      return;
+    }
+    loadJumpRopeTrainingReport();
   }
 
   Widget trainingReportListView() {
@@ -76,8 +106,9 @@ class _JumpRopeTrainingReportsViewState
       itemExtent: 180,
       delegate: SliverChildBuilderDelegate(
         (context, index) {
+          // final d = jumpRopeTrainingReportList[index];
           final d = jumpRopeTrainingReportList[index];
-          return new JumpRopeTrainingReportItem(d);
+          return JumpRopeTrainingReportItem(d);
         },
         childCount: jumpRopeTrainingReportList.length,
       ),
@@ -85,23 +116,28 @@ class _JumpRopeTrainingReportsViewState
   }
 
   Future<void> loadJumpRopeTrainingReport() async {
-    List<JumpRopeTrainingData> list = [];
-    for (int i = 1; i <= 3; i++) {
-      list.add(JumpRopeTrainingData());
-    }
+    List<TrainingReport> list =
+        widget.plugin.store.report.loadTrainingReportList();
     setState(() {
-      jumpRopeTrainingReportList.addAll(list);
+      jumpRopeTrainingReportList = list;
     });
+    final reportValidityPeriod =
+        int.parse(widget.plugin.networkConst['vfe']['reportValidityPeriod']);
+    LogUtil.d('reportValidityPeriod: $reportValidityPeriod');
   }
 }
 
 class JumpRopeTrainingReportItem extends StatelessWidget {
   JumpRopeTrainingReportItem(this.data);
 
-  JumpRopeTrainingData data;
+  // SkipResultData data;
+  TrainingReport data;
 
   @override
   Widget build(BuildContext context) {
+    final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
+    final kcal = calCalBurnedForJumpRope(
+        data.jumpRopeDuration, data.totalJumpRopeCount, 0);
     return Card(
         elevation: 0,
         margin:
@@ -123,12 +159,16 @@ class JumpRopeTrainingReportItem extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 //[reportTime, status]
-                                Text('06/12 09:30',
+                                Text(
+                                    formatTimestamp(
+                                        timestamp: data.reportTime,
+                                        date: 'MM/DD hh:mm',
+                                        toInt: false),
                                     style: TextStyle(
                                         fontSize: 16, color: Colors.black)),
                                 IconText(
-                                  'assets/images/icon-dd.png',
-                                  'Not Reported',
+                                  data.reportStatus(now).image,
+                                  data.reportStatus(now).display,
                                   style: TextStyle(
                                       fontSize: 12, color: Colors.green),
                                 ),
@@ -182,7 +222,8 @@ class JumpRopeTrainingReportItem extends StatelessWidget {
                                                     flex: 1,
                                                     child: IconText(
                                                       'assets/images/icon-js.png',
-                                                      '00:12:30',
+                                                      formatDuration(data
+                                                          .trainingDuration),
                                                       style: TextStyle(
                                                           fontSize: 16,
                                                           color: Colors.black),
@@ -192,7 +233,8 @@ class JumpRopeTrainingReportItem extends StatelessWidget {
                                                   child: Row(children: [
                                                     IconText(
                                                         'assets/images/icon-rl.png',
-                                                        '389',
+                                                        Fmt.priceFloor(kcal,
+                                                            lengthFixed: 1),
                                                         style: TextStyle(
                                                             fontSize: 16,
                                                             color:
@@ -205,7 +247,10 @@ class JumpRopeTrainingReportItem extends StatelessWidget {
                               ]))
                     ])),
             onTap: () {
-              Navigator.of(context).pushNamed(JumpRopeTrainingDetailView.route);
+              Navigator.of(context)
+                  .pushNamed(JumpRopeTrainingDetailView.route, arguments: {
+                'trainingReport': data,
+              });
             }));
   }
 }

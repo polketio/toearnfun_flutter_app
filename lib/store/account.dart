@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobx/mobx.dart';
 import 'package:polkawallet_sdk/api/types/recoveryInfo.dart';
 import 'package:polkawallet_sdk/api/types/walletConnect/pairingData.dart';
@@ -5,11 +6,15 @@ import 'package:polkawallet_sdk/api/types/walletConnect/pairingData.dart';
 part 'account.g.dart';
 
 class AccountStore extends _AccountStore with _$AccountStore {
-  AccountStore() : super();
+  AccountStore(FlutterSecureStorage secureStorage) : super(secureStorage);
 }
 
 abstract class _AccountStore with Store {
-  _AccountStore();
+  _AccountStore(this.secureStorage);
+
+  final FlutterSecureStorage secureStorage;
+
+  final _userWalletPasswordKey = 'user_wallet_password_';
 
   @observable
   AccountCreate newAccount = AccountCreate();
@@ -100,6 +105,14 @@ abstract class _AccountStore with Store {
   @action
   void deleteWCSession(WCPairedData session) {
     wcSessions.removeWhere((e) => e.topic == session.topic);
+  }
+
+  Future<void> saveUserWalletPassword(String pubkey, String password) async {
+    await secureStorage.write(key: '$_userWalletPasswordKey$pubkey', value: password);
+  }
+
+  Future<String?> getUserWalletPassword(String pubkey) async {
+    return await secureStorage.read(key: '$_userWalletPasswordKey$pubkey');
   }
 }
 

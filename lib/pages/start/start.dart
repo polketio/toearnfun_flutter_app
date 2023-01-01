@@ -21,7 +21,7 @@ class _StartViewState extends State<StartView>
     super.initState();
 
     _controller = OneShotAnimation(
-      'Animation1',
+      'idle',
       onStop: () {
         // WalletApp.isInitial++;
         if (toPage != null) toPage!();
@@ -43,7 +43,7 @@ class _StartViewState extends State<StartView>
   //     toPage = () async {
   //       Navigator.of(context).pushNamedAndRemoveUntil(
   //           GuidePage.route, (route) => false,
-  //           arguments: {"storeKey": storeKey, "storage": storage});
+  //           arguments: {'storeKey': storeKey, 'storage': storage});
   //     };
   //   }
   // }
@@ -62,10 +62,10 @@ class _StartViewState extends State<StartView>
           height: double.infinity,
           color: Colors.white,
           child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 70),
+              margin: EdgeInsets.symmetric(horizontal: 8),
               child: RiveAnimation.asset(
-                'assets/images/start_logo.riv',
-                animations: const ['Animation1'],
+                'assets/images/toearnfun.riv',
+                animations: const ['idle'],
                 controllers: [_controller!],
               ))),
     );

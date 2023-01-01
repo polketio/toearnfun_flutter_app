@@ -1,29 +1,35 @@
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:polkawallet_sdk/api/types/networkParams.dart';
 import 'package:polkawallet_sdk/plugin/homeNavItem.dart';
 import 'package:polkawallet_sdk/plugin/index.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
+import 'package:toearnfun_flutter_app/pages/device/bind_device_complete.dart';
+import 'package:toearnfun_flutter_app/pages/device/bind_device_scanner.dart';
+import 'package:toearnfun_flutter_app/pages/device/bind_device_tips.dart';
 import 'package:toearnfun_flutter_app/pages/device/device_connect.dart';
 import 'package:toearnfun_flutter_app/pages/profile/profile.dart';
 import 'package:toearnfun_flutter_app/pages/root.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_detail.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
+import 'package:toearnfun_flutter_app/pages/vfe/vfe_detail.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_one.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_three.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_two.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/welcome.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/import/mnemonic.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/wallet.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api.dart';
 import 'package:toearnfun_flutter_app/store/plugin_store.dart';
 
 class PluginPolket extends PolkawalletPlugin {
-  // store cache
-  late PluginStore _store;
+  PluginPolket(this.store);
 
-  PluginStore get store => _store;
+  // store cache
+  PluginStore store;
 
   //polket api
   late PolketApi _api;
@@ -51,7 +57,8 @@ class PluginPolket extends PolkawalletPlugin {
       {
         'name': 'Polket Testnet',
         'ss58': 42,
-        'endpoint': 'wss://testnet.playonchain.fun',
+        'endpoint': 'wss://testnet-node.polket.io',
+        // 'endpoint': 'ws://192.168.31.141:9944',
       },
     ].map((e) => NetworkParams.fromJson(e)).toList();
   }
@@ -77,16 +84,23 @@ class PluginPolket extends PolkawalletPlugin {
   Map<String, WidgetBuilder> getRoutes(Keyring keyring) {
     LogUtil.d('plugin.getRoutes');
     return {
-      RootView.route: (_) => RootView(this, keyring),
+      // RootView.route: (_) => RootView(this, keyring),
       WalletView.route: (_) => WalletView(this, keyring),
-      JumpRopeTrainingReportsView.route: (_) => JumpRopeTrainingReportsView(this, keyring),
+      JumpRopeTrainingReportsView.route: (_) =>
+          JumpRopeTrainingReportsView(this, keyring),
       NewWalletWelcomeView.route: (_) => NewWalletWelcomeView(this, keyring),
       NewWalletStepOne.route: (_) => NewWalletStepOne(this, keyring),
       NewWalletStepTwo.route: (_) => NewWalletStepTwo(this, keyring),
       NewWalletStepThree.route: (_) => NewWalletStepThree(this, keyring),
       DeviceConnectView.route: (_) => DeviceConnectView(this, keyring),
-      JumpRopeTrainingDetailView.route: (_) => JumpRopeTrainingDetailView(this, keyring),
+      JumpRopeTrainingDetailView.route: (_) =>
+          JumpRopeTrainingDetailView(this, keyring),
       ProfileView.route: (_) => ProfileView(this, keyring),
+      BindDeviceTips.route: (_) => BindDeviceTips(this, keyring),
+      BindDeviceScanner.route: (_) => BindDeviceScanner(this, keyring),
+      BindDeviceComplete.route: (_) => BindDeviceComplete(this, keyring),
+      VFEDetailView.route: (_) => VFEDetailView(this, keyring),
+      MnemonicRestoreWallet.route: (_) => MnemonicRestoreWallet(this, keyring),
     };
   }
 
@@ -94,13 +108,48 @@ class PluginPolket extends PolkawalletPlugin {
     balances.setTokens([]);
     balances.setExtraTokens([]);
 
-    _store.assets.loadCache(acc.pubKey);
+    store.assets.loadCache(acc.pubKey);
+    store.vfe.loadCurrentVFE(acc.pubKey);
+    store.vfe.loadUserState();
+  }
+
+  Future<void> loadUserVFEs(String user) async {
+    final brands = await _api.vfe.getVFEBrandsAll();
+    if (brands.isNotEmpty) {
+      store.vfe.allVFEBrands.addAll(brands);
+      for (var b in brands) {
+        final details =
+            await _api.vfe.getVFEDetailsByAddress(user, b.brandId ?? 0);
+        for (var d in details) {
+          d.setBrandInfo(b);
+        }
+        await store.vfe.addUserVFEList(user, details);
+      }
+    }
   }
 
   Future<void> _subscribeTokenBalances(String address) async {
     _api.assets.subscribeTokenBalances(address, (data) {
       balances.setTokens(data);
-      _store.assets.setTokenBalanceMap(data);
+      store.assets.setTokenBalanceMap(data);
+    });
+  }
+
+  Future<void> _subscribeUserState(String address) async {
+    _api.vfe.subscribeUserState(address, (data) {
+      store.vfe.updateUserState(data);
+    });
+  }
+
+  Future<void> _subscribeLastEnergyRecovery() async {
+    _api.vfe.subscribeLastEnergyRecovery((data) {
+      store.vfe.updateLastEnergyRecovery(data);
+    });
+  }
+
+  Future<void> _subscribeBlockNumber() async {
+    _api.system.subscribeBlockNumber((data) {
+      store.system.updateCurrentBlockNumber(data);
     });
   }
 
@@ -108,8 +157,6 @@ class PluginPolket extends PolkawalletPlugin {
   Future<void> onWillStart(Keyring keyring) async {
     _api = PolketApi(this, keyring);
 
-    _store = PluginStore();
-    await _store.init();
     _loadCacheData(keyring.current);
     LogUtil.d('plugin.onWillStart');
   }
@@ -119,7 +166,20 @@ class PluginPolket extends PolkawalletPlugin {
     _connected = true;
 
     if (keyring.current.address != null) {
+      // subscribe assets balance
       _subscribeTokenBalances(keyring.current.address!);
+      // subscribe user state
+      _subscribeUserState(keyring.current.address!);
+      // subscribe last energy recovery
+      _subscribeLastEnergyRecovery();
+      // subscribe new block number
+      _subscribeBlockNumber();
+      // load user vfe
+      loadUserVFEs(keyring.current.pubKey!);
+
+      String? password =
+          await store.account.getUserWalletPassword(keyring.current.pubKey!);
+      _api.vfe.userRestore(password);
     }
     LogUtil.d('plugin.onStarted');
   }
@@ -130,7 +190,17 @@ class PluginPolket extends PolkawalletPlugin {
 
     if (_connected && acc.address != null) {
       _api.assets.unsubscribeTokenBalances(acc.address!);
+      _api.vfe.unsubscribeUserState(acc.address!);
+      _api.vfe.unsubscribeLastEnergyRecovery();
+      _api.system.unsubscribeBlockNumber();
+
       _subscribeTokenBalances(acc.address!);
+      _subscribeUserState(acc.address!);
+      _subscribeLastEnergyRecovery();
+      _subscribeBlockNumber();
+
+      String? password = await store.account.getUserWalletPassword(acc.pubKey!);
+      _api.vfe.userRestore(password);
     }
   }
 }

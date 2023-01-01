@@ -1,14 +1,16 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:bruno/bruno.dart';
-import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
+import 'package:polkawallet_ui/utils/format.dart';
+import 'package:realm/realm.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
-import 'package:toearnfun_flutter_app/common/types/training_report.dart';
+import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
+import 'package:toearnfun_flutter_app/utils/sport.dart';
+import 'package:toearnfun_flutter_app/utils/time.dart';
 
 class JumpRopeTrainingDetailView extends StatefulWidget {
   JumpRopeTrainingDetailView(this.plugin, this.keyring);
@@ -30,6 +32,8 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
   final _backgroundColor = HexColor('#956DFD');
   final _roundColor = HexColor('#f9f7f7');
 
+  late TrainingReport report;
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +41,10 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
 
   @override
   Widget build(BuildContext context) {
+    final data = ModalRoute.of(context)?.settings.arguments as Map;
+    report = data['trainingReport'];
+    // LogUtil.d('report: $report');
+
     return Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: _backgroundColor,
@@ -57,7 +65,7 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
                       Expanded(flex: 0, child: topView()),
                       Expanded(flex: 1, child: centerView()),
                       Expanded(flex: 0, child: bottomView()),
-                      Expanded(flex: 0, child: buttonView()),
+                      Expanded(flex: 0, child: buttonView(context)),
                     ]))));
   }
 
@@ -75,14 +83,18 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
   }
 
   Widget topView() {
+    final kcal = calCalBurnedForJumpRope(
+        report?.jumpRopeDuration ?? 0, report?.totalJumpRopeCount ?? 0, 0);
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          itemView(
-              'assets/images/icon-time_big.png', 'Training Time', '00:16:30'),
-          itemView('assets/images/icon-calories.png', 'Fat burning', '90 KCal'),
-          itemView('assets/images/icon-bangsheng.png', 'Rope Breaks', '1 Time'),
+          itemView('assets/images/icon-time_big.png', 'Training Time',
+              formatDuration(report.jumpRopeDuration)),
+          itemView('assets/images/icon-calories.png', 'Fat burning',
+              '${Fmt.priceCeil(kcal, lengthMax: 2)} KCal'),
+          itemView('assets/images/icon-bangsheng.png', 'Rope Breaks',
+              '${report.interruptions} Time'),
         ],
       ),
     );
@@ -93,9 +105,12 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
         child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        itemView('assets/images/icon-pinlv.png', 'Average Speed', '120 J/M'),
-        itemView('assets/images/icon-speed.png', 'Fastest Speed', '160 J/M'),
-        itemView('assets/images/icon-lianxu.png', 'Most Jumps', '120 JUMPS'),
+        itemView('assets/images/icon-pinlv.png', 'Average Speed',
+            '${report.averageSpeed} J/M'),
+        itemView('assets/images/icon-speed.png', 'Fastest Speed',
+            '${report.maxSpeed} J/M'),
+        itemView('assets/images/icon-lianxu.png', 'Most Jumps',
+            '${report.maxJumpRopeCount} JUMPS'),
       ],
     ));
   }
@@ -141,6 +156,12 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
 
   Widget centerForegroundView(
       BuildContext context, BoxConstraints constraints) {
+    Widget rewardView;
+    if (report.reward != null) {
+      rewardView = earnFUNView(report.reward!);
+    } else {
+      rewardView = blindBoxView();
+    }
     return Container(
         height: constraints.maxWidth * 2 / 3,
         child: Stack(alignment: Alignment.bottomLeft, children: [
@@ -161,7 +182,7 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: totalJumpsView(2390),
+                  child: totalJumpsView(report.totalJumpRopeCount),
                 )
               ]);
             }),
@@ -185,22 +206,41 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        // child: Image.asset('assets/images/icon-baoxiang.png'),
-                        child: earnFUNView(90, 2),
+                        child: rewardView,
                       )
                     ]);
                   })))
         ]));
   }
 
-  Widget buttonView() {
+  Widget buttonView(BuildContext context) {
+    final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
+    final status = report.reportStatus(now);
+    String btnStr = '';
+    switch (status) {
+      case ReportStatus.notReported:
+        btnStr = 'Report Now';
+        break;
+      case ReportStatus.reported:
+        btnStr = 'Reported';
+        break;
+      case ReportStatus.expired:
+        btnStr = 'Expired';
+        break;
+      case ReportStatus.failed:
+        btnStr = report.error;
+        break;
+    }
     return Container(
         height: 50.h,
         width: double.infinity,
         margin: EdgeInsets.only(top: 44.h),
         child: ElevatedButton(
-          onPressed: () {},
-          child: const Text('Reported', style: TextStyle(fontSize: 24)),
+          onPressed: () async {
+            if (status == ReportStatus.notReported) {
+              await uploadTrainingReport(context, report);
+            }
+          },
           style: ButtonStyle(
             elevation: MaterialStateProperty.all(0),
             shape: MaterialStateProperty.all(
@@ -208,6 +248,7 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
             backgroundColor: MaterialStateProperty.all(_backgroundColor),
             alignment: Alignment.center,
           ),
+          child: Text(btnStr, style: const TextStyle(fontSize: 24)),
         ));
   }
 
@@ -250,7 +291,12 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
     );
   }
 
-  Widget earnFUNView(double fun, int energy) {
+  Widget earnFUNView(TrainingReward reward) {
+    final asset = widget.plugin.store.assets.getTokenByAssetId(reward.assetId);
+    final amount = reward.rewards;
+    final energyUsed = reward.energyUsed;
+    final decimals = asset?.decimals ?? 0;
+
     return Padding(
         padding: EdgeInsets.only(left: 10.w, right: 16.w),
         child: Column(
@@ -259,16 +305,113 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
           children: [
             //[FUN ENERGY]
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Image.asset('assets/images/icon-energy.png'),
-              AutoSizeText('+ $fun',
-                  maxLines: 1, style: TextStyle(fontSize: 20), minFontSize: 10),
+              Image.asset('assets/images/icon-fun-nobg.png'),
+              Flexible(
+                  child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child:
+                          Text('+ ${Fmt.balance(amount.toString(), decimals)}',
+                              maxLines: 1,
+                              style: const TextStyle(
+                                height: 1.0,
+                                textBaseline: TextBaseline.ideographic,
+                                package: BrnStrings.flutterPackageName,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 22,
+                                fontFamily: 'Bebas',
+                              )))),
             ]),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Image.asset('assets/images/icon-energy.png'),
-              AutoSizeText('- $energy',
-                  maxLines: 1, style: TextStyle(fontSize: 20), minFontSize: 10),
+              Flexible(
+                  child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('- $energyUsed',
+                          maxLines: 1,
+                          style: const TextStyle(
+                            height: 1.0,
+                            textBaseline: TextBaseline.ideographic,
+                            package: BrnStrings.flutterPackageName,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 22,
+                            fontFamily: 'Bebas',
+                          )))),
             ]),
           ],
         ));
+  }
+
+  Widget blindBoxView() {
+    return Image.asset('assets/images/icon-baoxiang.png');
+  }
+
+  // upload training report and get FUN
+  uploadTrainingReport(BuildContext context, TrainingReport report) async {
+    BrnLoadingDialog.show(context,
+        content: 'Uploading', barrierDismissible: false);
+    final signature = report.signature;
+    final reportData = report.encodeData();
+    final deviceKey = report.deviceKey;
+    final password = await widget.plugin.api.account.getPassword(
+      context,
+      widget.keyring.current,
+    );
+    final result = await widget.plugin.api.vfe
+        .uploadTrainingReport(deviceKey, signature, reportData, password);
+    final realm = widget.plugin.store.report.realm;
+
+    if (!mounted) return;
+    BrnLoadingDialog.dismiss(context);
+
+    if (!result.success) {
+      // update report state
+      BrnToast.show(result.error, context);
+
+      realm.write(() {
+        report.error = result.error;
+        // report.status = ReportStatus.failed.name;
+      });
+    } else {
+      BrnToast.show('Upload report successfully', context);
+      // save the reward info and update state
+      final events = result.events;
+      for (var event in events) {
+        if (event.title == 'vfe.TrainingReportsAndRewards') {
+          // TrainingReportsAndRewards {
+          //   owner: T::AccountId,
+          //   brand_id: T::CollectionId,
+          //   item_id: T::ItemId,
+          //   sport_type: SportType,
+          //   training_time: u32,
+          //   training_duration: u16,
+          //   training_count: u16,
+          //   energy_used: u16,
+          //   asset_id: AssetIdOf<T>,
+          //   rewards: BalanceOf<T>,
+          // },
+          int energyUsed = event.message[7] ?? 0;
+          int assetId = event.message[8] ?? 0;
+          String rewards = event.message[9].toString() ?? '0';
+
+          realm.write(() {
+            final reward = TrainingReward(ObjectId(),
+                energyUsed: energyUsed,
+                batteryUsed: energyUsed,
+                assetId: assetId,
+                rewards: rewards);
+            report.reward = reward;
+            report.status = ReportStatus.reported.name;
+          });
+
+          final currentVFE = widget.plugin.store.vfe.current;
+          currentVFE.remainingBattery =
+              currentVFE.remainingBattery - energyUsed;
+          await widget.plugin.store.vfe
+              .updateUserCurrent(widget.keyring.current.pubKey, currentVFE);
+        }
+      }
+    }
+
+    setState(() {});
   }
 }
