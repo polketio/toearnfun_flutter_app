@@ -56,7 +56,7 @@ class _WalletViewState extends State<WalletView> {
       actions: <Widget>[
         IconButton(
             onPressed: () {
-              Navigator.of(context).pushNamed(NewWalletWelcomeView.route);
+              // Navigator.of(context).pushNamed(NewWalletWelcomeView.route);
             },
             icon: Image.asset('assets/images/icon-more.png'),
             iconSize: 36.w),

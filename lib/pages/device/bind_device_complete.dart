@@ -11,6 +11,7 @@ import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/simulated_device.dart';
 import 'package:toearnfun_flutter_app/types/bluetooth_device.dart';
+import 'package:toearnfun_flutter_app/types/vfe_detail.dart';
 import 'package:toearnfun_flutter_app/utils/crypto.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
@@ -232,8 +233,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
 
           //the device is not bond, try to bind device
           final nonce = deviceExisted.nonce + 1;
-          final signature =
-              await connector.sigBindDevice(accountId, nonce);
+          final signature = await connector.sigBindDevice(accountId, nonce);
           // LogUtil.d('signature: $signature');
           if (!mounted) return;
           final password = await widget.plugin.api.account
@@ -245,6 +245,18 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
             BrnToast.show(result.error, context);
             BrnLoadingDialog.dismiss(context);
             return;
+          }
+
+          // if new vfe create set it for current.
+          final events = result.events;
+          for (var event in events) {
+            if (event.title == 'vfe.VFECreated') {
+              if (widget.plugin.store.vfe.current.itemId == null) {
+                // LogUtil.d('vfe detail: ${event.message[1]}');
+                final vfe = VFEDetail.fromJson(event.message[1]);
+                await widget.plugin.store.vfe.updateUserCurrent(accountId, vfe);
+              }
+            }
           }
 
           //load vfe
@@ -288,7 +300,8 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
       if (!mounted) return;
       final password = await widget.plugin.api.account
           .getPassword(context, widget.keyring.current);
-      final result = await widget.plugin.api.vfe.producerRegister(user, password);
+      final result =
+          await widget.plugin.api.vfe.producerRegister(user, password);
       if (!mounted) return;
       if (!result.success) {
         BrnToast.show(result.error, context);

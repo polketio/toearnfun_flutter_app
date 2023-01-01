@@ -185,19 +185,19 @@ class _NewWalletStepTwoState extends State<NewWalletStepTwo> {
           onPressed: () {
             if (_wordsSelected.join(' ') ==
                 widget.plugin.store.account.newAccount.key) {
-              Navigator.of(context).pushNamed(NewWalletStepThree.route);
+              Navigator.of(context).pushNamed(NewWalletStepThree.route,
+                  arguments: {"isCreate": true});
             } else {
               BrnDialogManager.showSingleButtonDialog(context,
                   title: "Warning",
                   label: 'OK',
                   message: "Invalid mnemonic, please enter again.", onTap: () {
-                    Navigator.of(context).pop();
-                    setState(() {
-                      _wordsLeft = widget
-                          .plugin.store.account.newAccount.key
-                          .split(' ');
-                      _wordsSelected = [];
-                    });
+                Navigator.of(context).pop();
+                setState(() {
+                  _wordsLeft =
+                      widget.plugin.store.account.newAccount.key.split(' ');
+                  _wordsSelected = [];
+                });
               });
             }
           },

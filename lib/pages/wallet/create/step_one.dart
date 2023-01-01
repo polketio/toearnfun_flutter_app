@@ -24,7 +24,6 @@ class NewWalletStepOne extends StatefulWidget {
 }
 
 class _NewWalletStepOneState extends State<NewWalletStepOne> {
-
   final _tipsColor = HexColor('#BFC0D0');
   final _backgroundColor = HexColor('#956DFD');
 
@@ -71,7 +70,8 @@ class _NewWalletStepOneState extends State<NewWalletStepOne> {
       backgroundColor: _backgroundColor,
       leading: MyBackButton(),
       centerTitle: true,
-      title: const Text('Write Down Passphrase', style: TextStyle(color: Colors.white)),
+      title: const Text('Write Down Passphrase',
+          style: TextStyle(color: Colors.white)),
     );
   }
 
@@ -135,9 +135,7 @@ class _NewWalletStepOneState extends State<NewWalletStepOne> {
               fillColor: HexColor('fbf7f7'),
             ),
             style: TextStyle(color: _backgroundColor),
-            controller: TextEditingController()
-              ..text =
-                  mnemonics,
+            controller: TextEditingController()..text = mnemonics,
           ),
           Container(
               alignment: Alignment.centerLeft,
@@ -155,14 +153,13 @@ class _NewWalletStepOneState extends State<NewWalletStepOne> {
         width: double.infinity,
         child: ElevatedButton(
           onPressed: () {
-            Navigator.of(context)
-                .pushNamed(NewWalletStepTwo.route);
+            Navigator.of(context).pushNamed(NewWalletStepTwo.route);
           },
           child: const Text('Continue', style: TextStyle(fontSize: 24)),
           style: ButtonStyle(
             elevation: MaterialStateProperty.all(0),
-            shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8))),
+            shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
             backgroundColor: MaterialStateProperty.all(_backgroundColor),
             alignment: Alignment.center,
           ),

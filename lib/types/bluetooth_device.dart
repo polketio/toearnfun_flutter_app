@@ -16,7 +16,7 @@ class FitnessDevice {
   String? status;
   int nonce = 0;
   int timestamp = 0;
-  MintCost? mintCost;
+  // MintCost? mintCost;
 
   FitnessDevice(this.name, this.mac);
 
@@ -33,10 +33,10 @@ class FitnessDevice {
         producerId = json['producerId'] ?? 0,
         status = json['status'] ?? '',
         nonce = json['nonce'] ?? 0,
-        timestamp = json['timestamp'] ?? 0,
-        mintCost = json['mintCost'] != null
-            ? MintCost.fromJson(json['mintCost'])
-            : null;
+        timestamp = json['timestamp'] ?? 0;
+        // mintCost = json['mintCost'] != null
+        //     ? MintCost.fromJson(json['mintCost'])
+        //     : null;
 
   Map<String, dynamic> toJson() => {
         'name': name,
@@ -51,7 +51,7 @@ class FitnessDevice {
         'status': status,
         'nonce': nonce,
         'timestamp': timestamp,
-        'mintCost': mintCost?.toJson(),
+        // 'mintCost': mintCost?.toJson(),
       };
 }
 

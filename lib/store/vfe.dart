@@ -64,7 +64,10 @@ abstract class _VFEStore with Store {
     userVFEList.clear();
     for (var vfe in vfeList) {
       userVFEList.add(vfe);
-      if (current.itemId == vfe.itemId || current.itemId == null) {
+      if (
+      current.itemId == vfe.itemId
+          // || current.itemId == null
+      ) {
         //update user current vfe
         updateUserCurrent(pubKey, vfe);
       }

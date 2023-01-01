@@ -198,6 +198,9 @@ class PluginPolket extends PolkawalletPlugin {
       _subscribeUserState(acc.address!);
       _subscribeLastEnergyRecovery();
       _subscribeBlockNumber();
+
+      String? password = await store.account.getUserWalletPassword(acc.pubKey!);
+      _api.vfe.userRestore(password);
     }
   }
 }

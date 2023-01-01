@@ -13,6 +13,7 @@ import 'package:pointycastle/src/utils.dart' as utils;
 import 'package:toearnfun_flutter_app/types/training_report.dart';
 import 'package:toearnfun_flutter_app/utils/bytes.dart';
 import 'package:toearnfun_flutter_app/utils/crypto.dart';
+import 'package:web3dart/credentials.dart';
 import 'package:web3dart/crypto.dart';
 
 class SimulatedDeviceConnector implements JumpRopeDeviceConnector {
@@ -83,6 +84,13 @@ class SimulatedDeviceConnector implements JumpRopeDeviceConnector {
     devicePrivateKey = generateNewPrivateKey(rng);
     final publicKey = EC.secp256r1.createPublicKey(devicePrivateKey!, true);
     final pkHex = hex.encode(publicKey);
+    // update connected device keypair
+    if (connectedDevice != null) {
+      connectedDevice!.prvKey =
+          hex.encode(utils.encodeBigInt(devicePrivateKey));
+      connectedDevice!.pubKey = pkHex;
+    }
+
     return pkHex;
   }
 
@@ -101,8 +109,7 @@ class SimulatedDeviceConnector implements JumpRopeDeviceConnector {
     FitnessDevice device = FitnessDevice('Simulated', '333-333-333-333');
     device.simulated = true;
     device.pubKey = await getPublicKey();
-    device.prvKey = hex.encode(utils.encodeBigInt(devicePrivateKey!));
-
+    device.prvKey = hex.encode(utils.encodeBigInt(devicePrivateKey));
     for (var o in observers) {
       o.onScanning(device);
     }
@@ -129,6 +136,13 @@ class SimulatedDeviceConnector implements JumpRopeDeviceConnector {
     final message = SHA256().update(data).digest();
     final signature =
         _generateSignature(devicePrivateKey!, Uint8List.fromList(message));
+
+    final privateKey = hex.encode(utils.encodeBigInt(devicePrivateKey));
+    // LogUtil.d('privateKey: $privateKey');
+    // LogUtil.d('publicKey: ${connectedDevice!.pubKey}');
+    // LogUtil.d('message: ${hex.encode(message)}');
+    // LogUtil.d('signature: $signature');
+
     return signature;
   }
 
@@ -189,10 +203,10 @@ class SimulatedDeviceConnector implements JumpRopeDeviceConnector {
 
     int reportTime = (DateTime.now().millisecondsSinceEpoch / 1000).round();
     var rng = Random();
-    final trainingDuration = rng.nextInt(180);
-    final totalJumpRopeCount = rng.nextInt(900);
-    final averageSpeed = rng.nextInt(300);
-    final maxSpeed = rng.nextInt(300);
+    final trainingDuration = _randomGen(30, 180);
+    final totalJumpRopeCount = _randomGen(300, 900);
+    final averageSpeed = _randomGen(120, 300);
+    final maxSpeed = _randomGen(120, 300);
     final interruptions = rng.nextInt(4);
     TrainingReport report = TrainingReport(
       ObjectId(),
@@ -220,7 +234,20 @@ class SimulatedDeviceConnector implements JumpRopeDeviceConnector {
         _generateSignature(privateKey, Uint8List.fromList(hex.decode(message)));
     report.signature = signature;
 
+    // LogUtil.d('privateKey: ${connectedDevice!.prvKey}');
+    // LogUtil.d('publicKey: ${connectedDevice!.pubKey}');
+    // LogUtil.d('message: $message');
+    // LogUtil.d('signature: $signature');
+
     _store!.report.addTrainingReport(report);
     return report;
+  }
+
+  _randomGen(min, max) {
+    //nextInt 方法生成一个从 0（包括）到 max（不包括）的非负随机整数
+    var x = Random().nextInt(max) + min;
+
+    //如果您不想返回整数，只需删除 floor() 方法
+    return x.floor();
   }
 }
