@@ -420,13 +420,13 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
                 BleManager.getInstance().setMtu(bleDevice, 247, new BleMtuChangedCallback() {
                     @Override
                     public void onSetMTUFailure(BleException exception) {
-                        Log.i(TAG, "[写入][失败] MTU设置" + exception.toString());
+//                        Log.i(TAG, "[写入][失败] MTU设置" + exception.toString());
                         mResult.success(true);
                     }
 
                     @Override
                     public void onMtuChanged(int mtu) {
-                        Log.i(TAG, "[写入][成功] MTU设置： " + mtu);
+//                        Log.i(TAG, "[写入][成功] MTU设置： " + mtu);
                         mResult.success(true);
                     }
                 });
@@ -509,7 +509,7 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
                         ", 绊绳: " + Integer.toString(display.getTripCnt()) + ", 电量:" + Integer.toString(display.getBatteryPercent()) + ", 有效时长:" + Integer.toString(display.getSkipValidSec());
                 Toast.makeText(mActivity, s, Toast.LENGTH_LONG).show();
 
-                Log.i(TAG, s);
+//                Log.i(TAG, s);
             }
         }
 
@@ -548,7 +548,7 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
                 str += Integer.toString(result.getSkipGroupEleSkipSecs(i)) + "," + Integer.toString(result.getSkipGroupEleSkipCnt(i)) + " ";
             }*/
             final String s = str;
-            Log.i(TAG, s);
+//            Log.i(TAG, s);
             Toast.makeText(mActivity, s, Toast.LENGTH_LONG).show();
         }
 
@@ -587,7 +587,7 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
                 str += Integer.toString(result.getSkipGroupEleSkipSecs(i)) + "," + Integer.toString(result.getSkipGroupEleSkipCnt(i)) + " ";
             }*/
             final String s = str;
-            Log.i(TAG, s);
+//            Log.i(TAG, s);
 
 
         }
@@ -596,21 +596,21 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
         public void onReceiveEnteredOtaMode(String mac) {
             super.onReceiveEnteredOtaMode(mac);
             final String s = "[接收][成功] 进入OTA模式, mac:" + mac;
-            Log.i(TAG, s);
+//            Log.i(TAG, s);
         }
 
         @Override
         public void onReceiveEnteredFactoryMode() {
             super.onReceiveEnteredFactoryMode();
             final String s = "[接收][成功] 进入工厂模式";
-            Log.i(TAG, s);
+//            Log.i(TAG, s);
         }
 
         @Override
         public void onReceiveRevertDevice() {
             super.onReceiveRevertDevice();
             final String s = "[接收][成功] 恢复出厂";
-            Log.i(TAG, s);
+//            Log.i(TAG, s);
         }
 
     };
@@ -622,7 +622,7 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
             String ss = com.Ls.skipBle.protocol.HexUtil.encodeHexStr(justWrite);
             if (current == total) {
                 final String s = "[写入][成功]" + getTag();
-                Log.i(TAG, s);
+//                Log.i(TAG, s);
                 // mResult.success(ss);
             }
         }
@@ -631,7 +631,7 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
         public void onWriteFailure(BleException exception) {
             super.onWriteFailure(exception);
             final String s = "[写入][失败]" + getTag() + ": " + exception.toString();
-            Log.i(TAG, s);
+//            Log.i(TAG, s);
 
         }
     };

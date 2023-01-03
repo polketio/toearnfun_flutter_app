@@ -43,7 +43,7 @@ public class DfuManager {
     private void startDFU(BluetoothDevice bluetoothDevice, boolean keepBond, boolean force,
                           boolean PacketsReceipt, int numberOfPackets, int mtu, Uri uri) {
 
-        Log.i(TAG, "startDFU");
+//        Log.i(TAG, "startDFU");
         final DfuServiceInitiator dfuStart = new DfuServiceInitiator(bluetoothDevice.getAddress())
                 .setDeviceName(bluetoothDevice.getName())
                 .setKeepBond(keepBond)

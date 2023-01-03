@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">NftBleDemo</string>
-    <string name="notifyTitle">提示</string>
-    <string name="gpsNotifyMsg">当前手机扫描蓝牙需要打开定位功能。</string>
-    <string name="setting">前往设置</string>
-    <string name="cancel">取消</string>
+    <string name="notifyTitle">Tips</string>
+    <string name="gpsNotifyMsg">The current mobile phone needs to open GPS to scan Bluetooth.</string>
+    <string name="setting">Setting</string>
+    <string name="cancel">Cancel</string>
 
-    <string name="start_scan">开始扫描</string>
-    <string name="stop_scan">停止扫描</string>
-    <string name="expand_search_settings">展开搜索设置</string>
-    <string name="retrieve_search_settings">收起搜索设置</string>
-    <string name="connect_fail">连接失败</string>
-    <string name="connect_suc">连接成功</string>
-    <string name="active_disconnected">断开了</string>
-    <string name="disconnected">连接断开</string>
-    <string name="please_open_blue">请先打开蓝牙</string>
-    <string name="name">设备广播名：</string>
+    <string name="start_scan">Start Scan</string>
+    <string name="stop_scan">Stop Scan</string>
+    <string name="expand_search_settings">Expand Search Settings</string>
+    <string name="retrieve_search_settings">Retrieve Search Settings</string>
+    <string name="connect_fail">Connect failed</string>
+    <string name="connect_suc">Connected</string>
+    <string name="active_disconnected">Disconnected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="please_open_blue">Please Open Bluetooth</string>
+    <string name="name">Broadcast name:</string>
     <string name="mac">MAC:</string>
-    <string name="scan_setting">在下面你可以配置需要扫描的设备的条件，可以为空</string>
-    <string name="setting_name">输入蓝牙设备广播名，多个之间以英文逗号隔开</string>
-    <string name="setting_mac">输入蓝牙设备mac地址</string>
-    <string name="setting_uuid">输入蓝牙设备UUID，多个之间以英文逗号隔开</string>
-    <string name="setting_rssi">输入蓝牙强度</string>
-    <string name="connect">连接</string>
-    <string name="connected">已连接</string>
-    <string name="disconnect">断开连接</string>
-    <string name="api">接口</string>
-    <string name="show_device">展示设备</string>
+    <string name="scan_setting">Below you can configure the conditions of the devices that need to be scanned, which can be empty</string>
+    <string name="setting_name">Enter the broadcast name of the Bluetooth device, separated by commas</string>
+    <string name="setting_mac">Enter the mac address of the Bluetooth device</string>
+    <string name="setting_uuid">Enter the UUID of the Bluetooth device, separated by commas</string>
+    <string name="setting_rssi">Enter bluetooth rssi</string>
+    <string name="connect">Connect</string>
+    <string name="connected">Connected</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="api">API</string>
+    <string name="show_device">Show Device</string>
 
-    <string name="count_down">倒计时</string>
-    <string name="count_back">倒计数</string>
-    <string name="free_jump">自由跳</string>
+    <string name="count_down">Count Down</string>
+    <string name="count_back">Count Back</string>
+    <string name="free_jump">free Jump</string>
 
     <!--功能列表-->
     <string name="str_fun_hardware_ver">硬件版本</string>

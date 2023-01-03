@@ -524,8 +524,8 @@ public class SkipApiActivity {
         String none="100";*/
         byte[] d = txPack.writeSkipBondDev(none, address);
         //Log.i(TAG, HexUtil.encodeHexStr(data));
-        Log.i("绑定设备", HexUtil.encodeHexStr(d));
-        Log.i(TAG, HexUtil.encodeHexStr(d));
+//        Log.i("绑定设备", HexUtil.encodeHexStr(d));
+//        Log.i(TAG, HexUtil.encodeHexStr(d));
         String uuid_service = SkipBleUUIDs.SERVICE_UUID;
         String uuid_write = SkipBleUUIDs.WRITE_CHARACTERISTIC_UUID;
         BleManager.getInstance().lcWrite(

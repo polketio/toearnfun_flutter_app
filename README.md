@@ -1,24 +1,38 @@
 # toearnfun_flutter_app
 
-A new Flutter project.
+**ToEarnFun** is a **fit to earn** Web3 smart fitness application. Compared with other **x-to-earn** applications that only have **SocialFi** and **GameFi** elements, it can be connected with real smart fitness equipment. It relies on the encryption technology of the hardware chip to ensure that the sweat is paid fairly. The entry-level users of **ToEarnFun** do not need to purchase cryptocurrencies, but only need to purchase smart fitness equipment adapted to the application, and they can **fit to earn** immediately, greatly reducing the difficulty for ordinary users to enter the web3 world.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+[Install flutter SDK.](https://docs.flutter.dev/get-started/install)
+[Install Android studio and plugin.](https://docs.flutter.dev/get-started/editor?tab=androidstudio)
 
-A few resources to get you started if this is your first Flutter project:
+## How to use
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Run
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Open **Android Studio**, and **open Android Emulator** or connect **Android Mobile phone**.
 
 ```shell
-# Run ToEarnFun App on testnet
+
+# Run ToEarnFun App on Polket testnet
 flutter run lib/main_dev.dart
 
 ```
 
+### Build APK
+
+```shell
+flutter build apk --split-per-abi
+```
+
+### Install APK
+
+```shell
+flutter install
+```
+
+## License
+
+[GPL-v3.0](./LICENSE)
 

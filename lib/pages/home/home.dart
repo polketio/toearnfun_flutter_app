@@ -44,11 +44,13 @@ class _HomeViewState extends State<HomeView>
     _animationController =
         AnimationController(vsync: this, duration: Duration(seconds: 3));
     _animationController.forward();
+    deviceConnectorAddObserver();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    deviceConnectorRemoveObserver();
     super.dispose();
   }
 
@@ -172,7 +174,6 @@ class _HomeViewState extends State<HomeView>
                               } else {
                                 connector = BluetoothDeviceConnector();
                               }
-                              connector.addObserver(this);
                               final existed =
                                   connector.autoScanAndConnect(deviceKey);
                               if (existed) {
@@ -483,5 +484,15 @@ class _HomeViewState extends State<HomeView>
     setState(() {
       connectedStatus = 'connecting...';
     });
+  }
+
+  void deviceConnectorAddObserver() {
+    BluetoothDeviceConnector().addObserver(this);
+    SimulatedDeviceConnector().addObserver(this);
+  }
+
+  void deviceConnectorRemoveObserver() {
+    BluetoothDeviceConnector().removeObserver(this);
+    SimulatedDeviceConnector().removeObserver(this);
   }
 }
