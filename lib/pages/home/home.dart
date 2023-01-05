@@ -2,6 +2,7 @@ import 'package:bruno/bruno.dart';
 import 'package:ele_progress/ele_progress.dart';
 import 'package:flukit/flukit.dart';
 import 'package:flustars/flustars.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -10,6 +11,7 @@ import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/pages/device/bind_device_selector.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
+import 'package:toearnfun_flutter_app/pages/vfe/vfe_charge.dart';
 import 'package:toearnfun_flutter_app/pages/vfe/vfe_detail.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
@@ -191,27 +193,37 @@ class _HomeViewState extends State<HomeView>
                             })),
                     Expanded(
                         flex: 1,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            SizedBox(
-                                width: 80.w,
-                                child: const Text('BATTERY',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        color: Colors.greenAccent,
-                                        fontSize: 12))),
-                            SizedBox(
-                                width: 80.w,
-                                height: 24.h,
-                                child: EProgress(
-                                    progress: battery,
-                                    colors: [HexColor('#b7e9e0')],
-                                    backgroundColor: Colors.grey,
-                                    textStyle: const TextStyle(
-                                        color: Colors.white, fontSize: 12))),
-                          ],
-                        ))
+                        child: GestureDetector(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                SizedBox(
+                                    width: 80.w,
+                                    child: const Text('BATTERY',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Colors.greenAccent,
+                                            fontSize: 12))),
+                                SizedBox(
+                                    width: 80.w,
+                                    height: 24.h,
+                                    child: EProgress(
+                                        progress: battery,
+                                        colors: [HexColor('#b7e9e0')],
+                                        backgroundColor: Colors.grey,
+                                        textStyle: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12))),
+                              ],
+                            ),
+                            onTap: () async {
+                              await showCupertinoDialog(
+                                  context: context,
+                                  builder: (_) {
+                                    return VFEChargeView(
+                                        widget.plugin, widget.keyring);
+                                  });
+                            }))
                   ],
                 ))
           ]),
