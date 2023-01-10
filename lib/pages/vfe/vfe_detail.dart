@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/pages/device/bind_device_selector.dart';
+import 'package:toearnfun_flutter_app/pages/vfe/vfe_charge.dart';
+import 'package:toearnfun_flutter_app/pages/vfe/vfe_level_up.dart';
 
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/types/vfe_brand.dart';
@@ -172,7 +174,7 @@ class _VFEDetailViewState extends State<VFEDetailView> {
                   height: 26.h,
                   width: double.infinity,
                   child: EProgress(
-                      progress: 78,
+                      progress: battery,
                       showText: true,
                       textInside: true,
                       strokeWidth: 26.h,
@@ -335,18 +337,34 @@ class _VFEDetailViewState extends State<VFEDetailView> {
             getToolbarItemView(
                 context, size, 'assets/images/icon-Levelup-on.png', 'Level up',
                 onTap: () {
-              BrnToast.show('press', context);
+                  if (vfeDetail != null) {
+                    VFELevelUpView.showDialogView(
+                        widget.plugin, widget.keyring, vfeDetail!);
+                  }
             }),
             getToolbarItemView(
                 context, size, 'assets/images/icon-Charge-on.png', 'Charge',
                 onTap: () {
-              BrnToast.show('press', context);
+              if (vfeDetail != null) {
+                VFEChargeView.showDialogView(
+                    widget.plugin, widget.keyring, vfeDetail!);
+              }
             }),
             getToolbarItemView(
                 context, size, 'assets/images/icon-Bind-on.png', bindButton,
                 onTap: () async {
               if (isBond) {
-                await unbindDevice(context);
+                BrnDialogManager.showConfirmDialog(context,
+                    title: "Unbind Device",
+                    cancel: 'Cancel',
+                    confirm: 'Confirm',
+                    message: "Do you want to unbind the device of this VFE?",
+                    onConfirm: () async {
+                  Navigator.of(context).pop();
+                  await unbindDevice(context);
+                }, onCancel: () {
+                  Navigator.of(context).pop();
+                });
               } else {
                 //bind
                 BindDeviceSelector.showDeviceTypesSelector(context, itemId);

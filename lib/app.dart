@@ -1,6 +1,7 @@
 import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_custom_dialog/flutter_custom_dialog.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -105,6 +106,7 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
 
   @override
   Widget build(BuildContext context) {
+
     // LogUtil.d('app.build');
     final routes = _getRoutes();
     // var baseTheme = ThemeData(brightness: Brightness.light);

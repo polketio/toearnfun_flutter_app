@@ -5,6 +5,7 @@ import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_custom_dialog/flutter_custom_dialog.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
@@ -58,6 +59,7 @@ class _HomeViewState extends State<HomeView>
 
   @override
   Widget build(BuildContext context) {
+    YYDialog.init(context);
     return Column(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -216,13 +218,9 @@ class _HomeViewState extends State<HomeView>
                                             fontSize: 12))),
                               ],
                             ),
-                            onTap: () async {
-                              await showCupertinoDialog(
-                                  context: context,
-                                  builder: (_) {
-                                    return VFEChargeView(
-                                        widget.plugin, widget.keyring);
-                                  });
+                            onTap: () {
+                              VFEChargeView.showDialogView(
+                                  widget.plugin, widget.keyring, userSelectedVFE);
                             }))
                   ],
                 ))

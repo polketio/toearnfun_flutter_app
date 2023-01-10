@@ -1,5 +1,3 @@
-import 'package:bruno/bruno.dart';
-import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_dialog/flutter_custom_dialog.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,18 +6,18 @@ import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/types/vfe_detail.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
-class VFEChargeView extends StatefulWidget {
-  VFEChargeView(this.plugin, this.keyring, this.vfeDetail);
+class VFELevelUpView extends StatefulWidget {
+  VFELevelUpView(this.plugin, this.keyring, this.vfeDetail);
 
   final PluginPolket plugin;
   final Keyring keyring;
   final VFEDetail vfeDetail;
 
   @override
-  State<VFEChargeView> createState() => _VFEChargeViewState();
+  State<VFELevelUpView> createState() => _VFELevelUpViewState();
 
   static showDialogView(PluginPolket plugin, Keyring keyring, VFEDetail vfe) {
-    final contentView = VFEChargeView(plugin, keyring, vfe);
+    final contentView = VFELevelUpView(plugin, keyring, vfe);
     return YYDialog().build()
       ..margin = EdgeInsets.only(left: 24.w, right: 24.w)
       ..backgroundColor = Colors.white
@@ -35,17 +33,15 @@ class VFEChargeView extends StatefulWidget {
   }
 }
 
-class _VFEChargeViewState extends State<VFEChargeView> {
+class _VFELevelUpViewState extends State<VFELevelUpView> {
   final _buttonTextColor = HexColor('#956DFD');
-  int remainingBattery = 0;
-  int restoreBattery = 0;
+  int currentLevel = 0;
   String chargeCost = '0';
 
   @override
   void initState() {
     super.initState();
-    remainingBattery = widget.vfeDetail.remainingBattery;
-    restoreBattery = widget.vfeDetail.remainingBattery;
+    currentLevel = widget.vfeDetail.level;
   }
 
   @override
@@ -66,7 +62,7 @@ class _VFEChargeViewState extends State<VFEChargeView> {
         width: double.infinity,
         padding: EdgeInsets.only(top: 21.h),
         alignment: Alignment.center,
-        child: Text('CHARGE', style: TextStyle(fontSize: 22)));
+        child: Text('LEVEL UP', style: TextStyle(fontSize: 22)));
   }
 
   Widget vfeView(BuildContext context) {
@@ -83,33 +79,12 @@ class _VFEChargeViewState extends State<VFEChargeView> {
       child: Column(
         children: [
           // current battery, slider bar, cost
-          Text('Battery: $restoreBattery%', style: TextStyle(fontSize: 18)),
+          Text('Lv $currentLevel', style: TextStyle(fontSize: 18)),
           Container(
-              padding: EdgeInsets.only(left: 8.w, right: 8.w),
-              height: 60.h,
-              child: Slider(
-                min: 0.0,
-                max: 100.0,
-                value: restoreBattery.toDouble(),
-                onChanged: (v) {
-                  final value = v.round();
-                  if (value >= remainingBattery) {
-                    setState(() {
-                      restoreBattery = value;
-                    });
-                  }
-                },
-                onChangeEnd: (v) {
-                  int chargeAmount = v.round() - remainingBattery;
-                  chargeAmount = chargeAmount > 0 ? chargeAmount : 0;
-                  LogUtil.d('chargeAmount = $chargeAmount');
-                  if (chargeAmount > 0) {
-                    setState(() {
-                      chargeCost = chargeAmount.toString();
-                    });
-                  }
-                },
-              )),
+              padding: EdgeInsets.fromLTRB(32.w, 16.h, 0, 8.h),
+              alignment: Alignment.centerLeft,
+              child: Text('Level up to Lv ${currentLevel + 1}',
+                  style: TextStyle(fontSize: 14))),
           Container(
               padding: EdgeInsets.only(left: 24.w, right: 24.w),
               height: 44.h,

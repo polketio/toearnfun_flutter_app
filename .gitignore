@@ -48,3 +48,4 @@ app.*.map.json
 android/LsSkipBleLib/build
 android/LsFileTransLib/build
 android/LsDfuLib/build
+priguardMapping.txt
