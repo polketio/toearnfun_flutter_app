@@ -1,13 +1,16 @@
 import 'package:bruno/bruno.dart';
 import 'package:ele_progress/ele_progress.dart';
+import 'package:flustars/flustars.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_custom_dialog/flutter_custom_dialog.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/pages/device/bind_device_selector.dart';
+import 'package:toearnfun_flutter_app/pages/vfe/vfe_add_point.dart';
 import 'package:toearnfun_flutter_app/pages/vfe/vfe_charge.dart';
 import 'package:toearnfun_flutter_app/pages/vfe/vfe_level_up.dart';
 
@@ -31,8 +34,10 @@ class VFEDetailView extends StatefulWidget {
 class _VFEDetailViewState extends State<VFEDetailView> {
   final _backgroundColor = HexColor('#956DFD');
   final _outlineBtnColor = HexColor('#a1d3c9');
+  final _baseBtnBgColor = Colors.black45;
 
   VFEDetail? vfeDetail;
+  bool showBaseAbility = false;
 
   @override
   void initState() {
@@ -47,23 +52,22 @@ class _VFEDetailViewState extends State<VFEDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    YYDialog.init(context);
     return Scaffold(
         backgroundColor: _backgroundColor,
         appBar: getAppBarView(context),
         body: SafeArea(
             child: Container(
                 alignment: Alignment.center,
-                child: Observer(builder: (_) {
-                  return Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        getTitleView(context),
-                        getLevelView(context),
-                        getVFEImageView(context),
-                        Expanded(child: getVFEAttributesView(context), flex: 1),
-                        getBottomToolBarView(context),
-                      ]);
-                }))));
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      getTitleView(context),
+                      getLevelView(context),
+                      getVFEImageView(context),
+                      Expanded(child: getVFEAttributesView(context), flex: 1),
+                      getBottomToolBarView(context),
+                    ]))));
   }
 
   PreferredSizeWidget getAppBarView(BuildContext context) {
@@ -203,6 +207,8 @@ class _VFEDetailViewState extends State<VFEDetailView> {
     final detail = vfeDetail ?? VFEDetail();
     final base = detail.baseAbility;
     final current = detail.currentAbility;
+
+    Color stripeColor;
     int max = current.efficiency;
     if (current.skill > max) {
       max = current.skill;
@@ -213,35 +219,76 @@ class _VFEDetailViewState extends State<VFEDetailView> {
     if (current.durable > max) {
       max = current.durable;
     }
+
+    int efficiency, skill, luck, durable;
+    if (showBaseAbility) {
+      efficiency = base.efficiency;
+      skill = base.skill;
+      luck = base.luck;
+      durable = base.durable;
+      stripeColor = _baseBtnBgColor;
+    } else {
+      efficiency = current.efficiency;
+      skill = current.skill;
+      luck = current.luck;
+      durable = current.durable;
+      stripeColor = _backgroundColor;
+    }
+
     return Container(
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      padding: EdgeInsets.all(16.h),
-      child: Column(
-        children: [
-          getAttributesTitleView(context),
-          Padding(
-              padding: EdgeInsets.only(top: 16.h),
-              child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    getAttributesItemView('assets/images/icon-Efficiency.png',
-                        'Efficiency', detail.currentAbility.efficiency, max),
-                    getAttributesItemView('assets/images/icon-Speed-ab.png',
-                        'Skill', detail.currentAbility.skill, max),
-                    getAttributesItemView('assets/images/icon-Luck.png', 'Luck',
-                        detail.currentAbility.luck, max),
-                    getAttributesItemView('assets/images/icon-Resilience.png',
-                        'Durable', detail.currentAbility.durable, max),
-                  ]))
-        ],
-      ),
-    );
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        padding: EdgeInsets.all(16.h),
+        child: Column(
+          children: [
+            getAttributesTitleView(context),
+            Padding(
+                padding: EdgeInsets.only(top: 16.h),
+                child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getAttributesItemView('assets/images/icon-Efficiency.png',
+                          stripeColor, 'Efficiency', efficiency, max),
+                      getAttributesItemView('assets/images/icon-Speed-ab.png',
+                          stripeColor, 'Skill', skill, max),
+                      getAttributesItemView('assets/images/icon-Luck.png',
+                          stripeColor, 'Luck', luck, max),
+                      getAttributesItemView('assets/images/icon-Resilience.png',
+                          stripeColor, 'Durable', durable, max),
+                    ]))
+          ],
+        ));
   }
 
   Widget getAttributesTitleView(BuildContext context) {
+    Widget baseBtn;
+    if (showBaseAbility) {
+      baseBtn = BrnSmallMainButton(
+        radius: 18,
+        title: 'Base',
+        bgColor: _baseBtnBgColor,
+        onTap: () {
+          setState(() {
+            showBaseAbility = false;
+          });
+        },
+      );
+    } else {
+      baseBtn = BrnSmallOutlineButton(
+        radius: 18,
+        title: 'Base',
+        lineColor: _outlineBtnColor,
+        textColor: _outlineBtnColor,
+        onTap: () {
+          setState(() {
+            showBaseAbility = true;
+          });
+        },
+      );
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       mainAxisSize: MainAxisSize.max,
@@ -252,29 +299,30 @@ class _VFEDetailViewState extends State<VFEDetailView> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             flex: 1),
-        BrnSmallOutlineButton(
-          radius: 20,
-          title: 'Base',
-          lineColor: _outlineBtnColor,
-          textColor: _outlineBtnColor,
-          onTap: () {
-            BrnToast.show('Base', context);
-          },
-        ),
+        SizedBox(height: 36.h, child: baseBtn),
         Padding(padding: EdgeInsets.only(left: 8.w)),
-        BrnSmallMainButton(
-          radius: 20,
-          bgColor: _outlineBtnColor,
-          title: '+ Point',
-          onTap: () {
-            BrnToast.show('Point', context);
-          },
-        )
+        SizedBox(
+            height: 36.h,
+            child: BrnSmallMainButton(
+              radius: 18,
+              bgColor: _outlineBtnColor,
+              title: '+ Point',
+              onTap: () async {
+                final updated = await Navigator.of(context)
+                    .pushNamed(VFEAddPointView.route, arguments: {
+                  'vfeDetail': vfeDetail,
+                });
+                if (updated != null) {
+                  setState(() {});
+                }
+              },
+            ))
       ],
     );
   }
 
-  Widget getAttributesItemView(String icon, String text, int amount, int max) {
+  Widget getAttributesItemView(
+      String icon, Color color, String text, int amount, int max) {
     double progress = 0;
     if (max > 0) {
       progress = amount * 100 / max;
@@ -305,7 +353,7 @@ class _VFEDetailViewState extends State<VFEDetailView> {
                       progress: progress.toInt(),
                       showText: false,
                       strokeWidth: 10.h,
-                      colors: [_backgroundColor],
+                      colors: [color],
                       backgroundColor: HexColor('#f0f0f0')),
                   flex: 1),
               Padding(padding: EdgeInsets.only(left: 12.w)),
@@ -337,17 +385,19 @@ class _VFEDetailViewState extends State<VFEDetailView> {
             getToolbarItemView(
                 context, size, 'assets/images/icon-Levelup-on.png', 'Level up',
                 onTap: () {
-                  if (vfeDetail != null) {
-                    VFELevelUpView.showDialogView(
-                        widget.plugin, widget.keyring, vfeDetail!);
-                  }
+              if (vfeDetail != null) {
+                VFELevelUpView.showDialogView(
+                    widget.plugin, widget.keyring, vfeDetail!,
+                    doConfirm: doConfirmLevelUp);
+              }
             }),
             getToolbarItemView(
                 context, size, 'assets/images/icon-Charge-on.png', 'Charge',
                 onTap: () {
               if (vfeDetail != null) {
                 VFEChargeView.showDialogView(
-                    widget.plugin, widget.keyring, vfeDetail!);
+                    widget.plugin, widget.keyring, vfeDetail!,
+                    doConfirm: doConfirmCharge);
               }
             }),
             getToolbarItemView(
@@ -427,7 +477,7 @@ class _VFEDetailViewState extends State<VFEDetailView> {
         setState(() {
           vfeDetail!.deviceKey = '';
           widget.plugin.store.vfe
-              .updateUserCurrent(widget.keyring.current.pubKey, vfeDetail!);
+              .updateUserVFE(widget.keyring.current.pubKey, vfeDetail!);
         });
       } else {
         BrnToast.show('Unbind device failed', context);
@@ -436,5 +486,77 @@ class _VFEDetailViewState extends State<VFEDetailView> {
 
     if (!mounted) return;
     BrnLoadingDialog.dismiss(context);
+  }
+
+  doConfirmLevelUp() async {
+    if (vfeDetail == null) {
+      BrnToast.show('VFE is not existed', context);
+      return;
+    }
+
+    BrnLoadingDialog.show(context,
+        content: 'Level up...', barrierDismissible: false);
+
+    final password = await widget.plugin.api.account.getPassword(
+      context,
+      widget.keyring.current,
+    );
+    final result = await widget.plugin.api.vfe
+        .levelUp(vfeDetail!.brandId!, vfeDetail!.itemId!, password);
+    final vfeUpdated = await widget.plugin.api.vfe.getVFEDetailByID(vfeDetail!.brandId!, vfeDetail!.itemId!);
+
+    if (!mounted) return;
+    BrnLoadingDialog.dismiss(context);
+
+    if (!result.success) {
+      // update  state
+      BrnToast.show(result.error, context);
+    } else {
+      BrnToast.show('Level up successfully', context);
+
+      if(vfeUpdated != null) {
+        updateVFEInfo(vfeUpdated);
+      }
+    }
+  }
+
+  doConfirmCharge(int chargeNum) async {
+    if (vfeDetail == null) {
+      BrnToast.show('VFE is not existed', context);
+      return;
+    }
+
+    BrnLoadingDialog.show(context,
+        content: 'Charging...', barrierDismissible: false);
+
+    final password = await widget.plugin.api.account.getPassword(
+      context,
+      widget.keyring.current,
+    );
+    final result = await widget.plugin.api.vfe.restorePower(
+        vfeDetail!.brandId!, vfeDetail!.itemId!, chargeNum, password);
+    final vfeUpdated = await widget.plugin.api.vfe.getVFEDetailByID(vfeDetail!.brandId!, vfeDetail!.itemId!);
+
+    if (!mounted) return;
+    BrnLoadingDialog.dismiss(context);
+
+    if (!result.success) {
+      // update  state
+      BrnToast.show(result.error, context);
+    } else {
+      BrnToast.show('Power Charged', context);
+      if(vfeUpdated != null) {
+        updateVFEInfo(vfeUpdated);
+      }
+    }
+  }
+
+  updateVFEInfo(VFEDetail vfe) {
+    setState(() {
+      vfe.owner = vfeDetail!.owner;
+      vfeDetail = vfe;
+      widget.plugin.store.vfe
+          .updateUserVFE(widget.keyring.current.pubKey, vfe);
+    });
   }
 }

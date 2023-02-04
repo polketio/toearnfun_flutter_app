@@ -147,6 +147,10 @@ public class BluetoothFlutterPlugin implements FlutterPlugin {
                 } else if (method.equals("unregisterCustomDataRxCallback")) {
                     unregisterCustomDataRxCallback();
                     mResult.success(true);
+                } else if (method.equals("syncDeviceTime")) {
+                    mSettingCallback.setTag("同步时间");
+                    api.syncDeviceTime(mBleDevice, mSettingCallback);
+                    mResult.success(true);
                 } else if (method.equals("setSkipMode")) {
                     mSettingCallback.setTag("设置跳绳模式");
                     api.setSkipMode(mBleDevice, mSettingCallback);

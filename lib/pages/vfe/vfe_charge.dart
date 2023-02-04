@@ -4,22 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_custom_dialog/flutter_custom_dialog.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
+import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/types/vfe_detail.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
 class VFEChargeView extends StatefulWidget {
-  VFEChargeView(this.plugin, this.keyring, this.vfeDetail);
+  VFEChargeView(this.plugin, this.keyring, this.vfeDetail, this.doConfirm);
 
   final PluginPolket plugin;
   final Keyring keyring;
   final VFEDetail vfeDetail;
+  final Function(int chargeNum) doConfirm;
 
   @override
   State<VFEChargeView> createState() => _VFEChargeViewState();
 
-  static showDialogView(PluginPolket plugin, Keyring keyring, VFEDetail vfe) {
-    final contentView = VFEChargeView(plugin, keyring, vfe);
+  static showDialogView(PluginPolket plugin, Keyring keyring, VFEDetail vfe, {required Function(int chargeNum) doConfirm}) {
+    final contentView = VFEChargeView(plugin, keyring, vfe, doConfirm);
     return YYDialog().build()
       ..margin = EdgeInsets.only(left: 24.w, right: 24.w)
       ..backgroundColor = Colors.white
@@ -39,6 +41,7 @@ class _VFEChargeViewState extends State<VFEChargeView> {
   final _buttonTextColor = HexColor('#956DFD');
   int remainingBattery = 0;
   int restoreBattery = 0;
+  int chargeAmount = 0;
   String chargeCost = '0';
 
   @override
@@ -78,6 +81,7 @@ class _VFEChargeViewState extends State<VFEChargeView> {
   }
 
   Widget chargeBarView(BuildContext context) {
+    final decimals = widget.plugin.store.vfe.incentiveToken?.decimals ?? 12;
     return Container(
       width: double.infinity,
       child: Column(
@@ -99,15 +103,20 @@ class _VFEChargeViewState extends State<VFEChargeView> {
                     });
                   }
                 },
-                onChangeEnd: (v) {
-                  int chargeAmount = v.round() - remainingBattery;
+                onChangeEnd: (v) async {
+                  final brandId = widget.vfeDetail.brandId ?? 0;
+                  final itemId = widget.vfeDetail.itemId ?? 0;
+
+                  chargeAmount = v.round() - remainingBattery;
                   chargeAmount = chargeAmount > 0 ? chargeAmount : 0;
                   LogUtil.d('chargeAmount = $chargeAmount');
-                  if (chargeAmount > 0) {
-                    setState(() {
-                      chargeCost = chargeAmount.toString();
-                    });
-                  }
+                  String costs = await widget.plugin.api.vfe
+                      .getChargingCosts(brandId, itemId, chargeAmount);
+                  costs = Fmt.balance(costs, decimals);
+                  // LogUtil.d('chargeCost = $chargeCost');
+                  setState(() {
+                    chargeCost = costs;
+                  });
                 },
               )),
           Container(
@@ -151,6 +160,7 @@ class _VFEChargeViewState extends State<VFEChargeView> {
                 TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
+                      widget.doConfirm(chargeAmount);
                     },
                     child: Text('Confirm',
                         style:

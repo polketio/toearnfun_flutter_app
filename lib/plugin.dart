@@ -15,6 +15,7 @@ import 'package:toearnfun_flutter_app/pages/profile/profile.dart';
 import 'package:toearnfun_flutter_app/pages/root.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_detail.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
+import 'package:toearnfun_flutter_app/pages/vfe/vfe_add_point.dart';
 import 'package:toearnfun_flutter_app/pages/vfe/vfe_detail.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_one.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_three.dart';
@@ -101,6 +102,7 @@ class PluginPolket extends PolkawalletPlugin {
       BindDeviceComplete.route: (_) => BindDeviceComplete(this, keyring),
       VFEDetailView.route: (_) => VFEDetailView(this, keyring),
       MnemonicRestoreWallet.route: (_) => MnemonicRestoreWallet(this, keyring),
+      VFEAddPointView.route: (_) => VFEAddPointView(this, keyring),
     };
   }
 
@@ -126,6 +128,11 @@ class PluginPolket extends PolkawalletPlugin {
         await store.vfe.addUserVFEList(user, details);
       }
     }
+  }
+
+  Future<void> loadIncentiveToken() async {
+    final token = await _api.vfe.getIncentiveToken();
+    store.vfe.incentiveToken = token;
   }
 
   Future<void> _subscribeTokenBalances(String address) async {
@@ -174,6 +181,8 @@ class PluginPolket extends PolkawalletPlugin {
       _subscribeLastEnergyRecovery();
       // subscribe new block number
       _subscribeBlockNumber();
+      // load incentive token
+      loadIncentiveToken();
       // load user vfe
       loadUserVFEs(keyring.current.pubKey!);
 

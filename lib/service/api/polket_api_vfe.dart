@@ -1,5 +1,6 @@
 import 'package:flustars/flustars.dart';
 import 'package:polkawallet_sdk/api/types/txInfoData.dart';
+import 'package:polkawallet_sdk/plugin/store/balances.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api.dart';
@@ -70,6 +71,17 @@ class PolketApiVFE {
         [];
     final list = res.map((e) => VFEDetail.fromJson(e)).toList();
     return list;
+  }
+
+  Future<VFEDetail?> getVFEDetailByID(
+      int brandId, int itemId) async {
+    final res = await plugin.sdk.api.service.webView?.evalJavascript(
+        'api.query.$module.vfeDetails($brandId, $itemId)');
+    if (res != null) {
+      return VFEDetail.fromJson(res);
+    } else {
+      return null;
+    }
   }
 
   Future<List<Producer>> getProducerAll() async {
@@ -149,7 +161,56 @@ class PolketApiVFE {
     );
   }
 
-  int get reportValidityPeriod  {
+  Future<String> getChargingCosts(
+      int brandId, int itemId, int chargeNum) async {
+    final cost = await plugin.sdk.api.service.webView?.evalJavascript(
+        'vfe.getChargingCosts(api, $brandId, $itemId, $chargeNum)');
+    return cost;
+  }
+
+  Future<String> getLevelUpCosts(
+      String who, int brandId, int itemId) async {
+    final cost = await plugin.sdk.api.service.webView
+        ?.evalJavascript('vfe.getLevelUpCosts(api, "$who", $brandId, $itemId)');
+    return cost;
+  }
+
+  Future<TokenBalanceData?> getIncentiveToken() async {
+    final res = await plugin.sdk.api.service.webView
+        ?.evalJavascript('vfe.getIncentiveToken(api)');
+    if (res != null) {
+      final token = TokenBalanceData(
+        id: res['id'].toString(),
+        name: res['name'],
+        fullName: res['name'],
+        symbol: res['symbol'],
+        decimals: int.parse(res['decimals']),
+      );
+      return token;
+    } else {
+      return null;
+    }
+  }
+
+  Future<DispatchResult> restorePower(int brandId, int itemId, int chargeNum, String? password) async {
+    final params = [brandId, itemId, chargeNum];
+    return PolketApi.call(
+        keyring, plugin.sdk, module, 'restorePower', params, password);
+  }
+
+  Future<DispatchResult> levelUp(int brandId, int itemId, String? password) async {
+    final params = [brandId, itemId];
+    return PolketApi.call(
+        keyring, plugin.sdk, module, 'levelUp', params, password);
+  }
+
+  Future<DispatchResult> increaseAbility(int brandId, int itemId, VFEAbility ability, String? password) async {
+    final params = [brandId, itemId, ability];
+    return PolketApi.call(
+        keyring, plugin.sdk, module, 'increaseAbility', params, password);
+  }
+
+  int get reportValidityPeriod {
     if (plugin.networkConst.isNotEmpty) {
       return int.parse(plugin.networkConst[module]['reportValidityPeriod']);
     } else {
@@ -157,7 +218,7 @@ class PolketApiVFE {
     }
   }
 
-  int get energyRecoveryDuration  {
+  int get energyRecoveryDuration {
     if (plugin.networkConst.isNotEmpty) {
       return int.parse(plugin.networkConst[module]['energyRecoveryDuration']);
     } else {
@@ -165,7 +226,7 @@ class PolketApiVFE {
     }
   }
 
-  int get dailyEarnedResetDuration  {
+  int get dailyEarnedResetDuration {
     if (plugin.networkConst.isNotEmpty) {
       return int.parse(plugin.networkConst[module]['dailyEarnedResetDuration']);
     } else {

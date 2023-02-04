@@ -2,22 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_custom_dialog/flutter_custom_dialog.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
+import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/types/vfe_detail.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
 class VFELevelUpView extends StatefulWidget {
-  VFELevelUpView(this.plugin, this.keyring, this.vfeDetail);
+  VFELevelUpView(this.plugin, this.keyring, this.vfeDetail, this.doConfirm);
 
   final PluginPolket plugin;
   final Keyring keyring;
   final VFEDetail vfeDetail;
+  final Function() doConfirm;
 
   @override
   State<VFELevelUpView> createState() => _VFELevelUpViewState();
 
-  static showDialogView(PluginPolket plugin, Keyring keyring, VFEDetail vfe) {
-    final contentView = VFELevelUpView(plugin, keyring, vfe);
+  static showDialogView(PluginPolket plugin, Keyring keyring, VFEDetail vfe, {required Function() doConfirm}) {
+    final contentView = VFELevelUpView(plugin, keyring, vfe, doConfirm);
     return YYDialog().build()
       ..margin = EdgeInsets.only(left: 24.w, right: 24.w)
       ..backgroundColor = Colors.white
@@ -42,6 +44,7 @@ class _VFELevelUpViewState extends State<VFELevelUpView> {
   void initState() {
     super.initState();
     currentLevel = widget.vfeDetail.level;
+    calculateLevelUpCosts();
   }
 
   @override
@@ -126,11 +129,27 @@ class _VFELevelUpViewState extends State<VFELevelUpView> {
                 TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
+                      widget.doConfirm();
                     },
                     child: Text('Confirm',
                         style:
                             TextStyle(fontSize: 18, color: _buttonTextColor))),
               ],
             )));
+  }
+
+  Future<void> calculateLevelUpCosts() async {
+    final brandId = widget.vfeDetail.brandId ?? 0;
+    final itemId = widget.vfeDetail.itemId ?? 0;
+    final owner = widget.vfeDetail.owner ?? '';
+    final decimals = widget.plugin.store.vfe.incentiveToken?.decimals ?? 12;
+
+    String costs =
+        await widget.plugin.api.vfe.getLevelUpCosts(owner, brandId, itemId);
+    costs = Fmt.balance(costs, decimals);
+    // LogUtil.d('chargeCost = $chargeCost');
+    setState(() {
+      chargeCost = costs;
+    });
   }
 }

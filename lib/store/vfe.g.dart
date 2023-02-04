@@ -97,6 +97,15 @@ mixin _$VFEStore on _VFEStore, Store {
         .run(() => super.updateUserCurrent(pubKey, vfe));
   }
 
+  late final _$updateUserVFEAsyncAction =
+      AsyncAction('_VFEStore.updateUserVFE', context: context);
+
+  @override
+  Future<void> updateUserVFE(String? pubKey, VFEDetail value) {
+    return _$updateUserVFEAsyncAction
+        .run(() => super.updateUserVFE(pubKey, value));
+  }
+
   late final _$addUserVFEListAsyncAction =
       AsyncAction('_VFEStore.addUserVFEList', context: context);
 

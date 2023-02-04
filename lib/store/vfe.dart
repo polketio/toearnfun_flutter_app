@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:get_storage/get_storage.dart';
 import 'package:mobx/mobx.dart';
+import 'package:polkawallet_sdk/plugin/store/balances.dart';
 import 'package:toearnfun_flutter_app/types/user.dart';
 import 'package:toearnfun_flutter_app/types/vfe_brand.dart';
 import 'package:toearnfun_flutter_app/types/vfe_detail.dart';
@@ -36,6 +37,8 @@ abstract class _VFEStore with Store {
   @observable
   int lastEnergyRecovery = 0;
 
+  TokenBalanceData? incentiveToken;
+
   @action
   void clearUserVFE() {
     userVFEList.clear();
@@ -57,6 +60,16 @@ abstract class _VFEStore with Store {
     current = vfe;
     final key = '${userCurrentVFEKey}_$pubKey';
     await storage.write(key, vfe.toJson());
+  }
+
+  @action
+  Future<void> updateUserVFE(String? pubKey, VFEDetail value) async {
+
+    for (var vfe in userVFEList) {
+      if (vfe.brandId == value.brandId && vfe.itemId == value.itemId) {
+        vfe = value;
+      }
+    }
   }
 
   @action
