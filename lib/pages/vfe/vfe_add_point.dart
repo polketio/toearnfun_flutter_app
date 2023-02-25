@@ -222,8 +222,8 @@ class _VFEAddPointViewState extends State<VFEAddPointView> {
             backgroundColor: MaterialStateProperty.all(btnColor),
             alignment: Alignment.center,
           ),
-          child: Text('Confirm',
-              style: const TextStyle(fontSize: 24, color: Colors.white)),
+          child: const Text('Confirm',
+              style: TextStyle(fontSize: 24, color: Colors.white)),
         ));
   }
 

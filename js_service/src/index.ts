@@ -12,6 +12,8 @@ import parachain from "./service/parachain";
 import assets from "./service/assets";
 import { genLinks } from "./utils/config/config";
 import vfe from "./service/vfe";
+import buyback from "./service/buyback";
+import vfeOrder from "./service/vfeOrder";
 import { polketOptions } from "./service/types";
 
 // console.log will send message to MsgChannel to App
@@ -88,6 +90,8 @@ const settings = {
 (<any>window).parachain = parachain;
 (<any>window).assets = assets;
 (<any>window).vfe = vfe;
+(<any>window).buyback = buyback;
+(<any>window).vfeOrder = vfeOrder;
 
 // walletConnect supporting is not ready.
 // (<any>window).walletConnect = wc;

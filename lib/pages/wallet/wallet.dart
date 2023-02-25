@@ -15,6 +15,8 @@ import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
 import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/common/consts.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/account/account_manage.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/buyback/buyback_plans.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/welcome.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
@@ -56,7 +58,7 @@ class _WalletViewState extends State<WalletView> {
       actions: <Widget>[
         IconButton(
             onPressed: () {
-              // Navigator.of(context).pushNamed(NewWalletWelcomeView.route);
+              Navigator.of(context).pushNamed(AccountManageView.route);
             },
             icon: Image.asset('assets/images/icon-more.png'),
             iconSize: 36.w),
@@ -82,8 +84,8 @@ class _WalletViewState extends State<WalletView> {
             ),
             SliverPersistentHeader(
               delegate: SliverHeaderDelegate(
-                maxHeight: 180.h,
-                minHeight: 134.h,
+                maxHeight: 190.h,
+                minHeight: 154.h,
                 child: mainAssetView(context),
               ),
             ),
@@ -91,30 +93,7 @@ class _WalletViewState extends State<WalletView> {
               pinned: true,
               floating: true,
               delegate: SliverHeaderDelegate(
-                  maxHeight: 60.h,
-                  minHeight: 60.h,
-                  child: Stack(fit: StackFit.expand, children: [
-                    Container(
-                        decoration: new BoxDecoration(
-                      color: _backgroundColor,
-                    )),
-                    Container(
-                        decoration: new BoxDecoration(
-                          color: Colors.white,
-                          borderRadius:
-                              BorderRadius.vertical(top: Radius.circular(20)),
-                        ),
-                        child: ListTile(
-                            onTap: null,
-                            title: const Text('Assets'),
-                            trailing: TextButton.icon(
-                              onPressed: null,
-                              icon: const Icon(Icons.history),
-                              label: const Text('History',
-                                  style: TextStyle(
-                                      color: Colors.black, fontSize: 16)),
-                            ))),
-                  ])),
+                  maxHeight: 60.h, minHeight: 60.h, child: assetsHeaderView()),
             ),
             assetsListView(),
           ],
@@ -124,7 +103,7 @@ class _WalletViewState extends State<WalletView> {
   // show user main asset view
   Widget mainAssetView(BuildContext context) {
     return Container(
-        decoration: new BoxDecoration(
+        decoration: BoxDecoration(
           color: _backgroundColor,
         ),
         child: Column(
@@ -133,22 +112,22 @@ class _WalletViewState extends State<WalletView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             //[Chain selector, Total Native token, address]
-            Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(17.w)),
-                child: BrnIconButton(
-                  name: 'Polket',
-                  iconWidget: Image.asset('assets/images/icon-DownArrow.png'),
-                  direction: Direction.right,
-                  widgetWidth: 110.w,
-                  widgetHeight: 34.h,
-                  onTap: () {},
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: HexColor('#956dfd'),
-                      fontWeight: FontWeight.bold),
-                )),
+            // Card(
+            //     elevation: 0,
+            //     shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(17.w)),
+            //     child: BrnIconButton(
+            //       name: 'Polket',
+            //       iconWidget: Image.asset('assets/images/icon-DownArrow.png'),
+            //       direction: Direction.right,
+            //       widgetWidth: 110.w,
+            //       widgetHeight: 34.h,
+            //       onTap: () {},
+            //       style: TextStyle(
+            //           fontSize: 16,
+            //           color: HexColor('#956dfd'),
+            //           fontWeight: FontWeight.bold),
+            //     )),
             SizedBox(
                 height: 34.h,
                 child: Observer(builder: (_) {
@@ -189,8 +168,48 @@ class _WalletViewState extends State<WalletView> {
                         BrnToast.show('Copied', context);
                       },
                     ))),
+            buttonsView(),
           ],
         ));
+  }
+
+  Widget assetsHeaderView() {
+    return Stack(fit: StackFit.expand, children: [
+      Container(
+          decoration: BoxDecoration(
+        color: _backgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: _backgroundColor,
+            blurRadius: 0.0,
+            spreadRadius: 0.0,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      )),
+      Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white,
+                blurRadius: 0.0,
+                spreadRadius: 0.0,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ListTile(
+              onTap: null,
+              title: const Text('Assets'),
+              trailing: TextButton.icon(
+                onPressed: null,
+                icon: const Icon(Icons.history),
+                label: const Text('History',
+                    style: TextStyle(color: Colors.black, fontSize: 16)),
+              ))),
+    ]);
   }
 
   // show currencies info
@@ -225,7 +244,8 @@ class _WalletViewState extends State<WalletView> {
                     // leading: Image.asset('assets/images/icon-PNT.png'),
                     title: Text('${d.symbol}', style: TextStyle(fontSize: 18)),
                     subtitle: Text('${d.name}', style: TextStyle(fontSize: 12)),
-                    trailing: Text('${Fmt.balance(d.amount, d.decimals ?? nativeDecimals)}',
+                    trailing: Text(
+                        '${Fmt.balance(d.amount, d.decimals ?? nativeDecimals)}',
                         style: TextStyle(fontSize: 18)),
                     onTap: () => print(index)));
           },
@@ -233,6 +253,39 @@ class _WalletViewState extends State<WalletView> {
         ),
       );
     });
+  }
+
+  Widget buttonsView() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        BrnIconButton(
+          name: 'Receive',
+          direction: Direction.bottom,
+          iconWidget: Icon(
+            Icons.call_received,
+            color: Colors.white,
+          ),
+          style: TextStyle(color: Colors.white),
+        ),
+        BrnIconButton(
+          name: 'Transfer',
+          direction: Direction.bottom,
+          iconWidget: Icon(Icons.call_made, color: Colors.white),
+          style: TextStyle(color: Colors.white),
+        ),
+        BrnIconButton(
+          name: 'Trade',
+          direction: Direction.bottom,
+          iconWidget: Icon(Icons.repeat, color: Colors.white),
+          style: TextStyle(color: Colors.white),
+          onTap: () {
+            Navigator.of(context).pushNamed(BuybackPlansView.route);
+          },
+        ),
+      ],
+    );
   }
 
   void showCreateWalletDialog() {
@@ -279,7 +332,8 @@ class _WalletViewState extends State<WalletView> {
           isFromCreatePage: true,
         );
         final pubKey = json['pubKey'] ?? '';
-        await widget.plugin.store.account.saveUserWalletPassword(pubKey, password);
+        await widget.plugin.store.account
+            .saveUserWalletPassword(pubKey, password);
         widget.plugin.store.account.setAccountCreated();
 
         setState(() {

@@ -3,16 +3,22 @@ import 'package:ele_progress/ele_progress.dart';
 import 'package:flustars/flustars.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_custom_dialog/flutter_custom_dialog.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:polkawallet_sdk/plugin/store/balances.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
+import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/pages/device/bind_device_selector.dart';
 import 'package:toearnfun_flutter_app/pages/vfe/vfe_add_point.dart';
 import 'package:toearnfun_flutter_app/pages/vfe/vfe_charge.dart';
+import 'package:toearnfun_flutter_app/pages/vfe/vfe_grid_item.dart';
 import 'package:toearnfun_flutter_app/pages/vfe/vfe_level_up.dart';
+import 'package:toearnfun_flutter_app/pages/vfe/vfe_sell.dart';
+import 'package:toearnfun_flutter_app/pages/vfe/vfe_transfer.dart';
 
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/types/vfe_brand.dart';
@@ -37,6 +43,8 @@ class _VFEDetailViewState extends State<VFEDetailView> {
   final _baseBtnBgColor = Colors.black45;
 
   VFEDetail? vfeDetail;
+  TokenBalanceData? marketPrice;
+  int? orderId;
   bool showBaseAbility = false;
 
   @override
@@ -46,6 +54,8 @@ class _VFEDetailViewState extends State<VFEDetailView> {
       final data = ModalRoute.of(context)?.settings.arguments as Map;
       setState(() {
         vfeDetail = data['vfeDetail'];
+        marketPrice = data['marketPrice'];
+        orderId = data['orderId'];
       });
     });
   }
@@ -56,6 +66,7 @@ class _VFEDetailViewState extends State<VFEDetailView> {
     return Scaffold(
         backgroundColor: _backgroundColor,
         appBar: getAppBarView(context),
+        resizeToAvoidBottomInset: false,
         body: SafeArea(
             child: Container(
                 alignment: Alignment.center,
@@ -236,9 +247,10 @@ class _VFEDetailViewState extends State<VFEDetailView> {
     }
 
     return Container(
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
         padding: EdgeInsets.all(16.h),
         child: Column(
           children: [
@@ -263,6 +275,7 @@ class _VFEDetailViewState extends State<VFEDetailView> {
   }
 
   Widget getAttributesTitleView(BuildContext context) {
+    List<Widget> extWidgets = [];
     Widget baseBtn;
     if (showBaseAbility) {
       baseBtn = BrnSmallMainButton(
@@ -289,6 +302,28 @@ class _VFEDetailViewState extends State<VFEDetailView> {
       );
     }
 
+    // view is not use for market
+    if (marketPrice == null) {
+      final addPointBtn = SizedBox(
+          height: 36.h,
+          child: BrnSmallMainButton(
+            radius: 18,
+            bgColor: _outlineBtnColor,
+            title: '+ Point',
+            onTap: () async {
+              final updated = await Navigator.of(context)
+                  .pushNamed(VFEAddPointView.route, arguments: {
+                'vfeDetail': vfeDetail,
+              });
+              if (updated != null) {
+                setState(() {});
+              }
+            },
+          ));
+      extWidgets.add(Padding(padding: EdgeInsets.only(left: 8.w)));
+      extWidgets.add(addPointBtn);
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       mainAxisSize: MainAxisSize.max,
@@ -300,23 +335,7 @@ class _VFEDetailViewState extends State<VFEDetailView> {
             ),
             flex: 1),
         SizedBox(height: 36.h, child: baseBtn),
-        Padding(padding: EdgeInsets.only(left: 8.w)),
-        SizedBox(
-            height: 36.h,
-            child: BrnSmallMainButton(
-              radius: 18,
-              bgColor: _outlineBtnColor,
-              title: '+ Point',
-              onTap: () async {
-                final updated = await Navigator.of(context)
-                    .pushNamed(VFEAddPointView.route, arguments: {
-                  'vfeDetail': vfeDetail,
-                });
-                if (updated != null) {
-                  setState(() {});
-                }
-              },
-            ))
+        ...extWidgets,
       ],
     );
   }
@@ -368,12 +387,30 @@ class _VFEDetailViewState extends State<VFEDetailView> {
   }
 
   Widget getBottomToolBarView(BuildContext context) {
+    if (marketPrice == null) {
+      return userToolbarView();
+    } else {
+      return marketToolbarView(marketPrice!);
+    }
+  }
+
+  Widget userToolbarView() {
     final isBond = (vfeDetail?.deviceKey ?? '').isEmpty ? false : true;
     final brandId = vfeDetail?.brandId ?? 0;
     final itemId = vfeDetail?.itemId ?? 0;
     String bindButton = isBond ? 'Unbind' : 'Bind';
     return Container(
-      color: Colors.white,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white,
+            blurRadius: 0.0,
+            spreadRadius: 0.0,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 30.h),
       alignment: Alignment.bottomCenter,
       child: LayoutBuilder(builder: (context, constraints) {
@@ -423,12 +460,17 @@ class _VFEDetailViewState extends State<VFEDetailView> {
             getToolbarItemView(
                 context, size, 'assets/images/icon-Sell-on.png', 'Sell',
                 onTap: () {
-              BrnToast.show('press', context);
+              Navigator.of(context).pushNamed(VFESellView.route, arguments: {
+                'vfeDetail': vfeDetail,
+              });
             }),
             getToolbarItemView(
                 context, size, 'assets/images/icon-Transfer-on.png', 'Transfer',
                 onTap: () {
-              BrnToast.show('press', context);
+              Navigator.of(context)
+                  .pushNamed(VFETransferView.route, arguments: {
+                'vfeDetail': vfeDetail,
+              });
             }),
           ],
         );
@@ -453,6 +495,71 @@ class _VFEDetailViewState extends State<VFEDetailView> {
             iconWidget: Image.asset(icon),
             style: TextStyle(color: _outlineBtnColor, fontSize: 12),
             onTap: onTap));
+  }
+
+  Widget marketToolbarView(TokenBalanceData marketPrice) {
+    final decimals = marketPrice.decimals ?? 0;
+    final symbol = marketPrice.symbol ?? '';
+    final priceTxt = '${Fmt.balance(marketPrice.amount, decimals)} $symbol';
+    final user = widget.keyring.current.address ?? '';
+    final owner = vfeDetail?.owner ?? '';
+    String btnTxt;
+    Function(BuildContext) doTapFunc;
+    if (user == owner) {
+      btnTxt = 'Cancel';
+      doTapFunc = confirmCancelOrder;
+    } else {
+      btnTxt = 'Buy now';
+      doTapFunc = confirmTakeOrder;
+    }
+
+    return Container(
+        height: 88.h,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 2.0,
+              spreadRadius: 0.0,
+              offset: Offset(0, -2),
+            ),
+          ],
+        ),
+        padding: EdgeInsets.fromLTRB(24.w, 0.h, 24.w, 0.h),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Current price',
+                  style: TextStyle(fontSize: 10, color: Colors.grey),
+                ),
+                Text(
+                  priceTxt,
+                  style: TextStyle(fontSize: 28),
+                ),
+              ],
+            ),
+            SizedBox(
+                height: 44.h,
+                width: 140.w,
+                child: BrnSmallMainButton(
+                  radius: 22,
+                  bgColor: _backgroundColor,
+                  textColor: Colors.white,
+                  title: btnTxt,
+                  fontSize: 20,
+                  onTap: () async {
+                    await doTapFunc(context);
+                  },
+                ))
+          ],
+        ));
   }
 
   Future<void> unbindDevice(BuildContext context) async {
@@ -503,7 +610,8 @@ class _VFEDetailViewState extends State<VFEDetailView> {
     );
     final result = await widget.plugin.api.vfe
         .levelUp(vfeDetail!.brandId!, vfeDetail!.itemId!, password);
-    final vfeUpdated = await widget.plugin.api.vfe.getVFEDetailByID(vfeDetail!.brandId!, vfeDetail!.itemId!);
+    final vfeUpdated = await widget.plugin.api.vfe
+        .getVFEDetailByID(vfeDetail!.brandId!, vfeDetail!.itemId!);
 
     if (!mounted) return;
     BrnLoadingDialog.dismiss(context);
@@ -514,7 +622,7 @@ class _VFEDetailViewState extends State<VFEDetailView> {
     } else {
       BrnToast.show('Level up successfully', context);
 
-      if(vfeUpdated != null) {
+      if (vfeUpdated != null) {
         updateVFEInfo(vfeUpdated);
       }
     }
@@ -535,7 +643,8 @@ class _VFEDetailViewState extends State<VFEDetailView> {
     );
     final result = await widget.plugin.api.vfe.restorePower(
         vfeDetail!.brandId!, vfeDetail!.itemId!, chargeNum, password);
-    final vfeUpdated = await widget.plugin.api.vfe.getVFEDetailByID(vfeDetail!.brandId!, vfeDetail!.itemId!);
+    final vfeUpdated = await widget.plugin.api.vfe
+        .getVFEDetailByID(vfeDetail!.brandId!, vfeDetail!.itemId!);
 
     if (!mounted) return;
     BrnLoadingDialog.dismiss(context);
@@ -545,7 +654,7 @@ class _VFEDetailViewState extends State<VFEDetailView> {
       BrnToast.show(result.error, context);
     } else {
       BrnToast.show('Power Charged', context);
-      if(vfeUpdated != null) {
+      if (vfeUpdated != null) {
         updateVFEInfo(vfeUpdated);
       }
     }
@@ -555,8 +664,91 @@ class _VFEDetailViewState extends State<VFEDetailView> {
     setState(() {
       vfe.owner = vfeDetail!.owner;
       vfeDetail = vfe;
-      widget.plugin.store.vfe
-          .updateUserVFE(widget.keyring.current.pubKey, vfe);
+      widget.plugin.store.vfe.updateUserVFE(widget.keyring.current.pubKey, vfe);
     });
+  }
+
+  confirmCancelOrder(BuildContext context) async {
+    if (orderId == null) {
+      BrnToast.show('Order is not existed', context);
+      return;
+    }
+    final password = await widget.plugin.api.account.getPassword(
+      context,
+      widget.keyring.current,
+      true,
+    );
+    if (password == null) {
+      return;
+    }
+
+    if (!mounted) return;
+    BrnLoadingDialog.show(context,
+        content: 'Processing...', barrierDismissible: false);
+
+    final result = await widget.plugin.api.vfeOrder
+        .removeOrder(orderId!, password);
+
+    if (!result.success) {
+      // update  state
+      if (!mounted) return;
+      BrnLoadingDialog.dismiss(context);
+      BrnToast.show(result.error, context);
+    } else {
+      await widget.plugin.loadUserVFEs(widget.keyring.current.pubKey!);
+      if (!mounted) return;
+      BrnLoadingDialog.dismiss(context);
+      BrnToast.show('Cancel order successfully', context);
+      widget.plugin.store.vfeOrder.removeOrder(orderId!);
+      // update UI state
+      setState(() {
+        vfeDetail?.owner = widget.keyring.current.address;
+        marketPrice = null;
+        orderId = null;
+      });
+    }
+  }
+
+  confirmTakeOrder(BuildContext context) async {
+    if (orderId == null) {
+      BrnToast.show('Order is not existed', context);
+      return;
+    }
+    final orderOwner = vfeDetail?.owner ?? '';
+    final password = await widget.plugin.api.account.getPassword(
+      context,
+      widget.keyring.current,
+      true,
+    );
+    if (password == null) {
+      return;
+    }
+
+    if (!mounted) return;
+    BrnLoadingDialog.show(context,
+        content: 'Processing...', barrierDismissible: false);
+
+    final result = await widget.plugin.api.vfeOrder
+        .takeOrder(orderId!, orderOwner, password);
+
+    if (!result.success) {
+      // update  state
+      if (!mounted) return;
+      BrnLoadingDialog.dismiss(context);
+      BrnToast.show(result.error, context);
+    } else {
+      await widget.plugin.loadUserVFEs(widget.keyring.current.pubKey!);
+      if (!mounted) return;
+      BrnLoadingDialog.dismiss(context);
+      BrnToast.show('Take order successfully', context);
+      widget.plugin.store.vfeOrder.removeOrder(orderId!);
+      // update UI state
+      setState(() {
+        vfeDetail?.owner = widget.keyring.current.address;
+        marketPrice = null;
+        orderId = null;
+      });
+
+    }
   }
 }

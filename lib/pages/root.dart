@@ -14,7 +14,7 @@ class RootView extends StatefulWidget {
     bottomBarViews = [
       HomeView(plugin, keyring),
       EquipmentBagView(plugin, keyring),
-      MarketplaceView(),
+      MarketplaceView(plugin, keyring),
     ];
   }
 

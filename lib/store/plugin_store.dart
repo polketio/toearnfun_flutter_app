@@ -7,6 +7,7 @@ import 'package:toearnfun_flutter_app/store/devices.dart';
 import 'package:toearnfun_flutter_app/store/system.dart';
 import 'package:toearnfun_flutter_app/store/training_report.dart';
 import 'package:toearnfun_flutter_app/store/vfe.dart';
+import 'package:toearnfun_flutter_app/store/vfe_order.dart';
 import 'package:toearnfun_flutter_app/types/training_report.dart';
 
 class PluginStore {
@@ -28,14 +29,16 @@ class PluginStore {
   late AccountStore account;
   late DevicesStore devices;
   late VFEStore vfe;
+  late VFEOrderStore vfeOrder;
   late TrainingReportStore report;
   late SystemStore system;
 
   Future<void> init() async {
     await GetStorage.init(polket_plugin_cache_key);
 
-    final config =
-        Configuration.local([TrainingReport.schema, TrainingReward.schema], schemaVersion: 4);
+    final config = Configuration.local(
+        [TrainingReport.schema, TrainingReward.schema],
+        schemaVersion: 4);
     _realm = Realm(config);
 
     // _storage.erase();
@@ -43,6 +46,7 @@ class PluginStore {
     assets = AssetsStore(_storage);
     devices = DevicesStore(_storage);
     vfe = VFEStore(_storage);
+    vfeOrder = VFEOrderStore(_storage);
     report = TrainingReportStore(_storage, _realm);
     system = SystemStore(_storage);
   }

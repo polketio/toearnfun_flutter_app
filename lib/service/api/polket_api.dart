@@ -4,20 +4,26 @@ import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api_account.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api_assets.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
+import 'package:toearnfun_flutter_app/service/api/polket_api_buyback.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api_system.dart';
 import 'package:toearnfun_flutter_app/service/api/polket_api_vfe.dart';
+import 'package:toearnfun_flutter_app/service/api/polket_api_vfe_order.dart';
 
 class PolketApi {
   PolketApi(PluginPolket plugin, Keyring keyring)
       : assets = PolketApiAssets(plugin),
         account = PolketApiAccount(plugin, keyring),
         vfe = PolketApiVFE(plugin, keyring),
+        buyback = PolketApiBuyback(plugin, keyring),
+        vfeOrder = PolketApiVFEOrder(plugin, keyring),
         system = PolketApiSystem(plugin, keyring);
 
   final PolketApiAssets assets;
   final PolketApiAccount account;
   final PolketApiVFE vfe;
   final PolketApiSystem system;
+  final PolketApiBuyback buyback;
+  final PolketApiVFEOrder vfeOrder;
 
   static Future<DispatchResult> call(
     Keyring keyring,

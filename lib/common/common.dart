@@ -1,3 +1,4 @@
+import 'package:bruno/bruno.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:polkawallet_ui/utils/format.dart';
@@ -80,5 +81,20 @@ class AppBarTittleView extends StatelessWidget {
         ),
       ]);
     });
+  }
+}
+
+class NoDataView extends StatelessWidget {
+  const NoDataView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BrnAbnormalStateWidget(
+      isCenterVertical: true,
+      img: Image.asset(
+        'assets/images/no-data-available.png',
+      ),
+      content: 'No data available',
+    );
   }
 }

@@ -46,7 +46,7 @@ class _ProfileViewState extends State<ProfileView> {
       backgroundColor: _backgroundColor,
       leading: MyBackButton(),
       centerTitle: true,
-      title: Text('Wallet', style: TextStyle(color: Colors.white)),
+      title: Text('Profile', style: TextStyle(color: Colors.white)),
     );
   }
 
@@ -76,14 +76,30 @@ class _ProfileViewState extends State<ProfileView> {
                       minHeight: 20.h,
                       child: Stack(fit: StackFit.expand, children: [
                         Container(
-                            decoration: new BoxDecoration(
+                            decoration: BoxDecoration(
                           color: _backgroundColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: _backgroundColor,
+                              blurRadius: 0.0,
+                              spreadRadius: 0.0,
+                              offset: const Offset(0, -2),
+                            ),
+                          ],
                         )),
                         Container(
-                            decoration: new BoxDecoration(
+                            decoration: const BoxDecoration(
                           color: Colors.white,
                           borderRadius:
                               BorderRadius.vertical(top: Radius.circular(20)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white,
+                              blurRadius: 0.0,
+                              spreadRadius: 0.0,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
                         ))
                       ]))),
               settingsListView(),

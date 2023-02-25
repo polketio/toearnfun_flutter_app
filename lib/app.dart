@@ -17,6 +17,7 @@ import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
 import 'package:toearnfun_flutter_app/service/webViewRunner.dart';
 import 'package:toearnfun_flutter_app/store/plugin_store.dart';
+import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
 const get_storage_container = 'configuration';
 const log_tag = 'ToEarnFun';
@@ -117,6 +118,7 @@ class _ToEarnFunAppState extends State<ToEarnFunApp> {
         title: 'ToEarnFun',
         theme: ThemeData(
           primaryColor: Colors.white,
+          toggleableActiveColor: HexColor('#8953ed'),
           // textTheme: GoogleFonts.secularOneTextTheme(baseTheme.textTheme),
           // textTheme: GoogleFonts.ibmPlexSansTextTheme(baseTheme.textTheme),
         ),

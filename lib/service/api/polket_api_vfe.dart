@@ -58,7 +58,7 @@ class PolketApiVFE {
 
   Future<List<VFEBrand>> getVFEBrandsAll() async {
     final List res = await plugin.sdk.api.service.webView
-            ?.evalJavascript('vfe.getVFEBrandsAll(api)') ??
+            ?.evalJavascript('$module.getVFEBrandsAll(api)') ??
         [];
     final list = res.map((e) => VFEBrand.fromJson(e)).toList();
     return list;
@@ -67,7 +67,7 @@ class PolketApiVFE {
   Future<List<VFEDetail>> getVFEDetailsByAddress(
       String address, int brandId) async {
     final List res = await plugin.sdk.api.service.webView?.evalJavascript(
-            'vfe.getVFEDetailsByAddress(api, "$address", $brandId)') ??
+            '$module.getVFEDetailsByAddress(api, "$address", $brandId)') ??
         [];
     final list = res.map((e) => VFEDetail.fromJson(e)).toList();
     return list;
@@ -86,7 +86,7 @@ class PolketApiVFE {
 
   Future<List<Producer>> getProducerAll() async {
     final List res = await plugin.sdk.api.service.webView
-            ?.evalJavascript('vfe.getProducerAll(api)') ??
+            ?.evalJavascript('$module.getProducerAll(api)') ??
         [];
     final list = res.map((e) => Producer.fromJson(e)).toList();
     return list;
@@ -164,20 +164,20 @@ class PolketApiVFE {
   Future<String> getChargingCosts(
       int brandId, int itemId, int chargeNum) async {
     final cost = await plugin.sdk.api.service.webView?.evalJavascript(
-        'vfe.getChargingCosts(api, $brandId, $itemId, $chargeNum)');
+        '$module.getChargingCosts(api, $brandId, $itemId, $chargeNum)');
     return cost;
   }
 
   Future<String> getLevelUpCosts(
       String who, int brandId, int itemId) async {
     final cost = await plugin.sdk.api.service.webView
-        ?.evalJavascript('vfe.getLevelUpCosts(api, "$who", $brandId, $itemId)');
+        ?.evalJavascript('$module.getLevelUpCosts(api, "$who", $brandId, $itemId)');
     return cost;
   }
 
   Future<TokenBalanceData?> getIncentiveToken() async {
     final res = await plugin.sdk.api.service.webView
-        ?.evalJavascript('vfe.getIncentiveToken(api)');
+        ?.evalJavascript('$module.getIncentiveToken(api)');
     if (res != null) {
       final token = TokenBalanceData(
         id: res['id'].toString(),
@@ -208,6 +208,12 @@ class PolketApiVFE {
     final params = [brandId, itemId, ability];
     return PolketApi.call(
         keyring, plugin.sdk, module, 'increaseAbility', params, password);
+  }
+
+  Future<DispatchResult> transfer(int brandId, int itemId, String dest, String? password) async {
+    final params = [brandId, itemId, dest];
+    return PolketApi.call(
+        keyring, plugin.sdk, module, 'transfer', params, password);
   }
 
   int get reportValidityPeriod {
