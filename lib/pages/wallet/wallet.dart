@@ -1,23 +1,21 @@
 import 'dart:async';
 import 'package:bruno/bruno.dart';
 import 'package:flukit/flukit.dart';
-import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_custom_dialog/flutter_custom_dialog.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/api/types/balanceData.dart';
-import 'package:polkawallet_sdk/api/types/txInfoData.dart';
 import 'package:polkawallet_sdk/plugin/store/balances.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_sdk/storage/types/keyPairData.dart';
 import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
-import 'package:toearnfun_flutter_app/common/consts.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/account/account_manage.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/buyback/buyback_plans.dart';
-import 'package:toearnfun_flutter_app/pages/wallet/create/welcome.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/wallet_deposit.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
@@ -41,9 +39,7 @@ class _WalletViewState extends State<WalletView> {
   @override
   void initState() {
     super.initState();
-    LogUtil.d('allAccounts: ${widget.keyring.allAccounts.length}');
     _currentAccount = widget.keyring.current;
-    LogUtil.d('_currentAccount: ${_currentAccount?.address}');
   }
 
   PreferredSizeWidget getAppBarView() {
@@ -54,7 +50,7 @@ class _WalletViewState extends State<WalletView> {
       backgroundColor: _backgroundColor,
       leading: MyBackButton(),
       centerTitle: true,
-      title: Text('Wallet', style: TextStyle(color: Colors.white)),
+      title: const Text('Wallet', style: TextStyle(color: Colors.white)),
       actions: <Widget>[
         IconButton(
             onPressed: () {
@@ -68,6 +64,7 @@ class _WalletViewState extends State<WalletView> {
 
   @override
   Widget build(BuildContext context) {
+    YYDialog.init(context);
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: getAppBarView(),
@@ -84,8 +81,8 @@ class _WalletViewState extends State<WalletView> {
             ),
             SliverPersistentHeader(
               delegate: SliverHeaderDelegate(
-                maxHeight: 190.h,
-                minHeight: 154.h,
+                maxHeight: 220.h,
+                minHeight: 200.h,
                 child: mainAssetView(context),
               ),
             ),
@@ -112,22 +109,18 @@ class _WalletViewState extends State<WalletView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             //[Chain selector, Total Native token, address]
-            // Card(
-            //     elevation: 0,
-            //     shape: RoundedRectangleBorder(
-            //         borderRadius: BorderRadius.circular(17.w)),
-            //     child: BrnIconButton(
-            //       name: 'Polket',
-            //       iconWidget: Image.asset('assets/images/icon-DownArrow.png'),
-            //       direction: Direction.right,
-            //       widgetWidth: 110.w,
-            //       widgetHeight: 34.h,
-            //       onTap: () {},
-            //       style: TextStyle(
-            //           fontSize: 16,
-            //           color: HexColor('#956dfd'),
-            //           fontWeight: FontWeight.bold),
-            //     )),
+            Container(
+                height: 30.h,
+                width: 80.w,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                ),
+                child: Text(
+                  'Polket',
+                  style: TextStyle(fontSize: 14, color: HexColor('#956dfd')),
+                )),
             SizedBox(
                 height: 34.h,
                 child: Observer(builder: (_) {
@@ -204,7 +197,9 @@ class _WalletViewState extends State<WalletView> {
               onTap: null,
               title: const Text('Assets'),
               trailing: TextButton.icon(
-                onPressed: null,
+                onPressed: () {
+                  BrnToast.show('Coming soon', context);
+                },
                 icon: const Icon(Icons.history),
                 label: const Text('History',
                     style: TextStyle(color: Colors.black, fontSize: 16)),
@@ -263,17 +258,23 @@ class _WalletViewState extends State<WalletView> {
         BrnIconButton(
           name: 'Receive',
           direction: Direction.bottom,
-          iconWidget: Icon(
+          iconWidget: const Icon(
             Icons.call_received,
             color: Colors.white,
           ),
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
+          onTap: () {
+            WalletDepositView.showDialogView(widget.keyring);
+          },
         ),
         BrnIconButton(
           name: 'Transfer',
           direction: Direction.bottom,
-          iconWidget: Icon(Icons.call_made, color: Colors.white),
-          style: TextStyle(color: Colors.white),
+          iconWidget: const Icon(Icons.call_made, color: Colors.white),
+          style: const TextStyle(color: Colors.white),
+          onTap: () {
+            BrnToast.show('Coming soon', context);
+          },
         ),
         BrnIconButton(
           name: 'Trade',
@@ -288,102 +289,9 @@ class _WalletViewState extends State<WalletView> {
     );
   }
 
-  void showCreateWalletDialog() {
-    BrnDialogManager.showMoreButtonDialog(context,
-        barrierDismissible: false,
-        actions: [
-          'Create a new wallet',
-          'Import a wallet using seed Phrase',
-          'Exit',
-        ],
-        title: 'Create Wallet', indexedActionClickCallback: (index) {
-      Navigator.of(context).pop();
-      if (index == 0) {
-        _generateAccount();
-      }
-      if (index == 2) {
-        _exit();
-      }
-    });
-  }
-
-  //exit this page
-  void _exit() {
-    Navigator.of(context).pop();
-  }
-
-  Future<void> _generateAccount({String key = ''}) async {
-    // LogUtil.d('_generateAccount');
-
-    final addressInfo = await widget.plugin.sdk.api.keyring
-        .generateMnemonic(widget.plugin.basic.ss58 ?? DEFAULT_SS58, key: key);
-    LogUtil.d('mnemonic: ${addressInfo.mnemonic}');
-    if (key.isEmpty && addressInfo.mnemonic != null) {
-      const password = '1234qwer';
-      widget.plugin.store.account.setNewAccountKey(addressInfo.mnemonic!);
-      widget.plugin.store.account.setNewAccount('tester', password);
-
-      try {
-        final json = await widget.plugin.api.account.importAccount(
-          isFromCreatePage: true,
-        );
-        await widget.plugin.api.account.addAccount(
-          json: json,
-          isFromCreatePage: true,
-        );
-        final pubKey = json['pubKey'] ?? '';
-        await widget.plugin.store.account
-            .saveUserWalletPassword(pubKey, password);
-        widget.plugin.store.account.setAccountCreated();
-
-        setState(() {
-          //update ui
-          this._currentAccount = widget.keyring.current;
-          LogUtil.d('current: ${widget.keyring.current.address}');
-        });
-      } catch (err) {
-        LogUtil.e(err.toString());
-      }
-    }
-  }
-
   // load cureencies info, show [icon, symbol, name, amount]
   Future<void> loadCurrencies() async {
     final tokens = await widget.plugin.api.assets.getAllAssets();
     widget.plugin.balances.setTokens(tokens);
-  }
-
-  Future<void> _sendTx(String address, String amount) async {
-    if (widget.keyring.keyPairs.length == 0) {
-      return;
-    }
-
-    final sender = TxSenderData(
-      widget.keyring.current.address,
-      widget.keyring.current.pubKey,
-    );
-    final txInfo = TxInfoData('balances', 'transfer', sender);
-    try {
-      final hash = await widget.plugin.sdk.api.tx.signAndSend(
-        txInfo,
-        [
-          // params.to
-          // _testAddressGav,
-          address,
-          // params.amount
-          amount
-        ],
-        '1234qwer',
-        onStatusChange: (status) {
-          LogUtil.d(status);
-          // setState(() {
-          //   _status = status;
-          // });
-        },
-      );
-      LogUtil.d('sendTx txid: ${hash.toString()}');
-    } catch (err) {
-      LogUtil.d('sendTx failed: ${err.toString()}');
-    }
   }
 }

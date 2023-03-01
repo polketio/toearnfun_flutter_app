@@ -1,3 +1,4 @@
+import 'package:bruno/bruno.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
@@ -53,7 +54,8 @@ class _RootViewState extends State<RootView> {
           'assets/images/home_icon_tl.png',
         ),
         onPressed: () {
-          Navigator.of(context).pushNamed(ProfileView.route);
+          BrnToast.show('Coming soon', context);
+          // Navigator.of(context).pushNamed(ProfileView.route);
         },
         alignment: Alignment.centerLeft,
       ),

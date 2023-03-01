@@ -1,3 +1,4 @@
+import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,6 +9,8 @@ import 'package:polkawallet_ui/components/v3/addressIcon.dart';
 import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/account/change_name.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/account/change_password.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/account/export_account.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
@@ -186,12 +189,18 @@ class _AccountManageViewState extends State<AccountManageView> {
               {
                 title = Text('Reset Password', style: titleTextStyle);
                 icon = Icons.password;
+                onTap = () {
+                  Navigator.of(ctx).pushNamed(ChangePasswordView.route);
+                };
               }
               break;
             case 2:
               {
-                title = Text('Export Mnemonic Phrase', style: titleTextStyle);
+                title = Text('Export Account', style: titleTextStyle);
                 icon = Icons.key;
+                onTap = () {
+                  _onExport(context);
+                };
               }
               break;
 
@@ -216,5 +225,21 @@ class _AccountManageViewState extends State<AccountManageView> {
         childCount: 3,
       ),
     );
+  }
+
+  _onExport(BuildContext context) async {
+    final password = await widget.plugin.api.account.getPassword(
+      context,
+      widget.keyring.current,
+      true,
+    );
+    if (password != null) {
+      final seed = await widget.plugin.sdk.api.keyring
+          .getDecryptedSeed(widget.keyring, password);
+      if (!mounted) return;
+      Navigator.of(context).pushNamed(ExportAccountView.route, arguments: {
+        'seed': seed,
+      });
+    }
   }
 }

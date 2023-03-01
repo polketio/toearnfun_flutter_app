@@ -28,14 +28,13 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
   bool isCreate = true;
 
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameCtrl = new TextEditingController();
-  final TextEditingController _passCtrl = new TextEditingController();
-  final TextEditingController _pass2Ctrl = new TextEditingController();
+  final TextEditingController _nameCtrl = TextEditingController();
+  final TextEditingController _passCtrl = TextEditingController();
+  final TextEditingController _pass2Ctrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-
   }
 
   @override
@@ -84,7 +83,6 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
   }
 
   Widget stepsView() {
-
     final data = ModalRoute.of(context)?.settings.arguments as Map;
     isCreate = data['isCreate'] ?? true;
 
@@ -150,6 +148,7 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
                   fillColor: HexColor('fbf7f7'),
                 ),
                 controller: _nameCtrl,
+                textInputAction: TextInputAction.next,
                 style: const TextStyle(color: Colors.black),
                 inputFormatters: [
                   LengthLimitingTextInputFormatter(20),
@@ -178,6 +177,7 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
                     fillColor: HexColor('fbf7f7'),
                   ),
                   controller: _passCtrl,
+                  textInputAction: TextInputAction.next,
                   style: const TextStyle(color: Colors.black),
                   inputFormatters: [
                     LengthLimitingTextInputFormatter(20),
@@ -274,7 +274,6 @@ class _NewWalletStepThreeState extends State<NewWalletStepThree> {
         BrnLoadingDialog.dismiss(context);
       }
     }
-
   }
 
   Future<Map?> _importAccount(BuildContext context) async {

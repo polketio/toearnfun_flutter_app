@@ -892,17 +892,21 @@ packages:
   polkawallet_sdk:
     dependency: "direct main"
     description:
-      name: polkawallet_sdk
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.5.0"
+      path: "."
+      ref: a6662ab23a431280acf8d04da55709c23b291bd1
+      resolved-ref: a6662ab23a431280acf8d04da55709c23b291bd1
+      url: "https://github.com/polketio/sdk.git"
+    source: git
+    version: "0.5.2"
   polkawallet_ui:
     dependency: "direct main"
     description:
-      name: polkawallet_ui
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.5.0"
+      path: "."
+      ref: d162610861420f4ebbd363f521fd6006f3656000
+      resolved-ref: d162610861420f4ebbd363f521fd6006f3656000
+      url: "https://github.com/polketio/ui.git"
+    source: git
+    version: "0.5.2"
   pool:
     dependency: transitive
     description:
@@ -938,6 +942,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
+  qr_flutter:
+    dependency: "direct main"
+    description:
+      name: qr_flutter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.0"
   qr_flutter_fork:
     dependency: transitive
     description:

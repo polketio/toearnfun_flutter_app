@@ -1,7 +1,5 @@
-import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:polkawallet_sdk/api/types/networkParams.dart';
 import 'package:polkawallet_sdk/plugin/homeNavItem.dart';
 import 'package:polkawallet_sdk/plugin/index.dart';
@@ -12,7 +10,6 @@ import 'package:toearnfun_flutter_app/pages/device/bind_device_scanner.dart';
 import 'package:toearnfun_flutter_app/pages/device/bind_device_tips.dart';
 import 'package:toearnfun_flutter_app/pages/device/device_connect.dart';
 import 'package:toearnfun_flutter_app/pages/profile/profile.dart';
-import 'package:toearnfun_flutter_app/pages/root.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_detail.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
 import 'package:toearnfun_flutter_app/pages/vfe/vfe_add_point.dart';
@@ -21,6 +18,8 @@ import 'package:toearnfun_flutter_app/pages/vfe/vfe_sell.dart';
 import 'package:toearnfun_flutter_app/pages/vfe/vfe_transfer.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/account/account_manage.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/account/change_name.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/account/change_password.dart';
+import 'package:toearnfun_flutter_app/pages/wallet/account/export_account.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/buyback/buyback_plan_detail.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/buyback/buyback_plans.dart';
 import 'package:toearnfun_flutter_app/pages/wallet/create/step_one.dart';
@@ -89,7 +88,6 @@ class PluginPolket extends PolkawalletPlugin {
 
   @override
   Map<String, WidgetBuilder> getRoutes(Keyring keyring) {
-    LogUtil.d('plugin.getRoutes');
     return {
       // RootView.route: (_) => RootView(this, keyring),
       WalletView.route: (_) => WalletView(this, keyring),
@@ -115,6 +113,8 @@ class PluginPolket extends PolkawalletPlugin {
       AccountManageView.route: (_) => AccountManageView(this, keyring),
       ChangeNameView.route: (_) => ChangeNameView(this, keyring),
       VFESellView.route: (_) => VFESellView(this, keyring),
+      ChangePasswordView.route: (_) => ChangePasswordView(this, keyring),
+      ExportAccountView.route: (_) => ExportAccountView(this, keyring),
     };
   }
 
@@ -181,7 +181,6 @@ class PluginPolket extends PolkawalletPlugin {
     _api = PolketApi(this, keyring);
 
     _loadCacheData(keyring.current);
-    LogUtil.d('plugin.onWillStart');
   }
 
   @override
@@ -206,7 +205,6 @@ class PluginPolket extends PolkawalletPlugin {
           await store.account.getUserWalletPassword(keyring.current.pubKey!);
       _api.vfe.userRestore(password);
     }
-    LogUtil.d('plugin.onStarted');
   }
 
   @override
