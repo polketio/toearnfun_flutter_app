@@ -2,6 +2,7 @@
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 import vfe from "../src/service/vfe";
+import { polketOptions } from '../src/service/types';
 
 
 describe('polket-node module: `VFE` unit test', () => {
@@ -17,12 +18,11 @@ describe('polket-node module: `VFE` unit test', () => {
     beforeAll(async () => {
         // Construct
         wsProvider = new WsProvider('wss://testnet-node.polket.io');
-        api = await ApiPromise.create({ provider: wsProvider });
+        api = await ApiPromise.create({ provider: wsProvider, ...polketOptions });
         // Create a keyring instance
         keyring = new Keyring({ type: 'sr25519' });
         // Add an account, straight mnemonic
         user = keyring.addFromUri(PHRASE);
-
     });
 
     afterAll(async () => {
@@ -94,13 +94,13 @@ describe('polket-node module: `VFE` unit test', () => {
     test('query VFE items unit test', async () => {
         const userAddr = '5Ejq3y9rnwEzPLJjNd8qZHapjHt3c2LmV6j9V7Vh7cfUikLU';
         const items = await api.query.vfeUniques.account.keys<[any, any, any]>(userAddr, 1);
-        items.map(({ args: [,, itemId] }) => {
+        items.map(({ args: [, , itemId] }) => {
             console.log(`itemId: ${itemId}`);
         });
     });
 
     test('query VFE detail unit test', async () => {
-        const userAddr = '5Ejq3y9rnwEzPLJjNd8qZHapjHt3c2LmV6j9V7Vh7cfUikLU';
+        const userAddr = '5EFPnt3Tr1CPhvRaM5PCCth9CUwAFPvo41UhXT7z8hH4DRig';
         const brandId = 1;
         const details = await vfe.getVFEDetailsByAddress(api, userAddr, brandId);
         // const items = await api.query.vfeUniques.account.keys<[any, any, any]>(userAddr, 1);
@@ -126,6 +126,24 @@ describe('polket-node module: `VFE` unit test', () => {
         producers.forEach((producer) => {
             console.log(`producer: ${JSON.stringify(producer)}`);
         });
+    });
+
+    test('get charging costs unit test', async () => {
+        const costs = await vfe.getChargingCosts(api, 1, 31, 3);
+
+        console.log(`costs: ${costs}`);
+    });
+
+
+    test('get level up costs unit test', async () => {
+        const who = '5EFPnt3Tr1CPhvRaM5PCCth9CUwAFPvo41UhXT7z8hH4DRig';
+        const costs = await vfe.getLevelUpCosts(api, who, 1, 31);
+        console.log(`costs: ${costs}`);
+    });
+
+    test('query incentive token unit test', async () => {
+        const token = await vfe.getIncentiveToken(api);
+        console.log(`token: ${JSON.stringify(token)}`);
     });
 });
 

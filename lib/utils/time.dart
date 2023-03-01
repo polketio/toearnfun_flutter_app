@@ -1,3 +1,5 @@
+import 'package:flustars/flustars.dart';
+
 /// format timestamp
 String formatTimestamp({
   int? timestamp, // 为空则显示当前时间
@@ -58,8 +60,8 @@ String formatDuration(int s) {
 /// String formatDurationText(int s) {
 String formatDurationText(int s) {
   final duration = Duration(seconds: s);
-  String hours = duration.inHours.toString().padLeft(2, '');
-  String minutes =
-      (duration.inMinutes.remainder(60) + 1).toString().padLeft(2, '');
+  String days = duration.inDays.toString().padLeft(3, '');
+  String hours = duration.inHours.remainder(24).toString().padLeft(2, '');
+  String minutes = (duration.inMinutes.remainder(60) + 1).toString().padLeft(2, '');
   return '${hours}h${minutes}min';
 }

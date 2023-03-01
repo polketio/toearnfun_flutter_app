@@ -1,6 +1,7 @@
 
 import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { polketOptions } from '../src/service/types';
 
 
 describe('polket-node module: `IdentityExtra` unit test', () => {
@@ -16,13 +17,7 @@ describe('polket-node module: `IdentityExtra` unit test', () => {
     beforeAll(async () => {
         // Construct
         wsProvider = new WsProvider('wss://testnet-node.polket.io');
-        api = await ApiPromise.create({
-            provider: wsProvider, types: {
-                IdentityRole: {
-                    _enum: ['None', 'Brand', 'Producer', 'Exchange', 'Audit']
-                },
-            }
-        });
+        api = await ApiPromise.create({ provider: wsProvider, ...polketOptions });
         // Create a keyring instance
         keyring = new Keyring({ type: 'sr25519' });
         // Add an account, straight mnemonic

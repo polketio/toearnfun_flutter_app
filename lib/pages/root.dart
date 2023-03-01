@@ -1,21 +1,27 @@
+import 'package:bruno/bruno.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
-import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
+import 'package:toearnfun_flutter_app/pages/home/equipment_bag.dart';
 import 'package:toearnfun_flutter_app/pages/home/home.dart';
+import 'package:toearnfun_flutter_app/pages/home/marketplace.dart';
 import 'package:toearnfun_flutter_app/pages/profile/profile.dart';
-import 'package:toearnfun_flutter_app/pages/wallet/wallet.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/utils/hex_color.dart';
 
 class RootView extends StatefulWidget {
-  RootView(this.plugin, this.keyring);
+  RootView(this.plugin, this.keyring) {
+    bottomBarViews = [
+      HomeView(plugin, keyring),
+      EquipmentBagView(plugin, keyring),
+      MarketplaceView(plugin, keyring),
+    ];
+  }
 
-  final PluginPolket plugin;
-  final Keyring keyring;
+  PluginPolket plugin;
+  Keyring keyring;
+  late List<Widget> bottomBarViews;
 
   static final String route = '/toearnfun/root';
 
@@ -24,13 +30,20 @@ class RootView extends StatefulWidget {
 }
 
 class _RootViewState extends State<RootView> {
+  int selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       backgroundColor: HexColor('#956DFD'),
       appBar: getAppBarView(context),
       bottomNavigationBar: getBottomTabBarView(),
-      body: HomeView(widget.plugin, widget.keyring),
+      body: widget.bottomBarViews[selectedIndex],
     );
   }
 
@@ -41,7 +54,8 @@ class _RootViewState extends State<RootView> {
           'assets/images/home_icon_tl.png',
         ),
         onPressed: () {
-          Navigator.of(context).pushNamed(ProfileView.route);
+          BrnToast.show('Coming soon', context);
+          // Navigator.of(context).pushNamed(ProfileView.route);
         },
         alignment: Alignment.centerLeft,
       ),
@@ -60,17 +74,35 @@ class _RootViewState extends State<RootView> {
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: <
             Widget>[
           IconButton(
-            icon: Image.asset('assets/images/icon_AtTabBar_home-off.png'),
-            onPressed: null,
+            icon: selectedIndex == 0
+                ? Image.asset('assets/images/icon_AtTabBar_home-on.png')
+                : Image.asset('assets/images/icon_AtTabBar_home-off.png'),
+            onPressed: () {
+              changeTabView(0);
+            },
           ),
           IconButton(
-            icon: Image.asset('assets/images/icon_AtTabBar_storehouse-off.png'),
-            onPressed: null,
+            icon: selectedIndex == 1
+                ? Image.asset('assets/images/icon_AtTabBar_storehouse-on.png')
+                : Image.asset('assets/images/icon_AtTabBar_storehouse-off.png'),
+            onPressed: () {
+              changeTabView(1);
+            },
           ),
           IconButton(
-            icon: Image.asset('assets/images/icon_AtTabBar_market-off.png'),
-            onPressed: null,
+            icon: selectedIndex == 2
+                ? Image.asset('assets/images/icon_AtTabBar_market-on.png')
+                : Image.asset('assets/images/icon_AtTabBar_market-off.png'),
+            onPressed: () {
+              changeTabView(2);
+            },
           ),
         ]));
+  }
+
+  changeTabView(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
   }
 }

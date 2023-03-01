@@ -30,8 +30,14 @@ dependencies:
   english_words: ^4.0.0
   bruno: ^3.1.0
   flutter_screenutil: ^5.0.0+2
-  polkawallet_sdk: ^0.5.0
-  polkawallet_ui: ^0.5.0
+  polkawallet_sdk:
+    git:
+      url: https://github.com/polketio/sdk.git
+      ref: a6662ab23a431280acf8d04da55709c23b291bd1
+  polkawallet_ui:
+    git:
+      url: https://github.com/polketio/ui.git
+      ref: d162610861420f4ebbd363f521fd6006f3656000
   flutter_svg: ^1.0.3
   json_annotation: ^4.4.0
   convert: ^3.0.1
@@ -49,9 +55,14 @@ dependencies:
   # Downgrade web3dart to 2.3.5 due to issue: `flutter pub run build_runner` failed
   web3dart: 2.3.5
   flutter_secure_storage: ^6.1.0
-  realm: 0.8.0+rc
+  realm: 1.0.1
   google_fonts: ^3.0.1
   sec: ^1.0.1
+  flutter_custom_dialog: ^1.3.0
+  flutter_scankit: ^1.2.4
+  flutter_easy_permission: ^1.1.2
+  flutter_sticky_header: ^0.6.5
+  qr_flutter: ^4.0.0
 
 dev_dependencies:
   flutter_test:

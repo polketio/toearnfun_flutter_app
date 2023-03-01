@@ -160,6 +160,7 @@ class BluetoothDeviceConnector implements JumpRopeDeviceConnector {
         o.onConnectSuccess(device);
       }
       LogUtil.d('device is connected');
+      syncDeviceTime(); //sync device time
     }
     return connect;
   }
@@ -215,8 +216,8 @@ class BluetoothDeviceConnector implements JumpRopeDeviceConnector {
     return await _channel.invokeMethod('devReset');
   }
 
-//同步设备时间
-  Future<String> syncDeviceTime() async {
+  //同步设备时间
+  Future<bool> syncDeviceTime() async {
     return await _channel.invokeMethod('syncDeviceTime');
   }
 

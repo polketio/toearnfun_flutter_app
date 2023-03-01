@@ -5,13 +5,13 @@ import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_custom_dialog/flutter_custom_dialog.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_ui/utils/format.dart';
 import 'package:toearnfun_flutter_app/pages/device/bind_device_selector.dart';
 import 'package:toearnfun_flutter_app/pages/training/training_reports.dart';
-import 'package:toearnfun_flutter_app/pages/vfe/vfe_charge.dart';
 import 'package:toearnfun_flutter_app/pages/vfe/vfe_detail.dart';
 import 'package:toearnfun_flutter_app/plugin.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/bluetooth_device.dart';
@@ -69,167 +69,167 @@ class _HomeViewState extends State<HomeView>
   }
 
   Widget vfeCardView(BuildContext context) {
-    return Container(
-      child: Observer(builder: (_) {
-        String deviceKey = '';
-        String itemId = 'N/A';
-        int battery = 0;
-        String vfeImage = 'assets/images/img-Unbound.png';
-        int itemIdOfVFE = 0;
-        final userSelectedVFE = widget.plugin.store.vfe.current;
-        if (userSelectedVFE.itemId != null) {
-          vfeImage = 'assets/images/vfe-card.png';
-          itemId = '#${userSelectedVFE.itemId.toString().padLeft(4, '0')}';
-          battery = userSelectedVFE.remainingBattery;
-          deviceKey = userSelectedVFE.deviceKey.replaceFirst('0x', '');
-          itemIdOfVFE = userSelectedVFE.itemId ?? 0;
-          LogUtil.d('user current vfe is updated');
-        }
+    return Observer(builder: (_) {
+      String deviceKey = '';
+      String itemId = 'N/A';
+      int battery = 0;
+      String vfeImage = 'assets/images/img-Unbound.png';
+      int itemIdOfVFE = 0;
+      final userSelectedVFE = widget.plugin.store.vfe.current;
+      if (userSelectedVFE.itemId != null) {
+        vfeImage = 'assets/images/vfe-card.png';
+        itemId = '#${userSelectedVFE.itemId.toString().padLeft(4, '0')}';
+        battery = userSelectedVFE.remainingBattery;
+        deviceKey = userSelectedVFE.deviceKey.replaceFirst('0x', '');
+        itemIdOfVFE = userSelectedVFE.itemId ?? 0;
+        LogUtil.d('user current vfe is updated');
+      }
 
-        return Stack(children: <Widget>[
-          // background
-          Container(
-            margin: EdgeInsets.fromLTRB(8.w, 0.h, 8.w, 0.h),
-            child: Image.asset(
-              'assets/images/home_bg.png',
-              fit: BoxFit.cover,
-            ),
+      return Stack(children: <Widget>[
+        // background
+        Container(
+          margin: EdgeInsets.fromLTRB(8.w, 0.h, 8.w, 0.h),
+          child: Image.asset(
+            'assets/images/home_bg.png',
+            fit: BoxFit.cover,
           ),
-          //col: [vfe-img, state-row]
-          Column(children: [
-            Padding(
-                padding:
-                    EdgeInsets.only(left: 16, right: 16, top: 36, bottom: 0),
-                child: GestureDetector(
-                    onTap: () async {
-                      //todo: check if user have any VFEs
-                      final accountId = widget.keyring.current.pubKey;
-                      if (accountId == null) {
-                        BrnToast.show('Please create a wallet first', context);
-                        return;
-                      }
+        ),
+        //col: [vfe-img, state-row]
+        Column(children: [
+          Padding(
+              padding:
+                  EdgeInsets.only(left: 16, right: 16, top: 36, bottom: 0),
+              child: GestureDetector(
+                  onTap: () async {
+                    //todo: check if user have any VFEs
+                    final accountId = widget.keyring.current.pubKey;
+                    if (accountId == null) {
+                      BrnToast.show('Please create a wallet first', context);
+                      return;
+                    }
 
-                      if (itemIdOfVFE != 0) {
-                        Navigator.of(context)
-                            .pushNamed(VFEDetailView.route, arguments: {
-                          'vfeDetail': userSelectedVFE,
-                        });
-                      } else {
-                        BindDeviceSelector.showDeviceTypesSelector(
-                            context, itemIdOfVFE);
-                      }
-                    },
-                    child: Image.asset(vfeImage))),
-            Padding(
-                padding: EdgeInsets.only(top: 16.h, left: 24.w, right: 24.w),
-                child: Row(
-                  //row: [ID, status, power]
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Expanded(
-                        flex: 1,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          // mainAxisSize: MainAxisSize.max,
-                          children: [
-                            const Text('VFE ID',
-                                style: TextStyle(
-                                    color: Colors.greenAccent, fontSize: 12)),
-                            SizedBox(
-                                height: 24.h,
-                                child: Text(itemId,
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 16))),
-                          ],
-                        )),
-                    Expanded(
-                        flex: 1,
-                        child: GestureDetector(
-                            child: Column(
-                              // crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Text('STATUS',
-                                    style: TextStyle(
-                                        color: Colors.greenAccent,
-                                        fontSize: 12)),
-                                SizedBox(
-                                    height: 24.h,
-                                    child: Text(connectedStatus,
-                                        style: const TextStyle(
-                                            color: Colors.white, fontSize: 16)))
-                              ],
-                            ),
-                            onTap: () {
-                              if (deviceKey.isEmpty) {
-                                BrnToast.show(
-                                    'Please bind the device first', context);
-                                return;
-                              }
+                    if (itemIdOfVFE != 0) {
+                      Navigator.of(context)
+                          .pushNamed(VFEDetailView.route, arguments: {
+                        'vfeDetail': userSelectedVFE,
+                      });
+                    } else {
+                      BindDeviceSelector.showDeviceTypesSelector(
+                          context, itemIdOfVFE);
+                    }
+                  },
+                  child: Image.asset(vfeImage))),
+          Padding(
+              padding: EdgeInsets.only(top: 16.h, left: 24.w, right: 24.w),
+              child: Row(
+                //row: [ID, status, power]
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Expanded(
+                      flex: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        // mainAxisSize: MainAxisSize.max,
+                        children: [
+                          const Text('VFE ID',
+                              style: TextStyle(
+                                  color: Colors.greenAccent, fontSize: 12)),
+                          SizedBox(
+                              height: 24.h,
+                              child: Text(itemId,
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 16))),
+                        ],
+                      )),
+                  Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                          child: Column(
+                            // crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Text('STATUS',
+                                  style: TextStyle(
+                                      color: Colors.greenAccent,
+                                      fontSize: 12)),
+                              SizedBox(
+                                  height: 24.h,
+                                  child: Text(connectedStatus,
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 16)))
+                            ],
+                          ),
+                          onTap: () {
+                            if (deviceKey.isEmpty) {
+                              BrnToast.show(
+                                  'Please bind the device first', context);
+                              return;
+                            }
 
-                              final device = widget.plugin.store.devices
-                                  .getConnectedDevice(deviceKey);
-                              final simulated = device?.simulated ?? false;
-                              JumpRopeDeviceConnector connector;
-                              if (simulated) {
-                                connector = SimulatedDeviceConnector();
-                              } else {
-                                connector = BluetoothDeviceConnector();
-                              }
-                              final existed =
-                                  connector.autoScanAndConnect(deviceKey);
-                              if (existed) {
-                                setState(() {
-                                  connectedStatus = 'connecting...';
-                                });
-                              } else {
-                                setState(() {
-                                  connectedStatus = 'disconnected';
-                                });
-                                BrnToast.show('Device is not existed', context);
-                                BindDeviceSelector.showDeviceTypesSelector(
-                                    context, itemIdOfVFE);
-                              }
-                            })),
-                    Expanded(
-                        flex: 1,
-                        child: GestureDetector(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                SizedBox(
-                                    width: 80.w,
-                                    child: const Text('BATTERY',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            color: Colors.greenAccent,
-                                            fontSize: 12))),
-                                SizedBox(
-                                    width: 80.w,
-                                    height: 24.h,
-                                    child: EProgress(
-                                        progress: battery,
-                                        colors: [HexColor('#b7e9e0')],
-                                        backgroundColor: Colors.grey,
-                                        textStyle: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12))),
-                              ],
-                            ),
-                            onTap: () async {
-                              await showCupertinoDialog(
-                                  context: context,
-                                  builder: (_) {
-                                    return VFEChargeView(
-                                        widget.plugin, widget.keyring);
-                                  });
-                            }))
-                  ],
-                ))
-          ]),
-        ]);
-      }),
-    );
+                            final device = widget.plugin.store.devices
+                                .getConnectedDevice(deviceKey);
+                            final simulated = device?.simulated ?? false;
+                            JumpRopeDeviceConnector connector;
+                            if (simulated) {
+                              connector = SimulatedDeviceConnector();
+                            } else {
+                              connector = BluetoothDeviceConnector();
+                            }
+                            final existed =
+                                connector.autoScanAndConnect(deviceKey);
+                            if (existed) {
+                              setState(() {
+                                connectedStatus = 'connecting...';
+                              });
+                            } else {
+                              setState(() {
+                                connectedStatus = 'disconnected';
+                              });
+                              BrnToast.show('Device is not existed', context);
+                              BindDeviceSelector.showDeviceTypesSelector(
+                                  context, itemIdOfVFE);
+                            }
+                          })),
+                  Expanded(
+                      flex: 1,
+                      child: GestureDetector(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                  width: 80.w,
+                                  child: const Text('BATTERY',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color: Colors.greenAccent,
+                                          fontSize: 12))),
+                              SizedBox(
+                                  width: 80.w,
+                                  height: 24.h,
+                                  child: EProgress(
+                                      progress: battery,
+                                      colors: [HexColor('#b7e9e0')],
+                                      backgroundColor: Colors.grey,
+                                      textStyle: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12))),
+                            ],
+                          ),
+                          onTap: () {
+                            if (itemIdOfVFE != 0) {
+                              Navigator.of(context)
+                                  .pushNamed(VFEDetailView.route, arguments: {
+                                'vfeDetail': userSelectedVFE,
+                              });
+                            }
+                            // VFEChargeView.showDialogView(
+                            //     widget.plugin, widget.keyring, userSelectedVFE);
+                          }))
+                ],
+              ))
+        ]),
+      ]);
+    });
   }
 
   Widget myTrainingView(BuildContext context) {
