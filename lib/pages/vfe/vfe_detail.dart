@@ -460,6 +460,11 @@ class _VFEDetailViewState extends State<VFEDetailView> {
             getToolbarItemView(
                 context, size, 'assets/images/icon-Sell-on.png', 'Sell',
                 onTap: () {
+              if (isBond) {
+                BrnToast.show('Please unbind VFE first.', context);
+                return;
+              }
+
               Navigator.of(context).pushNamed(VFESellView.route, arguments: {
                 'vfeDetail': vfeDetail,
               });
@@ -467,6 +472,10 @@ class _VFEDetailViewState extends State<VFEDetailView> {
             getToolbarItemView(
                 context, size, 'assets/images/icon-Transfer-on.png', 'Transfer',
                 onTap: () {
+              if (isBond) {
+                BrnToast.show('Please unbind VFE first.', context);
+                return;
+              }
               Navigator.of(context)
                   .pushNamed(VFETransferView.route, arguments: {
                 'vfeDetail': vfeDetail,
@@ -686,8 +695,8 @@ class _VFEDetailViewState extends State<VFEDetailView> {
     BrnLoadingDialog.show(context,
         content: 'Processing...', barrierDismissible: false);
 
-    final result = await widget.plugin.api.vfeOrder
-        .removeOrder(orderId!, password);
+    final result =
+        await widget.plugin.api.vfeOrder.removeOrder(orderId!, password);
 
     if (!result.success) {
       // update  state
@@ -748,7 +757,6 @@ class _VFEDetailViewState extends State<VFEDetailView> {
         marketPrice = null;
         orderId = null;
       });
-
     }
   }
 }

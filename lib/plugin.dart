@@ -64,7 +64,7 @@ class PluginPolket extends PolkawalletPlugin {
         'name': 'Polket Testnet',
         'ss58': 42,
         'endpoint': 'wss://testnet-node.polket.io',
-        // 'endpoint': 'ws://192.168.31.141:9944',
+        // 'endpoint': 'ws://10.0.2.2:9944',
       },
     ].map((e) => NetworkParams.fromJson(e)).toList();
   }

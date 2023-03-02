@@ -236,7 +236,6 @@ class _WalletViewState extends State<WalletView> {
                     borderRadius: BorderRadius.circular(10.w)),
                 child: ListTile(
                     leading: Image.asset('assets/images/icon-${d.symbol}.png'),
-                    // leading: Image.asset('assets/images/icon-PNT.png'),
                     title: Text('${d.symbol}', style: TextStyle(fontSize: 18)),
                     subtitle: Text('${d.name}', style: TextStyle(fontSize: 12)),
                     trailing: Text(
