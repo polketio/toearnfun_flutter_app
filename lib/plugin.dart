@@ -200,10 +200,6 @@ class PluginPolket extends PolkawalletPlugin {
       loadIncentiveToken();
       // load user vfe
       loadUserVFEs(keyring.current.pubKey!);
-
-      String? password =
-          await store.account.getUserWalletPassword(keyring.current.pubKey!);
-      _api.vfe.userRestore(password);
     }
   }
 

@@ -26,41 +26,64 @@ class BuybackPlanItemView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-        elevation: 0,
-        margin:
-            EdgeInsets.only(top: 12.h, left: 16.w, right: 16.w, bottom: 12.h),
-        color: Colors.white,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.w)),
-        child: GestureDetector(
-            child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            titleView(),
-            contentView(),
-            bottomView(),
-          ],
-        )));
+    return Observer(builder: (_) {
+      final start = data.start;
+      final end = data.start + data.period;
+      final currentHeight = plugin.store.system.currentBlockNumber;
+      final expectedBlockTime = plugin.api.system.expectedBlockTime / 1000;
+      String remainingTime = '';
+      Color statusBgColor;
+      String statusName = data.status;
+
+      switch (PlanStatus.values.byName(data.status)) {
+        case PlanStatus.Upcoming:
+          statusBgColor = Colors.orange;
+          final remainingSeconds =
+              (start - currentHeight) * expectedBlockTime.round();
+          remainingTime = 'Starts in: ${formatTime(remainingSeconds)}';
+          if (remainingSeconds <= 0) {
+            data.status = PlanStatus.InProgress.name;
+          }
+          break;
+        case PlanStatus.InProgress:
+          statusBgColor = Colors.green;
+          final remainingSeconds =
+              (end - currentHeight) * expectedBlockTime.round();
+          remainingTime = 'Ends in: ${formatTime(remainingSeconds)}';
+          if (remainingSeconds <= 0) {
+            data.status = PlanStatus.Completed.name;
+          }
+          break;
+        case PlanStatus.Completed:
+        case PlanStatus.AllPaybacked:
+          statusBgColor = _btnColor;
+          statusName = PlanStatus.Completed.name;
+          final remainingSeconds =
+              (currentHeight - end) * expectedBlockTime.round();
+          remainingTime = 'Ended: ${formatTime(remainingSeconds)} ago';
+          break;
+      }
+
+      return Card(
+          elevation: 0,
+          margin:
+              EdgeInsets.only(top: 12.h, left: 16.w, right: 16.w, bottom: 12.h),
+          color: Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.w)),
+          child: GestureDetector(
+              child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              titleView(statusBgColor, statusName),
+              contentView(),
+              bottomView(remainingTime),
+            ],
+          )));
+    });
   }
 
-  Widget titleView() {
-    Color statusBgColor;
-    String statusName = data.status;
-    switch (PlanStatus.values.byName(data.status)) {
-      case PlanStatus.Upcoming:
-        statusBgColor = Colors.orange;
-        break;
-      case PlanStatus.InProgress:
-        statusBgColor = Colors.green;
-        break;
-      case PlanStatus.Completed:
-      case PlanStatus.AllPaybacked:
-        statusBgColor = _btnColor;
-        statusName = PlanStatus.Completed.name;
-        break;
-    }
-
+  Widget titleView(Color statusBgColor, String statusName) {
     String buyAssetImg = buyAsset != null
         ? 'assets/images/icon-${buyAsset!.symbol}.png'
         : 'assets/images/icon-KSM.png';
@@ -169,63 +192,36 @@ class BuybackPlanItemView extends StatelessWidget {
     );
   }
 
-  Widget bottomView() {
-    return Observer(builder: (_) {
-      final start = data.start;
-      final end = data.start + data.period;
-      final currentHeight = plugin.store.system.currentBlockNumber;
-      final expectedBlockTime = plugin.api.system.expectedBlockTime / 1000;
-      String remainingTime = '';
-      switch (PlanStatus.values.byName(data.status)) {
-        case PlanStatus.Upcoming:
-          final remainingSeconds =
-              (start - currentHeight) * expectedBlockTime.round();
-          remainingTime = 'Starts in: ${formatTime(remainingSeconds)}';
-          break;
-        case PlanStatus.InProgress:
-          final remainingSeconds =
-              (end - currentHeight) * expectedBlockTime.round();
-          remainingTime = 'Ends in: ${formatTime(remainingSeconds)}';
-          break;
-        case PlanStatus.Completed:
-        case PlanStatus.AllPaybacked:
-          final remainingSeconds =
-              (currentHeight - end) * expectedBlockTime.round();
-          remainingTime = 'Ended: ${formatTime(remainingSeconds)} ago';
-          break;
-      }
+  Widget bottomView(String remainingTime) {
+    List<Widget> children = [
+      Text(remainingTime, style: TextStyle(fontSize: 18, color: Colors.green)),
+    ];
+    if (buttonOnTap != null) {
+      children.add(SizedBox(
+          height: 36.h,
+          child: BrnSmallMainButton(
+            radius: 18,
+            bgColor: _btnColor,
+            textColor: Colors.white,
+            title: 'View',
+            onTap: () {
+              buttonOnTap!(data);
+            },
+          )));
+    }
 
-      List<Widget> children = [
-        Text(remainingTime,
-            style: TextStyle(fontSize: 18, color: Colors.green)),
-      ];
-      if (buttonOnTap != null) {
-        children.add(SizedBox(
-            height: 36.h,
-            child: BrnSmallMainButton(
-              radius: 18,
-              bgColor: _btnColor,
-              textColor: Colors.white,
-              title: 'View',
-              onTap: () {
-                buttonOnTap!(data);
-              },
-            )));
-      }
-
-      return Container(
-          // color: HexColor('#F3F5FC'),
-          decoration: BoxDecoration(
-            color: HexColor('#F3F5FC'),
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(10.w)),
-          ),
-          height: 55.h,
-          padding: EdgeInsets.only(left: 12.w, right: 12.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: children,
-          ));
-    });
+    return Container(
+        // color: HexColor('#F3F5FC'),
+        decoration: BoxDecoration(
+          color: HexColor('#F3F5FC'),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(10.w)),
+        ),
+        height: 55.h,
+        padding: EdgeInsets.only(left: 12.w, right: 12.w),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: children,
+        ));
   }
 
   String formatTime(int s) {

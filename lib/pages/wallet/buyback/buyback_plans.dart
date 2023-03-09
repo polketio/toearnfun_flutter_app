@@ -48,7 +48,7 @@ class _BuybackPlansViewState extends State<BuybackPlansView> {
               refreshTriggerPullDistance: 100.h,
               refreshIndicatorExtent: 60.h,
               onRefresh: () async {
-                // await Future<void>.delayed(const Duration(seconds: 2));
+                await Future<void>.delayed(const Duration(milliseconds: 600));
                 // loadJumpRopeTrainingReport();
                 loadBuybackPlans();
               },

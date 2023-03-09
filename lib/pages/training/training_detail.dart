@@ -217,18 +217,22 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
     final now = (DateTime.now().millisecondsSinceEpoch / 1000).round();
     final status = report.reportStatus(now);
     String btnStr = '';
+    Color btnColor = _backgroundColor;
     switch (status) {
       case ReportStatus.notReported:
         btnStr = 'Report Now';
         break;
       case ReportStatus.reported:
         btnStr = 'Reported';
+        btnColor = Colors.green;
         break;
       case ReportStatus.expired:
         btnStr = 'Expired';
+        btnColor = Colors.green;
         break;
       case ReportStatus.failed:
-        btnStr = report.error;
+        btnStr = report.errorToHuman();
+        btnColor = Colors.red;
         break;
     }
     return Container(
@@ -245,7 +249,7 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
             elevation: MaterialStateProperty.all(0),
             shape: MaterialStateProperty.all(
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-            backgroundColor: MaterialStateProperty.all(_backgroundColor),
+            backgroundColor: MaterialStateProperty.all(btnColor),
             alignment: Alignment.center,
           ),
           child: Text(btnStr, style: const TextStyle(fontSize: 24)),
@@ -369,7 +373,7 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
 
       realm.write(() {
         report.error = result.error;
-        // report.status = ReportStatus.failed.name;
+        report.status = ReportStatus.failed.name;
       });
     } else {
       BrnToast.show('Upload report successfully', context);
@@ -403,11 +407,13 @@ class _JumpRopeTrainingDetailViewState extends State<JumpRopeTrainingDetailView>
             report.status = ReportStatus.reported.name;
           });
 
-          final currentVFE = widget.plugin.store.vfe.current;
-          currentVFE.remainingBattery =
-              currentVFE.remainingBattery - energyUsed;
-          await widget.plugin.store.vfe
-              .updateUserCurrent(widget.keyring.current.pubKey, currentVFE);
+          final usedVFE = widget.plugin.store.vfe.getUserVFEByDeviceKey(report.deviceKey);
+          if (usedVFE != null) {
+            usedVFE!.remainingBattery =
+                usedVFE!.remainingBattery - energyUsed;
+            await widget.plugin.store.vfe
+                .updateUserVFE(widget.keyring.current.pubKey, usedVFE);
+          }
         }
       }
     }

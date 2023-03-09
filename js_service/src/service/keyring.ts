@@ -251,6 +251,7 @@ function sendTx(api: ApiPromise, txInfo: any, paramList: any[], password: string
     }
     let unsub = () => {};
     const onStatusChange = (result: SubmittableResult) => {
+      
       if (result.status.isInBlock || result.status.isFinalized) {
         const { success, error, events } = _extractEvents(api, result);
         if (success) {

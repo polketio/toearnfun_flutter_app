@@ -15,7 +15,6 @@ enum ReportStatus {
 }
 
 extension ReportStatusExtension on ReportStatus {
-
   String get display {
     switch (this) {
       case ReportStatus.notReported:
@@ -28,6 +27,7 @@ extension ReportStatusExtension on ReportStatus {
         return 'Failed';
     }
   }
+
   String get image {
     switch (this) {
       case ReportStatus.notReported:
@@ -117,7 +117,7 @@ class _TrainingReport {
     data.add(int16Bytes(jumpRopeDuration, Endian.little)); // 2 bytes
     return hex.encode(data.toBytes());
   }
-  
+
   ReportStatus reportStatus(int now) {
     ReportStatus reportStatus = ReportStatus.notReported;
     if (status.isEmpty) {
@@ -125,6 +125,19 @@ class _TrainingReport {
     }
     reportStatus = ReportStatus.values.byName(status);
     return reportStatus;
+  }
+
+  String errorToHuman() {
+    String msg = '';
+    msg = error.replaceFirst('Exception: ', '');
+    final isOnChainException = error.contains('vfe.');
+    if (isOnChainException) {
+      msg = msg.replaceFirst('vfe.', '');
+    } else {
+      msg = 'Unknown Error';
+    }
+
+    return msg;
   }
 }
 
