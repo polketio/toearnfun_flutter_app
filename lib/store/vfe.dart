@@ -73,7 +73,7 @@ abstract class _VFEStore with Store {
 
   @action
   Future<void> addUserVFEList(String? pubKey, List<VFEDetail> vfeList) async {
-    userVFEList.clear();
+    // userVFEList.clear();
     for (var vfe in vfeList) {
       userVFEList.add(vfe);
       if (

@@ -128,6 +128,7 @@ class PluginPolket extends PolkawalletPlugin {
   }
 
   Future<void> loadUserVFEs(String user) async {
+    store.vfe.clearUserVFE();
     final brands = await _api.vfe.getVFEBrandsAll();
     if (brands.isNotEmpty) {
       store.vfe.allVFEBrands.addAll(brands);
