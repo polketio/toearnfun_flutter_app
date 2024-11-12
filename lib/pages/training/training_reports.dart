@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bruno/bruno.dart';
 import 'package:flukit/flukit.dart';
 import 'package:flustars/flustars.dart';
@@ -6,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:polkawallet_sdk/storage/keyring.dart';
 import 'package:polkawallet_ui/utils/format.dart';
+import 'package:realm/realm.dart';
 import 'package:toearnfun_flutter_app/common/common.dart';
 import 'package:toearnfun_flutter_app/plugins/ropes/simulated_device.dart';
 import 'package:toearnfun_flutter_app/types/training_report.dart';
@@ -30,7 +33,8 @@ class JumpRopeTrainingReportsView extends StatefulWidget {
 
 class _JumpRopeTrainingReportsViewState
     extends State<JumpRopeTrainingReportsView> {
-  List<TrainingReport> jumpRopeTrainingReportList = [];
+  RealmResults<TrainingReport>? jumpRopeTrainingReportList;
+  StreamSubscription? subscription;
 
   @override
   void initState() {
@@ -38,6 +42,12 @@ class _JumpRopeTrainingReportsViewState
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       loadJumpRopeTrainingReport();
     });
+  }
+
+  @override
+  void dispose() {
+    subscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -55,7 +65,7 @@ class _JumpRopeTrainingReportsViewState
               refreshTriggerPullDistance: 100.h,
               refreshIndicatorExtent: 60.h,
               onRefresh: () async {
-                // await Future<void>.delayed(const Duration(seconds: 2));
+                await Future<void>.delayed(const Duration(milliseconds: 600));
                 // loadJumpRopeTrainingReport();
                 loadJumpRopeTrainingReport();
               },
@@ -87,8 +97,9 @@ class _JumpRopeTrainingReportsViewState
 
   void generateSimulatedReport(BuildContext context) async {
     final report = SimulatedDeviceConnector().generateRandomReport();
-    if(report == null) {
-      BrnEnhanceOperationDialog enhanceOperationDialog = BrnEnhanceOperationDialog(
+    if (report == null) {
+      BrnEnhanceOperationDialog enhanceOperationDialog =
+          BrnEnhanceOperationDialog(
         iconType: BrnDialogConstants.iconAlert,
         context: context,
         titleText: "Tips",
@@ -102,25 +113,36 @@ class _JumpRopeTrainingReportsViewState
   }
 
   Widget trainingReportListView() {
-    return SliverFixedExtentList(
-      itemExtent: 180,
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          // final d = jumpRopeTrainingReportList[index];
-          final d = jumpRopeTrainingReportList[index];
-          return JumpRopeTrainingReportItem(d);
-        },
-        childCount: jumpRopeTrainingReportList.length,
-      ),
-    );
+    final list = jumpRopeTrainingReportList?.toList() ?? [];
+    if (list.isEmpty) {
+      return SliverFillViewport(
+          viewportFraction: 1.0,
+          delegate: SliverChildBuilderDelegate((context, index) {
+            return const NoDataView();
+          }));
+    } else {
+      return SliverFixedExtentList(
+        itemExtent: 180,
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            // final d = jumpRopeTrainingReportList[index];
+            final d = list[index];
+            return JumpRopeTrainingReportItem(d);
+          },
+          childCount: list.length,
+        ),
+      );
+    }
   }
 
   Future<void> loadJumpRopeTrainingReport() async {
-    List<TrainingReport> list =
+    jumpRopeTrainingReportList =
         widget.plugin.store.report.loadTrainingReportList();
-    setState(() {
-      jumpRopeTrainingReportList = list;
+    subscription ??= jumpRopeTrainingReportList?.changes.listen((event) {
+      LogUtil.d('event: ${event.toString()}');
+      setState(() {});
     });
+
     final reportValidityPeriod =
         int.parse(widget.plugin.networkConst['vfe']['reportValidityPeriod']);
     LogUtil.d('reportValidityPeriod: $reportValidityPeriod');

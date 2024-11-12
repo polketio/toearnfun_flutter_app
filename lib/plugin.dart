@@ -128,6 +128,7 @@ class PluginPolket extends PolkawalletPlugin {
   }
 
   Future<void> loadUserVFEs(String user) async {
+    store.vfe.clearUserVFE();
     final brands = await _api.vfe.getVFEBrandsAll();
     if (brands.isNotEmpty) {
       store.vfe.allVFEBrands.addAll(brands);
@@ -200,10 +201,6 @@ class PluginPolket extends PolkawalletPlugin {
       loadIncentiveToken();
       // load user vfe
       loadUserVFEs(keyring.current.pubKey!);
-
-      String? password =
-          await store.account.getUserWalletPassword(keyring.current.pubKey!);
-      _api.vfe.userRestore(password);
     }
   }
 

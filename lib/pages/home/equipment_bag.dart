@@ -1,5 +1,6 @@
 import 'package:bruno/bruno.dart';
 import 'package:flukit/flukit.dart';
+import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -45,7 +46,7 @@ class _EquipmentBagViewState extends State<EquipmentBagView> {
               refreshTriggerPullDistance: 100.h,
               refreshIndicatorExtent: 60.h,
               onRefresh: () async {
-                // await Future<void>.delayed(const Duration(seconds: 2));
+                await Future<void>.delayed(const Duration(milliseconds: 600));
                 await refreshVFEList();
               },
             ),
@@ -124,7 +125,8 @@ class _EquipmentBagViewState extends State<EquipmentBagView> {
         message: "Do you want to replace your current VFE?",
         onConfirm: () async {
       Navigator.of(context).pop();
-      widget.plugin.store.vfe.current = vfe;
+      await widget.plugin.store.vfe
+          .updateUserCurrent(widget.keyring.current.pubKey, vfe);
     }, onCancel: () {
       Navigator.of(context).pop();
     });

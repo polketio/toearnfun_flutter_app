@@ -61,7 +61,7 @@ class _MarketplaceViewState extends State<MarketplaceView>
             slivers: [
               SliverPullRefreshIndicator(
                 onRefresh: () async {
-                  // await Future<void>.delayed(const Duration(seconds: 2));
+                  await Future<void>.delayed(const Duration(milliseconds: 600));
                   await refreshMarketOrders();
                 },
               ),

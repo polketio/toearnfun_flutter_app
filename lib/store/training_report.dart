@@ -33,10 +33,10 @@ abstract class _TrainingReportStore with Store {
     return storage.read(userLastReportTimeKey);
   }
 
-  List<TrainingReport> loadTrainingReportList() {
+  RealmResults<TrainingReport> loadTrainingReportList() {
     final list = realm.query<TrainingReport>(
         'TRUEPREDICATE SORT(reportTime DESC)');
-    return list.toList();
+    return list;
   }
 
   void addTrainingReport(TrainingReport data, [bool update = false]) {

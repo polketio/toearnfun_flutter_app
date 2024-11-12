@@ -202,8 +202,8 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
 
     if (accountId == null) {
       if (!mounted) return;
-      BrnToast.show('Please create a wallet first', context);
       BrnLoadingDialog.dismiss(context);
+      BrnToast.show('Please create a wallet first', context);
       return;
     }
 
@@ -216,8 +216,8 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
       if (deviceExisted != null) {
         if (deviceExisted.status == DeviceStatus.Voided.name) {
           if (!mounted) return;
-          BrnToast.show('This device is voided', context);
           BrnLoadingDialog.dismiss(context);
+          BrnToast.show('This device is voided', context);
           return;
         }
 
@@ -226,8 +226,8 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
           if (deviceExisted.itemId != 0) {
             // LogUtil.d('itemIdOfVFE: $itemIdOfVFE');
             if (!mounted) return;
-            BrnToast.show('This device is bond', context);
             BrnLoadingDialog.dismiss(context);
+            BrnToast.show('This device is bond', context);
             return;
           }
 
@@ -242,8 +242,8 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
               signature, nonce, itemIdOfVFE > 0 ? itemIdOfVFE : null, password);
           if (!result.success) {
             if (!mounted) return;
-            BrnToast.show(result.error, context);
             BrnLoadingDialog.dismiss(context);
+            BrnToast.show(result.error, context);
             return;
           }
 
@@ -303,6 +303,7 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
       final result =
           await widget.plugin.api.vfe.producerRegister(user, password);
       if (!mounted) return;
+      BrnLoadingDialog.dismiss(context);
       if (!result.success) {
         BrnToast.show(result.error, context);
       } else {
@@ -319,14 +320,12 @@ class _BindDeviceCompleteState extends State<BindDeviceComplete> {
       final result = await widget.plugin.api.vfe
           .registerDevice(newPubKey, producerId, VFE_BRAND_ID, password);
       if (!mounted) return;
+      BrnLoadingDialog.dismiss(context);
       if (!result.success) {
         BrnToast.show(result.error, context);
       } else {
         BrnToast.show('Register device successfully', context);
       }
     }
-
-    if (!mounted) return;
-    BrnLoadingDialog.dismiss(context);
   }
 }

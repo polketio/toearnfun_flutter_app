@@ -64,7 +64,6 @@ abstract class _VFEStore with Store {
 
   @action
   Future<void> updateUserVFE(String? pubKey, VFEDetail value) async {
-
     for (var vfe in userVFEList) {
       if (vfe.brandId == value.brandId && vfe.itemId == value.itemId) {
         vfe = value;
@@ -74,12 +73,12 @@ abstract class _VFEStore with Store {
 
   @action
   Future<void> addUserVFEList(String? pubKey, List<VFEDetail> vfeList) async {
-    userVFEList.clear();
+    // userVFEList.clear();
     for (var vfe in vfeList) {
       userVFEList.add(vfe);
       if (
       current.itemId == vfe.itemId
-          // || current.itemId == null
+      // || current.itemId == null
       ) {
         //update user current vfe
         updateUserCurrent(pubKey, vfe);
@@ -114,5 +113,18 @@ abstract class _VFEStore with Store {
   @action
   Future<void> updateLastEnergyRecovery(int value) async {
     lastEnergyRecovery = value;
+  }
+
+  VFEDetail? getUserVFEByDeviceKey(String deviceKey) {
+    if (deviceKey.isEmpty) {
+      return null;
+    }
+    for (var vfe in userVFEList) {
+      final key = vfe.deviceKey.replaceFirst('0x', '');
+      if (key == deviceKey) {
+        return vfe;
+      }
+    }
+    return null;
   }
 }
